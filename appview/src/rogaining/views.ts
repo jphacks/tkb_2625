@@ -53,6 +53,21 @@ export function resolveBlobUrlCached(
 	return promise;
 }
 
+const ACCEPTED_EVENT_IMAGE_TYPES = new Set(["image/png", "image/jpeg", "image/webp"]);
+const MAX_EVENT_IMAGE_SIZE = 1_000_000;
+
+function isValidEventImage(mimeType: string, size: number): boolean {
+	if (!ACCEPTED_EVENT_IMAGE_TYPES.has(mimeType)) {
+		console.warn(`[views] invalid image mimeType: ${mimeType}`);
+		return false;
+	}
+	if (size < 0 || size > MAX_EVENT_IMAGE_SIZE) {
+		console.warn(`[views] invalid image size: ${size}`);
+		return false;
+	}
+	return true;
+}
+
 export function buildEventView(
 	row: EventRow,
 	author: ProfileViewBasic,
@@ -70,12 +85,14 @@ export function buildEventView(
 			description: row.description ?? undefined,
 			image:
 				row.imageCid && row.imageMimeType && row.imageSize != null
-					? {
-							$type: "blob",
-							ref: { $link: row.imageCid },
-							mimeType: row.imageMimeType,
-							size: row.imageSize,
-						}
+					? isValidEventImage(row.imageMimeType, row.imageSize)
+						? {
+								$type: "blob",
+								ref: { $link: row.imageCid },
+								mimeType: row.imageMimeType,
+								size: row.imageSize,
+							}
+						: undefined
 					: undefined,
 			startsAt: row.startsAt.toISOString(),
 			endsAt: row.endsAt.toISOString(),
