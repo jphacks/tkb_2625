@@ -15,6 +15,13 @@
       "when": 1792828558854,
       "tag": "0001_bright_baron_zemo",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1792832167830,
+      "tag": "0002_known_yellow_claw",
+      "breakpoints": true
     }
   ]
 }

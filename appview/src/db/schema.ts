@@ -18,6 +18,9 @@ export const eventsTable = sqliteTable("events", {
   createdAt: integer("created_at", { mode: "timestamp" })
     .notNull()
     .$defaultFn(() => new Date()),
+  indexedAt: integer("indexed_at", { mode: "timestamp" })
+    .notNull()
+    .default(sql`(unixepoch())`),
 });
 
 export const approveTable = sqliteTable("approve", {
