@@ -6,8 +6,10 @@
     "verbatimModuleSyntax": true,
     "skipLibCheck": true,
     "types": ["node"],
-    "noEmit": true
+	"outDir": "dist",
+	"esModuleInterop": true,
+	"rootDir": "./src/"
   },
-  "include": ["src", "drizzle.config.ts", "*.d.ts"],
+  "include": ["src"],
   "exclude": ["node_modules"]
 }
