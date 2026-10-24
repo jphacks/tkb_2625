@@ -1,10 +1,12 @@
+import type { ServiceAuth } from "../auth.js";
+import type { AppviewEnv } from "../env.js";
 import type { Server } from "../lexicons/index.js";
 
-export default function getCheckpoints(server: Server<any>) {
-  server.win.tomoX.rogaining.getCheckpoints(async ({ auth, params, input, c }) => {
+export default function getCheckpoints(server: Server<AppviewEnv>,auth:ServiceAuth) {
+  server.win.tomoX.rogaining.getCheckpoints({auth,handler:async ({ auth, params, input, c }) => {
     return {
       encoding: "application/json",
       body: { checkpoints: [] },
     };
-  });
+  }});
 }
