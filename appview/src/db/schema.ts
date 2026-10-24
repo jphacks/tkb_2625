@@ -64,7 +64,7 @@ export const submitsTable = sqliteTable(
     photoSize: integer("photo_size").notNull(),
     latitude: real("latitude").notNull(),
     longitude: real("longitude").notNull(),
-    createdAt: integer("created_at", { mode: "timestamp" }).notNull().default(sql`(unixepoch())`),
+    createdAt: integer("created_at", { mode: "timestamp" }).notNull(),
     indexedAt: integer("indexed_at", { mode: "timestamp" }).notNull().default(sql`(unixepoch())`),
   },
   (table) => [
