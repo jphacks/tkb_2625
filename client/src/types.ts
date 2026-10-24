@@ -13,6 +13,7 @@ export interface Checkpoint {
 }
 export interface Submission {
   id: string;
+  teamId: string;
   checkpointId: string;
   status: SubmissionStatus;
   reason: string;
@@ -23,10 +24,23 @@ export interface DemoState {
   version: number;
   endsAt: string;
   submissions: Submission[];
-}
-export interface Snapshot extends DemoState {
-  team: { name: string; number: string; members: string[] };
+  teams: Team[];
+  participants: Participant[];
   checkpoints: Checkpoint[];
+  selectedTeamId: string | null;
+}
+export interface Team {
+  id: string;
+  number: string;
+  name: string;
+  position: { lat: number; lng: number; updatedAt: string } | null;
+}
+export interface Participant { id: string; name: string; teamId: string | null }
+export interface TeamView extends Team { members: string[]; points: number; rank: number }
+export interface Snapshot extends DemoState {
+  team: TeamView;
+  teams: TeamView[];
+  allSubmissions: Submission[];
   points: number;
 }
 export interface DemoRepository {
@@ -38,6 +52,12 @@ export interface CommandPayloads {
   reviewSubmission: { id: string; decision: SubmissionStatus; reason?: string };
   endDemo: undefined;
   resetDemo: undefined;
+  addTeam: { name: string; number: string };
+  deleteTeam: { id: string };
+  assignParticipant: { participantId: string; teamId: string | null };
+  addCheckpoint: Omit<Checkpoint, 'kind'>;
+  deleteCheckpoint: { id: string };
+  selectTeam: { id: string };
 }
 export type CommandArguments = {
   [K in keyof CommandPayloads]: CommandPayloads[K] extends undefined

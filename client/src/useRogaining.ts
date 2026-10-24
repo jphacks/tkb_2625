@@ -35,6 +35,12 @@ export function useRogaining(createService = createDemoService) {
         case 'reviewSubmission': next = await service.reviewSubmission(args[1]); break;
         case 'endDemo': next = await service.endDemo(); break;
         case 'resetDemo': next = await service.resetDemo(); break;
+        case 'addTeam': next = await service.addTeam(args[1]); break;
+        case 'deleteTeam': next = await service.deleteTeam(args[1]); break;
+        case 'assignParticipant': next = await service.assignParticipant(args[1]); break;
+        case 'addCheckpoint': next = await service.addCheckpoint(args[1]); break;
+        case 'deleteCheckpoint': next = await service.deleteCheckpoint(args[1]); break;
+        case 'selectTeam': next = await service.selectTeam(args[1]); break;
       }
       if (mounted.current) setState(next);
       return next;

@@ -1,4 +1,5 @@
-import { checkpoints, createInitialState, reviewSubmission, submitPhoto, team, totalPoints } from './data';
+import { createInitialState, reviewSubmission, submitPhoto, toSnapshot } from './data';
+import { addTeam, deleteTeam, assignParticipant, addCheckpoint, deleteCheckpoint, selectTeam } from './adminData';
 import { repository } from './repository';
 import type { CommandPayloads, DemoRepository, DemoState, Snapshot } from './types';
 
@@ -14,7 +15,7 @@ export function createDemoService(storage: DemoRepository = repository, clock = 
   let committed: DemoState | undefined;
   let warning = '';
   let queue = Promise.resolve();
-  const snapshot = (state: DemoState): Snapshot => ({ ...state, team, checkpoints, points: totalPoints(state) });
+  const snapshot = toSnapshot;
   // 同時操作も直前に確定した状態から処理。失敗した保存を画面へ反映しない。
   const serialize = <T>(operation: () => Promise<T>): Promise<T> => {
     const result = queue.then(operation);
@@ -42,5 +43,11 @@ export function createDemoService(storage: DemoRepository = repository, clock = 
     reviewSubmission: ({ id, decision, reason = '' }: CommandPayloads['reviewSubmission']) => command(state => reviewSubmission(state, id, decision, reason)),
     endDemo: () => command(state => ({ ...state, endsAt: new Date(clock() - 1000).toISOString() })),
     resetDemo: () => command(() => createInitialState(clock())),
+    addTeam: (payload: CommandPayloads['addTeam']) => command(state => addTeam(state, payload)),
+    deleteTeam: ({ id }: CommandPayloads['deleteTeam']) => command(state => deleteTeam(state, id)),
+    assignParticipant: (payload: CommandPayloads['assignParticipant']) => command(state => assignParticipant(state, payload)),
+    addCheckpoint: (payload: CommandPayloads['addCheckpoint']) => command(state => addCheckpoint(state, payload)),
+    deleteCheckpoint: ({ id }: CommandPayloads['deleteCheckpoint']) => command(state => deleteCheckpoint(state, id)),
+    selectTeam: ({ id }: CommandPayloads['selectTeam']) => command(state => selectTeam(state, id)),
   };
 }

@@ -1,10 +1,11 @@
 import { useEffect, useRef, useState } from 'react';
-import { Link, NavLink, Navigate, Route, Routes } from 'react-router-dom';
+import { Link, NavLink, Navigate, Route, Routes, useLocation } from 'react-router-dom';
 import { ArrowDownUp, ArrowRight, ArrowUpRight, Camera, Check, CheckCheck, ChevronRight, Clock3, Compass, Flag, ImagePlus, LayoutGrid, Leaf, Map, MapPin, RotateCcw, ShieldCheck, Sprout, Users, X } from 'lucide-react';
 import { checkpointStatus, latestSubmission, selectCheckpoints, STATUSES } from './data';
 import { prepareImage } from './images';
 import { useRogaining } from './useRogaining';
 import MapPage from './MapPage';
+import AdminConsole from './AdminConsole';
 import type { Checkpoint, CheckpointStatus, Execute, Snapshot, SubmissionStatus } from './types';
 
 type PageProps = { state: Snapshot; execute: Execute; notify: (message: string) => void };
@@ -15,6 +16,7 @@ function Status({ value }: { value: CheckpointStatus }) { const status = STATUSE
 
 export default function App() {
   const { state, notice, setNotice, loading, error, pending, execute, retry } = useRogaining();
+  const isAdmin = useLocation().pathname.startsWith('/admin');
   const [now, setNow] = useState(Date.now());
   useEffect(() => {
     const timer = setInterval(() => setNow(Date.now()), 1000);
@@ -38,22 +40,23 @@ export default function App() {
       </div>
     </header>
 
-    <div className="dashboard-top">
+    {!isAdmin && <div className="dashboard-top">
       <div className="team-identity"><span className="eyebrow">TEAM {team.number}</span><h1>{team.name}<Sprout size={22}/></h1><span className="muted">いつもの街に、まだ知らない発見を。</span></div>
       <div className={`metric timer ${remaining === 0 ? 'ended' : ''}`}><span className="metric-label"><Clock3 size={14}/> {remaining ? '残り時間' : '大会終了'}</span><strong>{duration}</strong><span className="metric-foot">{remaining ? '自分たちのペースで、楽しもう。' : 'おつかれさまでした。'}</span></div>
       <div className="metric score"><span className="metric-label"><Flag size={14}/> 獲得ポイント</span><strong>{points}<small>pt</small></strong><span className="metric-foot">{approved} / {checkpoints.length} チェックポイント達成</span></div>
-    </div>
+    </div>}
 
     <nav className="tab-nav" aria-label="メインナビゲーション"><div className="tab-inner">{tabs.map(({ to, label, en, icon: Icon }) => <NavLink key={to} to={to}><Icon size={18}/><span>{label}<small>{en}</small></span></NavLink>)}<Link className="admin-link" to="/admin"><ShieldCheck size={16}/><span>管理者デモ</span><ArrowUpRight size={14}/></Link></div></nav>
 
     <main id="main" className="main-container">
+      {!isAdmin && <div className="user-team-switch"><label>参加者モックの表示チーム<select value={state.selectedTeamId || ''} disabled={pending || !state.teams.length} onChange={e => { void execute('selectTeam', { id: e.target.value }).catch(reason => setNotice(reason instanceof Error ? reason.message : 'チームを変更できませんでした。')); }}>{!state.teams.length && <option value="">チームなし</option>}{state.teams.map(t => <option key={t.id} value={t.id}>{t.number} / {t.name}</option>)}</select></label><span>{state.teams.length ? '管理画面とチーム・CP・得点を共有しています。' : '管理画面でチームを作成してください。'}</span></div>}
       {notice && <div className="notice" role="status">{notice}<button aria-label="通知を閉じる" onClick={() => setNotice('')}><X size={18}/></button></div>}
       <Routes>
         <Route path="/" element={<Navigate to="/cards" replace/>}/>
-        <Route path="/cards" element={<Cards state={state} execute={execute} ended={!remaining} notify={setNotice}/>}/>
+        <Route path="/cards" element={<Cards key={state.selectedTeamId} state={state} execute={execute} ended={!remaining} notify={setNotice}/>}/>
         <Route path="/team" element={<Team state={state}/>}/>
-        <Route path="/map" element={<MapPage state={state}/>}/>
-        <Route path="/admin" element={<Admin state={state} execute={execute} pending={pending} notify={setNotice}/>}/>
+        <Route path="/map" element={<MapPage key={state.selectedTeamId} state={state}/>}/>
+        <Route path="/admin/*" element={<AdminConsole state={state} execute={execute} pending={pending} notify={setNotice} review={<PhotoReview state={state} execute={execute} pending={pending} notify={setNotice}/>}/>}/>
         <Route path="*" element={<div className="empty"><Compass/><h2>道に迷いましたか？</h2><Link to="/cards" className="button primary">カード画面へ戻る</Link></div>}/>
       </Routes>
     </main>
@@ -87,7 +90,7 @@ function PhotoModal({ cp, state, execute, ended, close, notify }: PageProps & { 
   const [preview, setPreview] = useState('');
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
-  const canSubmit = !ended && ['unsubmitted', 'rejected'].includes(status);
+  const canSubmit = !ended && Boolean(state.selectedTeamId) && ['unsubmitted', 'rejected'].includes(status);
   useEffect(() => {
     const previous = document.activeElement;
     const element = dialog.current;
@@ -112,6 +115,7 @@ function PhotoModal({ cp, state, execute, ended, close, notify }: PageProps & { 
     {status === 'pending' && <div className="info-panel">写真を提出しました。審査結果をお待ちください。</div>}
     {status === 'approved' && <div className="success-panel"><CheckCheck size={18}/> 承認済み · {cp.points}ポイントを獲得しました。</div>}
     {ended && <div className="info-panel">大会が終了したため、写真の提出はできません。</div>}
+    {!state.selectedTeamId && <div className="info-panel">管理画面でチームを作成すると写真を提出できます。</div>}
     {canSubmit && <><p className="upload-note">JPEG / PNG / WebP · 8MBまで。保存時に画像を縮小します。</p><div className="upload-actions"><button className="button" disabled={busy} onClick={() => input.current?.click()}><ImagePlus size={17}/>{preview ? '画像を差し替える' : '画像を選択'}</button><label className={`button ${busy ? 'disabled' : ''}`}><Camera size={17}/>カメラで撮影<input type="file" className="sr-only" accept="image/jpeg,image/png,image/webp" capture="environment" disabled={busy} onChange={e => { if (e.target.files?.[0]) select(e.target.files[0]); e.target.value = ''; }}/></label><input ref={input} type="file" hidden accept="image/jpeg,image/png,image/webp" onChange={e => { if (e.target.files?.[0]) select(e.target.files[0]); e.target.value = ''; }}/></div></>}
     {busy && <p role="status">画像を処理・提出しています…</p>}{error && <p className="error-text" role="alert">{error}</p>}<div className="dialog-footer"><button className="button" onClick={close} disabled={busy}>閉じる</button>{canSubmit && <button className="button primary" onClick={submit} disabled={busy}>{status === 'rejected' ? '写真を再提出する' : '写真を提出する'}<ArrowRight size={17}/></button>}</div></div></dialog>;
 }
@@ -122,17 +126,17 @@ function Team({ state }: { state: Snapshot }) {
   return <><PageHeading eyebrow="GOOD WALKS, BETTER TOGETHER" title="私たちのチーム" text="発見の記録を、仲間と一緒に。"/><div className="team-layout"><section className="team-panel"><div className="team-emblem"><Sprout size={43} strokeWidth={1}/></div><span className="eyebrow">TEAM {team.number}</span><h2>{team.name}</h2><p className="muted">今日も、いい道草を。</p><div className="team-stats"><div><strong>{state.points}<small>pt</small></strong><span>獲得ポイント</span></div><div><strong>{approved}<small>/ {checkpoints.length}</small></strong><span>チェックポイント達成</span></div></div><h3 className="eyebrow">MEMBERS / {team.members.length}</h3><ul className="member-list">{team.members.map((name, i) => <li key={name}><span className="avatar">{name[0]}</span><span>{name}</span>{i === 0 && <small>リーダー</small>}</li>)}</ul></section><section className="history-panel"><h2><Clock3 size={20}/>提出履歴 <span className="muted">{state.submissions.length}件</span></h2><p className="muted history-intro">再提出前の記録も、ここに残ります。</p>{[...state.submissions].reverse().map(s => { const cp = checkpoints.find(c => c.id === s.checkpointId); if (!cp) return null; return <article className="history-entry" key={s.id}><img src={s.image} alt={`${cp.name}の提出画像`}/><div><span className="eyebrow">CP {cp.id} · {dateFormat(s.submittedAt)}</span><h3>{cp.name}</h3><Status value={s.status}/>{s.reason && <p className="history-reason">{s.reason}</p>}</div><strong className={s.status === 'approved' ? 'earned' : 'muted'}>{s.status === 'approved' ? `+${cp.points}` : '—'}<small>pt</small></strong></article>; })}{!state.submissions.length && <div className="empty">写真を提出すると、ここに履歴が残ります。</div>}</section></div></>;
 }
 
-function Admin({ state, execute, pending: busy, notify }: PageProps & { pending: boolean }) {
+function PhotoReview({ state, execute, pending: busy, notify }: PageProps & { pending: boolean }) {
   const { checkpoints, team } = state;
   const [reasons, setReasons] = useState<Record<string, string>>({});
   const [error, setError] = useState('');
-  const pending = state.submissions.filter(s => s.status === 'pending');
+  const pending = state.allSubmissions.filter(s => s.status === 'pending');
   async function review(id: string, decision: SubmissionStatus) {
     setError('');
     try { await execute('reviewSubmission', { id, decision, reason: reasons[id] || '' }); notify(decision === 'approved' ? '承認し、ポイントを反映しました。' : '不承認にしました。参加者は再提出できます。'); } catch (e) { setError(e instanceof Error ? e.message : '処理に失敗しました。'); }
   }
   async function demoAction(method: 'endDemo' | 'resetDemo', message: string) { try { await execute(method); notify(message); setError(''); } catch (e) { setError(e instanceof Error ? e.message : '処理に失敗しました。'); } }
-  return <><PageHeading eyebrow="REVIEW DESK" title="管理者デモ" text="提出写真を確認して、参加者の発見を承認しましょう。"/><div className="info-panel"><ShieldCheck size={20}/><span>この画面は同じブラウザ内のデモ用です。認証・権限制御や他の端末との同期はありません。</span></div><div className="admin-summary"><div><span className="eyebrow">TEAM {team.number}</span><h2>{team.name}</h2></div><strong>{state.points}<small>pt</small></strong><span>審査待ち <b>{pending.length}</b>件</span></div>{error && <p role="alert" className="error-panel">{error}</p>}<div className="review-grid">{pending.map(s => { const cp = checkpoints.find(c => c.id === s.checkpointId); if (!cp) return null; return <article key={s.id} className="review-card"><div className="review-card-heading"><h3>CP {cp.id} / {cp.name}</h3><span>{cp.points}pt</span></div><p className="muted">{dateFormat(s.submittedAt)} 提出</p><div className="photo-comparison"><figure><figcaption>目標画像</figcaption><img src={cp.image} alt={`${cp.name}の目標画像`}/></figure><figure><figcaption>提出画像</figcaption><img src={s.image} alt={`${cp.name}の提出画像`}/></figure></div><label className="reason-label">不承認の理由<textarea value={reasons[s.id] || ''} onChange={e => setReasons({ ...reasons, [s.id]: e.target.value })} placeholder="不承認の場合は理由を入力してください" maxLength={500}/></label><div className="review-actions"><button className="button" disabled={busy} onClick={() => review(s.id, 'rejected')}><X size={16}/>不承認</button><button className="button primary" disabled={busy} onClick={() => review(s.id, 'approved')}><Check size={16}/>承認する</button></div></article>; })}</div>{!pending.length && <div className="empty"><CheckCheck size={32}/><h3>審査待ちの写真はありません</h3><p>カード画面から新しい写真を提出できます。</p><Link className="button" to="/cards">カードへ戻る<ChevronRight size={16}/></Link></div>}<section className="demo-controls"><div><h3>レビュー用のデモ操作</h3><p>初期化すると、提出した写真や審査結果もリセットされます。</p></div><div><button className="button" disabled={busy} onClick={() => demoAction('endDemo', '大会を終了しました。カード画面で提出制限を確認できます。')}><Clock3 size={16}/>大会を終了する</button><button className="button" disabled={busy} onClick={() => { if (window.confirm('提出写真・履歴・審査結果を初期状態に戻し、大会を3時間で再開しますか？')) demoAction('resetDemo', 'デモを初期化しました。'); }}><RotateCcw size={16}/>デモを初期化</button></div></section></>;
+  return <><PageHeading eyebrow="REVIEW DESK" title="写真審査" text="提出写真を確認して、参加者の発見を承認しましょう。"/><div className="info-panel"><ShieldCheck size={20}/><span>この画面は同じブラウザ内のデモ用です。認証・権限制御や他の端末との同期はありません。</span></div><div className="admin-summary"><div><span className="eyebrow">ALL TEAMS</span><h2>全チームの提出写真</h2></div><strong>{state.teams.reduce((sum, t) => sum + t.points, 0)}<small>pt</small></strong><span>審査待ち <b>{pending.length}</b>件</span></div>{error && <p role="alert" className="error-panel">{error}</p>}<div className="review-grid">{pending.map(s => { const cp = checkpoints.find(c => c.id === s.checkpointId); if (!cp) return null; return <article key={s.id} className="review-card"><div className="review-card-heading"><h3>CP {cp.id} / {cp.name}</h3><span>{cp.points}pt</span></div><p className="muted">{state.teams.find(t => t.id === s.teamId)?.name} · {dateFormat(s.submittedAt)} 提出</p><div className="photo-comparison"><figure><figcaption>目標画像</figcaption><img src={cp.image} alt={`${cp.name}の目標画像`}/></figure><figure><figcaption>提出画像</figcaption><img src={s.image} alt={`${cp.name}の提出画像`}/></figure></div><label className="reason-label">不承認の理由<textarea value={reasons[s.id] || ''} onChange={e => setReasons({ ...reasons, [s.id]: e.target.value })} placeholder="不承認の場合は理由を入力してください" maxLength={500}/></label><div className="review-actions"><button className="button" disabled={busy} onClick={() => review(s.id, 'rejected')}><X size={16}/>不承認</button><button className="button primary" disabled={busy} onClick={() => review(s.id, 'approved')}><Check size={16}/>承認する</button></div></article>; })}</div>{!pending.length && <div className="empty"><CheckCheck size={32}/><h3>審査待ちの写真はありません</h3><p>カード画面から新しい写真を提出できます。</p><Link className="button" to="/cards">カードへ戻る<ChevronRight size={16}/></Link></div>}<section className="demo-controls"><div><h3>レビュー用のデモ操作</h3><p>初期化すると、提出した写真や審査結果もリセットされます。</p></div><div><button className="button" disabled={busy} onClick={() => demoAction('endDemo', '大会を終了しました。カード画面で提出制限を確認できます。')}><Clock3 size={16}/>大会を終了する</button><button className="button" disabled={busy} onClick={() => { if (window.confirm('提出写真・履歴・審査結果を初期状態に戻し、大会を3時間で再開しますか？')) demoAction('resetDemo', 'デモを初期化しました。'); }}><RotateCcw size={16}/>デモを初期化</button></div></section></>;
 }
 
 export function PageHeading({ eyebrow, title, text }: { eyebrow: string; title: string; text: string }) { return <div className="page-heading"><span className="eyebrow">{eyebrow}</span><h2>{title}</h2><p>{text}</p></div>; }

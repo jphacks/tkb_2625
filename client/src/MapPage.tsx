@@ -18,12 +18,13 @@ export default function MapPage({ state }: { state: Snapshot }) {
   const [recording, setRecording] = useState(false);
   const [route, setRoute] = useState<[number, number][]>([]);
   const [position, setPosition] = useState<[number, number] | null>(null);
-  const [message, setMessage] = useState('デモのルートと架空のチェックポイントを表示しています。');
+  const demoMessage = state.team.position ? '選択チームのモック位置とチェックポイントを表示しています。管理画面と共通の位置です。' : 'このチームの位置は未取得です。チェックポイントのみ表示しています。';
+  const [message, setMessage] = useState(demoMessage);
   const [tileError, setTileError] = useState(false);
   const [heading, setHeading] = useState<number | null>(null);
   const [orientationEnabled, setOrientationEnabled] = useState(false);
-  const displayRoute = mode === 'demo' ? demoRoute : route;
-  const displayPosition = mode === 'demo' ? demoRoute.at(-1) : position;
+  const displayRoute = mode === 'demo' ? (state.team.id === 'team-014' ? demoRoute : []) : route;
+  const displayPosition: [number, number] | null = mode === 'demo' ? (state.team.position ? [state.team.position.lat, state.team.position.lng] : null) : position;
   useEffect(() => {
     if (!container.current) return;
     const instance = L.map(container.current, { center: [35.6727, 139.6963], zoom: 15, scrollWheelZoom: false });
@@ -84,12 +85,12 @@ export default function MapPage({ state }: { state: Snapshot }) {
   }
   function switchMode(next: 'demo' | 'live') {
     setRecording(false); setMode(next);
-    setMessage(next === 'demo' ? 'デモのルートと架空のチェックポイントを表示しています。' : '実測モードです。「記録開始」を押すと位置情報の利用を求めます。');
+    setMessage(next === 'demo' ? demoMessage : '実測モードです。「記録開始」を押すと位置情報の利用を求めます。');
     if (next === 'demo') map.current?.setView([35.6727, 139.6963], 15);
   }
   function recenter() {
     if (displayPosition) map.current?.setView(displayPosition, 16);
-    else setMessage('現在位置はまだありません。「記録開始」で位置情報を取得してください。');
+    else setMessage(mode === 'demo' ? 'このチームのモック位置は未取得です。実測GPSモードでは位置情報を取得できます。' : '現在位置はまだありません。「記録開始」で位置情報を取得してください。');
   }
   return <><div className="page-heading"><span className="eyebrow">FIND YOUR OWN WAY</span><h2>街を探索する</h2><p>次の発見は、どの道の先に？</p></div><div className="map-layout"><section className="map-panel"><div className="map-toolbar"><div className="mode-switch" role="group" aria-label="地図の表示モード"><button className={mode === 'demo' ? 'active' : ''} onClick={() => switchMode('demo')}>デモ表示</button><button className={mode === 'live' ? 'active' : ''} onClick={() => switchMode('live')}>実測 GPS</button></div><span className="north-indicator"><Navigation size={16}/> N / 地図の北</span></div><div className="map-wrap"><div ref={container} className="leaflet-map" aria-label="チェックポイントと移動経路の地図"/><span className={`map-mode-badge ${mode}`}>{mode === 'demo' ? 'DEMO / 架空の経路・位置' : recording ? 'GPS / 記録中' : 'GPS / 記録停止中'}</span><button className="recenter icon-button" onClick={recenter} aria-label={mode === 'demo' ? 'デモ位置へ戻る' : '現在位置へ戻る'}><Crosshair size={22}/></button></div><div className="map-status" role="status"><span className={`live-dot ${recording ? '' : 'idle'}`}/>{message}</div>{tileError && <p className="error-panel" role="alert">背景地図を読み込めませんでした。ネットワークを確認してください。チェックポイントと経路は引き続き表示しています。</p>}<div className="map-actions"><button className="button primary" disabled={mode !== 'live'} onClick={() => { setRecording(v => !v); if (recording) setMessage('GPS記録を停止しました。記録済みの経路はこの画面内で保持します。'); }}>{recording ? <Pause size={17}/> : <Play size={17}/ >}{recording ? '記録停止' : '記録開始'}</button><button className="button" onClick={enableCompass}><Compass size={17}/>端末の方位を確認</button><span className="heading-value">{heading === null ? '端末の方位：未取得' : `端末の向き：${Math.round(heading)}°（北=0°）`}</span></div></section><aside className="map-sidebar"><span className="eyebrow">ON YOUR ROUTE</span><h3>チェックポイント</h3><p className="muted">番号を押すと地図で場所を確認できます。</p><div className="map-cp-list">{checkpoints.map(cp => <button key={cp.id} onClick={() => map.current?.setView([cp.lat, cp.lng], 17)}><span className="map-list-number">{cp.id}</span><span><strong>{cp.name}</strong><small>{cp.area}</small></span><b>{cp.points}<small>pt</small></b></button>)}</div><Link to="/cards" className="button">カードから写真を提出<ArrowUpRight size={16}/></Link></aside></div><div className="field-note"><MapPin size={20}/><p><strong>この大会の場所・名称はデモ用です。</strong><span>GPS経路はこの画面を離れると消去されます。実際の大会には正式なチェックポイント情報が必要です。</span></p></div></>;
 }
