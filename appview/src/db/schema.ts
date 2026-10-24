@@ -10,6 +10,8 @@ export const eventsTable = sqliteTable("events", {
   name: text("name").notNull(),
   description: text("description"),
   imageCid: text("image_cid"),
+  imageMimeType: text("image_mime_type"),
+  imageSize: integer("image_size"),
   startsAt: integer("starts_at", { mode: "timestamp" }).notNull(),
   endsAt: integer("ends_at", { mode: "timestamp" }).notNull(),
   approverDid: text("approver_did").notNull(),
