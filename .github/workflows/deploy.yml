@@ -7,9 +7,9 @@ on:
 concurrency: deploy
 
 env:
-  - CLIENT_DIR:/srv/rogaining/client
-  - APPVIEW_DIR:/srv/rogaining/appview
-  - APPVIEW_SERVICE:rogaininng-appview.service
+  CLIENT_DIR: /srv/rogaining/client
+  APPVIEW_DIR: /srv/rogaining/appview
+  APPVIEW_SERVICE: rogaining-appview.service
 
 # self-hosted runner 側で必要なもの: node, pnpm, rsync
 # リポジトリ Variables: APPVIEW_DIR (例 /srv/rogaining/appview), CLIENT_DIR (例 /srv/rogaining/client)
