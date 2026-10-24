@@ -39,6 +39,7 @@ export const checkpointsTable = sqliteTable(
   {
     uri: text("uri").notNull().primaryKey(),
     cid: text("cid").notNull(),
+    record: text("record", { mode: "json" }).notNull(),
     eventUri: text("event_uri").notNull(),
     eventCid: text("event_cid").notNull(),
     name: text("name").notNull(),
@@ -50,6 +51,7 @@ export const checkpointsTable = sqliteTable(
     imageCid: text("image_cid"),
     internalImageCids: text("internal_image_cids", { mode: "json" }).$type<string[]>(),
     createdAt: integer("created_at", { mode: "timestamp" }).notNull().default(sql`(unixepoch())`),
+    indexedAt: integer("indexed_at", { mode: "timestamp" }).notNull().default(sql`(unixepoch())`),
     updatedAt: integer("updated_at", { mode: "timestamp" }).notNull().default(sql`(unixepoch())`),
   },
   (table) => [
@@ -63,6 +65,7 @@ export const submitsTable = sqliteTable(
   {
     uri: text("uri").primaryKey(),
     cid: text("cid").notNull(),
+    record: text("record", { mode: "json" }).notNull(),
     authorDid: text("author_did").notNull(),
     eventUri: text("event_uri").notNull().references(() => eventsTable.uri),
     eventCid: text("event_cid").notNull(),
