@@ -1,4 +1,5 @@
-import { sqliteTable, text, integer } from "drizzle-orm/sqlite-core";
+import { sqliteTable, text, integer, check } from "drizzle-orm/sqlite-core";
+import { sql } from "drizzle-orm";
 
 export const eventsTable = sqliteTable("events", {
   uri: text("uri").primaryKey(),
@@ -14,6 +15,8 @@ export const eventsTable = sqliteTable("events", {
   approverDid: text("approver_did").notNull(),
   
   createdAt: integer("created_at", { mode: "timestamp" })
-      .notNull()
-      .$defaultFn(() => new Date()),
-});
+    .notNull()
+    .$defaultFn(() => new Date()),
+}, (table) => [
+  check("events_time_order", sql`${table.endsAt} > ${table.startsAt}`),
+]);
