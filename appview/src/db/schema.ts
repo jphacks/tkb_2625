@@ -41,6 +41,8 @@ export const checkpointsTable = sqliteTable(
     longitude: real("longitude").notNull(),
     radiusMeters: integer("radius_meters").notNull().default(30),
     description: text("description"),
+    imageCid: text("image_cid"),
+    internalImageCids: text("internal_image_cids", { mode: "json" }).$type<string[]>(),
     createdAt: integer("created_at", { mode: "timestamp" }).notNull().default(sql`(unixepoch())`),
     updatedAt: integer("updated_at", { mode: "timestamp" }).notNull().default(sql`(unixepoch())`),
   },
