@@ -1,0 +1,33 @@
+{
+  "id": "win.tomo-x.rogaining.getCheckpoints",
+  "defs": {
+    "main": {
+      "type": "query",
+      "errors": [{ "name": "EventNotFound" }],
+      "output": {
+        "schema": {
+          "type": "object",
+          "required": ["checkpoints"],
+          "properties": {
+            "checkpoints": {
+              "type": "array",
+              "items": {
+                "ref": "win.tomo-x.rogaining.defs#checkpointView",
+                "type": "ref"
+              }
+            }
+          }
+        },
+        "encoding": "application/json"
+      },
+      "parameters": {
+        "type": "params",
+        "required": ["event"],
+        "properties": { "event": { "type": "string", "format": "at-uri" } }
+      },
+      "description": "List the checkpoints of an event."
+    }
+  },
+  "$type": "com.atproto.lexicon.schema",
+  "lexicon": 1
+}

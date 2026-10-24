@@ -1,0 +1,94 @@
+{
+  "id": "win.tomo-x.rogaining.defs",
+  "defs": {
+    "location": {
+      "type": "object",
+      "required": ["latitude", "longitude"],
+      "properties": {
+        "latitude": { "type": "string", "maxLength": 20 },
+        "longitude": { "type": "string", "maxLength": 20 }
+      },
+      "description": "Coordinates as decimal degrees encoded as strings (lexicon has no float type), e.g. \"35.681236\"."
+    },
+    "eventView": {
+      "type": "object",
+      "required": ["uri", "cid", "author", "record", "indexedAt"],
+      "properties": {
+        "cid": { "type": "string", "format": "cid" },
+        "uri": { "type": "string", "format": "at-uri" },
+        "author": {
+          "ref": "app.bsky.actor.defs#profileViewBasic",
+          "type": "ref"
+        },
+        "record": {
+          "type": "unknown",
+          "description": "The win.tomo-x.rogaining.event record."
+        },
+        "approver": {
+          "ref": "app.bsky.actor.defs#profileViewBasic",
+          "type": "ref"
+        },
+        "imageUrl": { "type": "string", "format": "uri" },
+        "indexedAt": { "type": "string", "format": "datetime" },
+        "checkpointCount": { "type": "integer", "minimum": 0 },
+        "participantCount": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "rankingEntry": {
+      "type": "object",
+      "required": ["participant", "rank", "totalPoints", "approvedCount"],
+      "properties": {
+        "rank": { "type": "integer", "minimum": 1 },
+        "participant": {
+          "ref": "app.bsky.actor.defs#profileViewBasic",
+          "type": "ref"
+        },
+        "totalPoints": { "type": "integer", "minimum": 0 },
+        "approvedCount": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "checkpointView": {
+      "type": "object",
+      "required": ["uri", "cid", "record", "indexedAt"],
+      "properties": {
+        "cid": { "type": "string", "format": "cid" },
+        "uri": { "type": "string", "format": "at-uri" },
+        "record": {
+          "type": "unknown",
+          "description": "The win.tomo-x.rogaining.checkpoint record."
+        },
+        "indexedAt": { "type": "string", "format": "datetime" }
+      }
+    },
+    "submissionView": {
+      "type": "object",
+      "required": ["uri", "cid", "author", "record", "status", "indexedAt"],
+      "properties": {
+        "cid": { "type": "string", "format": "cid" },
+        "uri": { "type": "string", "format": "at-uri" },
+        "author": {
+          "ref": "app.bsky.actor.defs#profileViewBasic",
+          "type": "ref"
+        },
+        "record": {
+          "type": "unknown",
+          "description": "The win.tomo-x.rogaining.submit record."
+        },
+        "status": {
+          "type": "string",
+          "description": "approved when a valid approve record by the event's approver exists.",
+          "knownValues": ["pending", "approved"]
+        },
+        "photoUrl": { "type": "string", "format": "uri" },
+        "indexedAt": { "type": "string", "format": "datetime" },
+        "approvalUri": {
+          "type": "string",
+          "format": "at-uri",
+          "description": "AT-URI of the approve record, if approved."
+        }
+      }
+    }
+  },
+  "$type": "com.atproto.lexicon.schema",
+  "lexicon": 1
+}

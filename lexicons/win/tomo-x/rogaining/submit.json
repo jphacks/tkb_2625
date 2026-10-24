@@ -1,0 +1,44 @@
+{
+  "id": "win.tomo-x.rogaining.submit",
+  "defs": {
+    "main": {
+      "key": "tid",
+      "type": "record",
+      "record": {
+        "type": "object",
+        "required": ["event", "checkpoint", "createdAt", "photo", "location"],
+        "properties": {
+          "event": {
+            "ref": "com.atproto.repo.strongRef",
+            "type": "ref",
+            "description": "The event being participated in."
+          },
+          "photo": {
+            "type": "blob",
+            "accept": ["image/png", "image/jpeg", "image/webp"],
+            "maxSize": 2000000,
+            "description": "Photo as proof of arrival."
+          },
+          "location": {
+            "ref": "win.tomo-x.rogaining.defs#location",
+            "type": "ref",
+            "description": "Where the participant was when submitting."
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "datetime",
+            "description": "When the checkpoint was reached."
+          },
+          "checkpoint": {
+            "ref": "com.atproto.repo.strongRef",
+            "type": "ref",
+            "description": "The checkpoint that was reached."
+          }
+        }
+      },
+      "description": "A participant's proof of reaching a checkpoint."
+    }
+  },
+  "$type": "com.atproto.lexicon.schema",
+  "lexicon": 1
+}

@@ -1,0 +1,45 @@
+{
+  "id": "win.tomo-x.rogaining.checkpoint",
+  "defs": {
+    "main": {
+      "key": "tid",
+      "type": "record",
+      "record": {
+        "type": "object",
+        "required": ["event", "name", "point", "location", "createdAt"],
+        "properties": {
+          "name": { "type": "string", "maxLength": 1000, "maxGraphemes": 100 },
+          "event": {
+            "ref": "com.atproto.repo.strongRef",
+            "type": "ref",
+            "description": "The event this checkpoint belongs to."
+          },
+          "point": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Score awarded for reaching this checkpoint."
+          },
+          "location": {
+            "ref": "win.tomo-x.rogaining.defs#location",
+            "type": "ref"
+          },
+          "createdAt": { "type": "string", "format": "datetime" },
+          "description": {
+            "type": "string",
+            "maxLength": 10000,
+            "maxGraphemes": 1000
+          },
+          "radiusMeters": {
+            "type": "integer",
+            "default": 30,
+            "minimum": 1,
+            "description": "Allowed distance from the location for a valid submission."
+          }
+        }
+      },
+      "description": "A checkpoint belonging to a rogaining event."
+    }
+  },
+  "$type": "com.atproto.lexicon.schema",
+  "lexicon": 1
+}

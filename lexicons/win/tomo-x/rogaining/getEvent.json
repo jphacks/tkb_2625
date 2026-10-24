@@ -1,0 +1,30 @@
+{
+  "id": "win.tomo-x.rogaining.getEvent",
+  "defs": {
+    "main": {
+      "type": "query",
+      "errors": [{ "name": "EventNotFound" }],
+      "output": {
+        "schema": {
+          "type": "object",
+          "required": ["event"],
+          "properties": {
+            "event": {
+              "ref": "win.tomo-x.rogaining.defs#eventView",
+              "type": "ref"
+            }
+          }
+        },
+        "encoding": "application/json"
+      },
+      "parameters": {
+        "type": "params",
+        "required": ["event"],
+        "properties": { "event": { "type": "string", "format": "at-uri" } }
+      },
+      "description": "Get the metadata of an event."
+    }
+  },
+  "$type": "com.atproto.lexicon.schema",
+  "lexicon": 1
+}

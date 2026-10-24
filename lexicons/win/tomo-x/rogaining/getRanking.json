@@ -1,0 +1,33 @@
+{
+  "id": "win.tomo-x.rogaining.getRanking",
+  "defs": {
+    "main": {
+      "type": "query",
+      "errors": [{ "name": "EventNotFound" }],
+      "output": {
+        "schema": {
+          "type": "object",
+          "required": ["ranking"],
+          "properties": {
+            "ranking": {
+              "type": "array",
+              "items": {
+                "ref": "win.tomo-x.rogaining.defs#rankingEntry",
+                "type": "ref"
+              }
+            }
+          }
+        },
+        "encoding": "application/json"
+      },
+      "parameters": {
+        "type": "params",
+        "required": ["event"],
+        "properties": { "event": { "type": "string", "format": "at-uri" } }
+      },
+      "description": "Get the leaderboard of an event, computed from approved submissions (each checkpoint counts once per participant)."
+    }
+  },
+  "$type": "com.atproto.lexicon.schema",
+  "lexicon": 1
+}

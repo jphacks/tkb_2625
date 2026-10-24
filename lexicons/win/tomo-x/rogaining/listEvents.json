@@ -1,0 +1,42 @@
+{
+  "id": "win.tomo-x.rogaining.listEvents",
+  "defs": {
+    "main": {
+      "type": "query",
+      "output": {
+        "schema": {
+          "type": "object",
+          "required": ["events"],
+          "properties": {
+            "events": {
+              "type": "array",
+              "items": {
+                "ref": "win.tomo-x.rogaining.defs#eventView",
+                "type": "ref"
+              }
+            }
+          }
+        },
+        "encoding": "application/json"
+      },
+      "parameters": {
+        "type": "params",
+        "properties": {
+          "status": {
+            "type": "string",
+            "description": "Filter by event period relative to now.",
+            "knownValues": ["upcoming", "ongoing", "ended"]
+          },
+          "approver": {
+            "type": "string",
+            "format": "did",
+            "description": "Only events approved by this DID."
+          }
+        }
+      },
+      "description": "List rogaining events, newest first."
+    }
+  },
+  "$type": "com.atproto.lexicon.schema",
+  "lexicon": 1
+}

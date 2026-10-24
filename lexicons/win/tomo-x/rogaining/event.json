@@ -1,0 +1,45 @@
+{
+  "id": "win.tomo-x.rogaining.event",
+  "defs": {
+    "main": {
+      "key": "tid",
+      "type": "record",
+      "record": {
+        "type": "object",
+        "required": ["name", "startsAt", "endsAt", "createdAt", "approver"],
+        "properties": {
+          "name": { "type": "string", "maxLength": 1000, "maxGraphemes": 100 },
+          "image": {
+            "type": "blob",
+            "accept": ["image/png", "image/jpeg", "image/webp"],
+            "maxSize": 1000000
+          },
+          "endsAt": {
+            "type": "string",
+            "format": "datetime",
+            "description": "When the event ends."
+          },
+          "approver": {
+            "type": "string",
+            "format": "did",
+            "description": "The DID of the user who can approve submissions for this event."
+          },
+          "startsAt": {
+            "type": "string",
+            "format": "datetime",
+            "description": "When the event starts."
+          },
+          "createdAt": { "type": "string", "format": "datetime" },
+          "description": {
+            "type": "string",
+            "maxLength": 30000,
+            "maxGraphemes": 3000
+          }
+        }
+      },
+      "description": "A rogaining event."
+    }
+  },
+  "$type": "com.atproto.lexicon.schema",
+  "lexicon": 1
+}

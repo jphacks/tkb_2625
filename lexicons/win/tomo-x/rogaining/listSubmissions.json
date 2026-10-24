@@ -1,0 +1,49 @@
+{
+  "id": "win.tomo-x.rogaining.listSubmissions",
+  "defs": {
+    "main": {
+      "type": "query",
+      "errors": [{ "name": "EventNotFound" }],
+      "output": {
+        "schema": {
+          "type": "object",
+          "required": ["submissions"],
+          "properties": {
+            "submissions": {
+              "type": "array",
+              "items": {
+                "ref": "win.tomo-x.rogaining.defs#submissionView",
+                "type": "ref"
+              }
+            }
+          }
+        },
+        "encoding": "application/json"
+      },
+      "parameters": {
+        "type": "params",
+        "required": ["event"],
+        "properties": {
+          "event": { "type": "string", "format": "at-uri" },
+          "status": {
+            "type": "string",
+            "knownValues": ["pending", "approved"]
+          },
+          "checkpoint": {
+            "type": "string",
+            "format": "at-uri",
+            "description": "Only submissions for this checkpoint."
+          },
+          "participant": {
+            "type": "string",
+            "format": "at-identifier",
+            "description": "Only submissions by this account."
+          }
+        }
+      },
+      "description": "List submissions for an event, newest first. Used by participants to see their own progress and by approvers to review pending ones."
+    }
+  },
+  "$type": "com.atproto.lexicon.schema",
+  "lexicon": 1
+}

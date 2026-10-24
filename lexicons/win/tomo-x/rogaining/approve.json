@@ -1,0 +1,28 @@
+{
+  "id": "win.tomo-x.rogaining.approve",
+  "defs": {
+    "main": {
+      "key": "tid",
+      "type": "record",
+      "record": {
+        "type": "object",
+        "required": ["submit", "createdAt"],
+        "properties": {
+          "submit": {
+            "ref": "com.atproto.repo.strongRef",
+            "type": "ref",
+            "description": "The submission being approved."
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "datetime",
+            "description": "When the submission was approved."
+          }
+        }
+      },
+      "description": "An event approver's approval of a participant's checkpoint submission. Only valid when created by the DID in the event's approver field."
+    }
+  },
+  "$type": "com.atproto.lexicon.schema",
+  "lexicon": 1
+}

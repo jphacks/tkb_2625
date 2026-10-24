@@ -1,0 +1,15 @@
+[Unit]
+Description=rogaining appview
+After=network.target
+
+[Service]
+# APPVIEW_DIR に合わせる。User もサーバー側のユーザーに変える
+WorkingDirectory=/srv/rogaining/appview
+ExecStart=/usr/bin/node dist/index.js
+Restart=always
+User=rogaining
+Environment=NODE_ENV=production
+# EnvironmentFile=/srv/rogaining/appview.env
+
+[Install]
+WantedBy=multi-user.target
