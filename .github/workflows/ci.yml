@@ -8,19 +8,31 @@ on:
 jobs:
   check:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        project: [appview, client]
-    defaults:
-      run:
-        working-directory: ${{ matrix.project }}
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
         with:
-          version: 10
+          version: 11
       - uses: actions/setup-node@v4
         with:
           node-version: 24
-      - run: pnpm install --frozen-lockfile
-      - run: pnpm build
+
+      - name: appview install
+        working-directory: appview
+        run: pnpm install --frozen-lockfile
+      - name: appview typecheck
+        working-directory: appview
+        run: pnpm typecheck
+      - name: appview build
+        working-directory: appview
+        run: pnpm build
+
+      - name: client install
+        working-directory: client
+        run: pnpm install --frozen-lockfile
+      - name: client typecheck
+        working-directory: client
+        run: pnpm typecheck
+      - name: client build
+        working-directory: client
+        run: pnpm build
