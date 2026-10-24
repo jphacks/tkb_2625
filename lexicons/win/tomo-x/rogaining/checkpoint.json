@@ -6,7 +6,7 @@
       "type": "record",
       "record": {
         "type": "object",
-        "required": ["event", "name", "point", "location", "createdAt"],
+        "required": ["event", "name", "point", "location", "createdAt","image","internalImages"],
         "properties": {
           "name": { "type": "string", "maxLength": 1000, "maxGraphemes": 100 },
           "event": {

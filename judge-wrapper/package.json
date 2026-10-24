@@ -1,0 +1,30 @@
+{
+  "name": "judge-wrapper",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "gen:lexicon": "lex build --lexicons ../lexicons --out ./src/lexicons --override --clear"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "MIT",
+  "devEngines": {
+    "packageManager": {
+      "name": "pnpm",
+      "version": "^11.21.0",
+      "onFail": "download"
+    }
+  },
+  "type": "module",
+  "dependencies": {
+    "@atproto/did-resolver": "^0.1.0",
+    "@atproto/lex": "^0.4.2",
+    "@atproto/lex-password-session": "^0.3.0",
+    "@atproto/syntax": "^0.7.7",
+    "@bsky/jetstream": "^1.0.0",
+    "@isaacs/ttlcache": "^2.1.5",
+    "execa": "^10.2.0",
+    "p-queue": "^10.0.0"
+  }
+}
