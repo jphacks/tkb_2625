@@ -1,4 +1,4 @@
-// Publishes every lexicon under mylexicons/ to the account's repo as
+// Publishes every lexicon under lexicons/win/tomo-x/rogaining/ to the account's repo as
 // com.atproto.lexicon.schema records (rkey = NSID).
 //
 // Usage: node --env-file=.env publish-lexicon.ts
@@ -6,7 +6,7 @@
 import { readdir, readFile } from "node:fs/promises";
 import { join } from "node:path";
 
-const LEXICON_DIR = "mylexicons";
+const LEXICON_DIR = "lexicons/win/tomo-x/rogaining";
 const COLLECTION = "com.atproto.lexicon.schema";
 
 function loadEnv(){

@@ -10,6 +10,27 @@
       },
       "description": "Coordinates as decimal degrees encoded as strings (lexicon has no float type), e.g. \"35.681236\"."
     },
+    "teamView": {
+      "type": "object",
+      "required": ["uri", "cid", "record", "members", "indexedAt"],
+      "properties": {
+        "cid": { "type": "string", "format": "cid" },
+        "uri": { "type": "string", "format": "at-uri" },
+        "record": {
+          "type": "unknown",
+          "description": "The win.tomo-x.rogaining.team record."
+        },
+        "members": {
+          "type": "array",
+          "items": {
+            "ref": "app.bsky.actor.defs#profileViewBasic",
+            "type": "ref"
+          },
+          "description": "Profiles of the team members."
+        },
+        "indexedAt": { "type": "string", "format": "datetime" }
+      }
+    },
     "eventView": {
       "type": "object",
       "required": ["uri", "cid", "author", "record", "indexedAt"],
@@ -30,6 +51,7 @@
         },
         "imageUrl": { "type": "string", "format": "uri" },
         "indexedAt": { "type": "string", "format": "datetime" },
+        "teamCount": { "type": "integer", "minimum": 0 },
         "checkpointCount": { "type": "integer", "minimum": 0 },
         "participantCount": { "type": "integer", "minimum": 0 }
       }

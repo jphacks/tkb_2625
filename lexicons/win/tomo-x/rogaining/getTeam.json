@@ -1,0 +1,30 @@
+{
+  "id": "win.tomo-x.rogaining.getTeam",
+  "defs": {
+    "main": {
+      "type": "query",
+      "errors": [{ "name": "TeamNotFound" }],
+      "output": {
+        "schema": {
+          "type": "object",
+          "required": ["team"],
+          "properties": {
+            "team": {
+              "ref": "win.tomo-x.rogaining.defs#teamView",
+              "type": "ref"
+            }
+          }
+        },
+        "encoding": "application/json"
+      },
+      "parameters": {
+        "type": "params",
+        "required": ["team"],
+        "properties": { "team": { "type": "string", "format": "at-uri" } }
+      },
+      "description": "Get a team and its members."
+    }
+  },
+  "$type": "com.atproto.lexicon.schema",
+  "lexicon": 1
+}

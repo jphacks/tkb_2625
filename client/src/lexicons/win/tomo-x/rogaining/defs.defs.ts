@@ -21,16 +21,34 @@ const location = /*#__PURE__*/ l.typedObject<Location>($nsid, "location", /*#__P
 
 export { location };
 
+type TeamView = { $type?: "win.tomo-x.rogaining.defs#teamView";"cid":l.CidString;"uri":l.AtUriString;
+
+  /**
+   * The win.tomo-x.rogaining.team record.
+   */
+  "record":l.LexMap;
+
+  /**
+   * Profiles of the team members.
+   */
+  "members":(ActorDefs.ProfileViewBasic)[];"indexedAt":l.DatetimeString };
+
+export type { TeamView };
+
+const teamView = /*#__PURE__*/ l.typedObject<TeamView>($nsid, "teamView", /*#__PURE__*/ l.object({"cid":/*#__PURE__*/ l.string({"format":"cid"}),"uri":/*#__PURE__*/ l.string({"format":"at-uri"}),"record":/*#__PURE__*/ l.lexMap(),"members":/*#__PURE__*/ l.array(/*#__PURE__*/ l.ref<ActorDefs.ProfileViewBasic>((() => ActorDefs.profileViewBasic) as any), ),"indexedAt":/*#__PURE__*/ l.string({"format":"datetime"})}));
+
+export { teamView };
+
 type EventView = { $type?: "win.tomo-x.rogaining.defs#eventView";"cid":l.CidString;"uri":l.AtUriString;"author":ActorDefs.ProfileViewBasic;
 
   /**
    * The win.tomo-x.rogaining.event record.
    */
-  "record":l.LexMap;"approver"?:ActorDefs.ProfileViewBasic;"imageUrl"?:l.UriString;"indexedAt":l.DatetimeString;"checkpointCount"?:number;"participantCount"?:number };
+  "record":l.LexMap;"approver"?:ActorDefs.ProfileViewBasic;"imageUrl"?:l.UriString;"indexedAt":l.DatetimeString;"teamCount"?:number;"checkpointCount"?:number;"participantCount"?:number };
 
 export type { EventView };
 
-const eventView = /*#__PURE__*/ l.typedObject<EventView>($nsid, "eventView", /*#__PURE__*/ l.object({"cid":/*#__PURE__*/ l.string({"format":"cid"}),"uri":/*#__PURE__*/ l.string({"format":"at-uri"}),"author":/*#__PURE__*/ l.ref<ActorDefs.ProfileViewBasic>((() => ActorDefs.profileViewBasic) as any),"record":/*#__PURE__*/ l.lexMap(),"approver":/*#__PURE__*/ l.optional(/*#__PURE__*/ l.ref<ActorDefs.ProfileViewBasic>((() => ActorDefs.profileViewBasic) as any)),"imageUrl":/*#__PURE__*/ l.optional(/*#__PURE__*/ l.string({"format":"uri"})),"indexedAt":/*#__PURE__*/ l.string({"format":"datetime"}),"checkpointCount":/*#__PURE__*/ l.optional(/*#__PURE__*/ l.integer({"minimum":0})),"participantCount":/*#__PURE__*/ l.optional(/*#__PURE__*/ l.integer({"minimum":0}))}));
+const eventView = /*#__PURE__*/ l.typedObject<EventView>($nsid, "eventView", /*#__PURE__*/ l.object({"cid":/*#__PURE__*/ l.string({"format":"cid"}),"uri":/*#__PURE__*/ l.string({"format":"at-uri"}),"author":/*#__PURE__*/ l.ref<ActorDefs.ProfileViewBasic>((() => ActorDefs.profileViewBasic) as any),"record":/*#__PURE__*/ l.lexMap(),"approver":/*#__PURE__*/ l.optional(/*#__PURE__*/ l.ref<ActorDefs.ProfileViewBasic>((() => ActorDefs.profileViewBasic) as any)),"imageUrl":/*#__PURE__*/ l.optional(/*#__PURE__*/ l.string({"format":"uri"})),"indexedAt":/*#__PURE__*/ l.string({"format":"datetime"}),"teamCount":/*#__PURE__*/ l.optional(/*#__PURE__*/ l.integer({"minimum":0})),"checkpointCount":/*#__PURE__*/ l.optional(/*#__PURE__*/ l.integer({"minimum":0})),"participantCount":/*#__PURE__*/ l.optional(/*#__PURE__*/ l.integer({"minimum":0}))}));
 
 export { eventView };
 
