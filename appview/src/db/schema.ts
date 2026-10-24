@@ -1,7 +1,7 @@
 import { sqliteTable, text, integer } from "drizzle-orm/sqlite-core";
 
 export const eventsTable = sqliteTable("events", {
-  uri: text("uri").primaryKey({ autoIncrement: true }),
+  uri: text("uri").primaryKey(),
   cid: text("cid").notNull(),
   did: text("did").notNull(),
   rkey: text("rkey").notNull(),
@@ -14,6 +14,6 @@ export const eventsTable = sqliteTable("events", {
   approverDid: text("approver_did").notNull(),
   
   createdAt: integer("created_at", { mode: "timestamp" })
-    .notNull()
-    .$defaultFn(() => new Date()),
+      .notNull()
+      .$defaultFn(() => new Date()),
 });
