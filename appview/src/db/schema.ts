@@ -1,5 +1,6 @@
 import { sqliteTable, text, integer, real, index, check } from "drizzle-orm/sqlite-core";
 import { sql } from "drizzle-orm";
+import { relations } from "drizzle-orm";
 
 export const eventsTable = sqliteTable("events", {
   uri: text("uri").primaryKey(),
@@ -50,3 +51,40 @@ export const checkpointsTable = sqliteTable(
     index("checkpoints_event_uri_idx").on(table.eventUri),
   ],
 );
+
+
+export const submitsTable = sqliteTable(
+  "submits",
+  {
+    uri: text("uri").primaryKey(),
+    cid: text("cid").notNull(),
+    authorDid: text("author_did").notNull(),
+    eventUri: text("event_uri").notNull().references(() => eventsTable.uri),
+    eventCid: text("event_cid").notNull(),
+    checkpointUri: text("checkpoint_uri").notNull().references(() => checkpointsTable.uri),
+    checkpointCid: text("checkpoint_cid").notNull(),
+    photoCid: text("photo_cid").notNull(),
+    photoMimeType: text("photo_mime_type").notNull(),
+    photoSize: integer("photo_size").notNull(),
+    latitude: real("latitude").notNull(),
+    longitude: real("longitude").notNull(),
+    createdAt: integer("created_at", { mode: "timestamp" }).notNull(),
+    indexedAt: integer("indexed_at", { mode: "timestamp" }).notNull().default(sql`(unixepoch())`),
+  },
+  (table) => [
+    index("submits_event_uri_idx").on(table.eventUri),
+    index("submits_checkpoint_uri_idx").on(table.checkpointUri),
+    index("submits_author_did_idx").on(table.authorDid),
+  ],
+);
+
+export const submitsRelations = relations(submitsTable, ({ one }) => ({
+  event: one(eventsTable, {
+    fields: [submitsTable.eventUri],
+    references: [eventsTable.uri],
+  }),
+  checkpoint: one(checkpointsTable, {
+    fields: [submitsTable.checkpointUri],
+    references: [checkpointsTable.uri],
+  }),
+}));
