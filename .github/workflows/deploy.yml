@@ -11,28 +11,35 @@ env:
   APPVIEW_DIR: /srv/rogaining/appview
   APPVIEW_SERVICE: rogaining-appview.service
 
-# self-hosted runner: Node.js 24, pnpm, rsync, systemctl再起動権限が必要。
-# 配信対象は既存のclientのまま。frontの本番配信は別途設定する。
+# self-hosted runner 側で必要なもの: node, pnpm, rsync
+# リポジトリ Variables: APPVIEW_DIR (例 /srv/rogaining/appview), CLIENT_DIR (例 /srv/rogaining/client)
+# APPVIEW_SERVICE は systemd unit。runnerユーザーがパスワードなしで
+# `sudo systemctl restart <unit>` できるようにしておく
 jobs:
   deploy:
     runs-on: self-hosted
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version-file: .nvmrc
-      - uses: pnpm/action-setup@v4
-      - name: Install workspace
-        run: pnpm install --frozen-lockfile
-      - name: Build client and appview
-        run: pnpm --filter client --filter appview run build
-      - name: Package appview runtime
-        run: pnpm --filter appview --prod deploy .deploy/appview
+
+      - name: Build client
+        working-directory: client
+        run: |
+          pnpm install
+          pnpm build
+
+      - name: Build appview
+        working-directory: appview
+        run: |
+          pnpm install
+          pnpm build
+
       - name: Deploy client
         run: rsync -a --delete client/dist/ "${{ env.CLIENT_DIR }}/"
+
       - name: Deploy appview
         run: |
-          rsync -a --delete .deploy/appview/dist/ "${{ env.APPVIEW_DIR }}/dist/"
-          rsync -a --delete .deploy/appview/node_modules/ "${{ env.APPVIEW_DIR }}/node_modules/"
-          cp .deploy/appview/package.json "${{ env.APPVIEW_DIR }}/"
+          rsync -a --delete appview/dist/ "${{ env.APPVIEW_DIR }}/dist/"
+          cp appview/package.json "${{ env.APPVIEW_DIR }}/"
+          cd "${{ env.APPVIEW_DIR }}"
+          pnpm install --prod
           sudo systemctl restart "${{ env.APPVIEW_SERVICE }}"

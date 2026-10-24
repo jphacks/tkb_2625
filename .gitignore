@@ -32,6 +32,3 @@ data
 .env
 
 mylexicons
-
-# Workspace deployment bundle
-.deploy/
