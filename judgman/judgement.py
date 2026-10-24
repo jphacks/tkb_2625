@@ -228,8 +228,8 @@ def get_ref_images_from_dir(point_dir: str) -> List[str]:
         return []
     
     ref_paths = [
-        os.path.join(point_dir, fname) 
-        for fname in os.listdir(point_dir) 
+        os.path.join(point_dir, fname)
+        for fname in os.listdir(point_dir)
         if fname.endswith(valid_exts)
     ]
     return sorted(ref_paths)
