@@ -1,13 +1,7 @@
 import { sqliteTable, text, integer, real, index, check } from "drizzle-orm/sqlite-core";
 import { sql } from "drizzle-orm";
 
-// TODO: 仮のテーブル。lexicons に合わせて置き換える
-export const example = sqliteTable("example", {
-  id: integer("id").primaryKey({ autoIncrement: true }),
-  name: text("name").notNull(),
-  createdAt: integer("created_at", { mode: "timestamp" })
-    .notNull()
-});
+
 
 export const eventsTable = sqliteTable("events", {
   uri: text("uri").primaryKey(),
