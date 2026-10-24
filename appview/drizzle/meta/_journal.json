@@ -8,6 +8,13 @@
       "when": 1792797910588,
       "tag": "0000_sloppy_silver_fox",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "6",
+      "when": 1792828558854,
+      "tag": "0001_bright_baron_zemo",
+      "breakpoints": true
     }
   ]
 }
