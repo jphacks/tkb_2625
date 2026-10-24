@@ -1,8 +1,6 @@
 import { sqliteTable, text, integer, real, index, check } from "drizzle-orm/sqlite-core";
 import { sql } from "drizzle-orm";
 
-
-
 export const eventsTable = sqliteTable("events", {
   uri: text("uri").primaryKey(),
   cid: text("cid").notNull(),
