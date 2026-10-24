@@ -2,7 +2,7 @@ import type { InferSelectModel } from "drizzle-orm";
 import { eventsTable } from "../db/schema.js";
 import type { EventView } from "../lexicons/types/win/tomo-x/rogaining/defs.js";
 import type { ProfileViewBasic } from "../lexicons/types/app/bsky/actor/defs.js";
-import { resolveDiddoc, resolvePdsUrl } from "../resolver.js";
+import { resolveProfileBasic, resolveBlobUrl } from "../resolver.js";
 
 export type EventRow = InferSelectModel<typeof eventsTable>;
 
@@ -18,57 +18,36 @@ export function createEventViewContext(): EventViewContext {
 	};
 }
 
-export function resolveProfileBasic(
+export function resolveProfileBasicCached(
 	did: string,
 	context: EventViewContext = createEventViewContext(),
 ): Promise<ProfileViewBasic> {
 	const cached = context.profileCache.get(did);
 	if (cached) return cached;
 
-	const promise: Promise<ProfileViewBasic> = (async () => {
-		try {
-			const doc = await resolveDiddoc(did, false);
-			const handle =
-				doc?.alsoKnownAs?.find(
-					(value): value is string => typeof value === "string" && value.startsWith("at://"),
-				)?.slice("at://".length);
-			if (!handle) {
-				console.warn(`[views] handle not found for ${did}; falling back to DID`);
-			}
-			return { $type: "app.bsky.actor.defs#profileViewBasic", did, handle: handle ?? did };
-		} catch (error) {
-			console.warn(`[views] failed to resolve profile for ${did}:`, error);
-			return { $type: "app.bsky.actor.defs#profileViewBasic", did, handle: did };
-		}
-	})();
+	const promise = resolveProfileBasic(did).catch((error) => {
+		context.profileCache.delete(did);
+		throw error;
+	});
 
 	context.profileCache.set(did, promise);
 	return promise;
 }
 
-function resolveBlobUrl(
+export function resolveBlobUrlCached(
 	did: string,
 	cid: string | null,
-	context: EventViewContext,
+	context: EventViewContext = createEventViewContext(),
 ): Promise<string | undefined> {
 	if (!cid) return Promise.resolve(undefined);
 	const cacheKey = `${did}:${cid}`;
 	const cached = context.blobUrlCache.get(cacheKey);
 	if (cached) return cached;
 
-	const promise: Promise<string | undefined> = (async () => {
-		try {
-			const pdsUrl = await resolvePdsUrl(did);
-			if (!pdsUrl) {
-				console.warn(`[views] PDS not found for ${did}; imageUrl omitted`);
-				return undefined;
-			}
-			return `${pdsUrl.replace(/\/$/, "")}/xrpc/com.atproto.sync.getBlob?did=${encodeURIComponent(did)}&cid=${encodeURIComponent(cid)}`;
-		} catch (error) {
-			console.warn(`[views] failed to resolve blob URL for ${did}/${cid}:`, error);
-			return undefined;
-		}
-	})();
+	const promise = resolveBlobUrl(did, cid).catch((error) => {
+		context.blobUrlCache.delete(cacheKey);
+		throw error;
+	});
 
 	context.blobUrlCache.set(cacheKey, promise);
 	return promise;
@@ -89,6 +68,7 @@ export function buildEventView(
 			$type: "win.tomo-x.rogaining.event",
 			name: row.name,
 			description: row.description ?? undefined,
+			image: row.imageCid ? { cid: row.imageCid } : undefined,
 			startsAt: row.startsAt.toISOString(),
 			endsAt: row.endsAt.toISOString(),
 			approver: row.approverDid,
@@ -96,15 +76,8 @@ export function buildEventView(
 		},
 		approver,
 		imageUrl,
-		indexedAt: row.createdAt.toISOString(),
+		indexedAt: row.indexedAt.toISOString(),
 	};
-}
-
-export async function toEventViews(
-	rows: EventRow[],
-	context: EventViewContext = createEventViewContext(),
-): Promise<EventView[]> {
-	return Promise.all(rows.map((row) => toEventView(row, context)));
 }
 
 export async function toEventView(
@@ -112,10 +85,17 @@ export async function toEventView(
 	context: EventViewContext = createEventViewContext(),
 ): Promise<EventView> {
 	const [author, approver, imageUrl] = await Promise.all([
-	 resolveProfileBasic(row.authorDid, context),
-	 resolveProfileBasic(row.approverDid, context),
-	 resolveBlobUrl(row.authorDid, row.imageCid, context),
+	 resolveProfileBasicCached(row.authorDid, context),
+	 resolveProfileBasicCached(row.approverDid, context),
+	 resolveBlobUrlCached(row.authorDid, row.imageCid, context),
 	]);
 
 	return buildEventView(row, author, approver, imageUrl);
+}
+
+export async function toEventViews(
+	rows: EventRow[],
+	context: EventViewContext = createEventViewContext(),
+): Promise<EventView[]> {
+	return Promise.all(rows.map((row) => toEventView(row, context)));
 }
