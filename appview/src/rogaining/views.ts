@@ -68,7 +68,9 @@ export function buildEventView(
 			$type: "win.tomo-x.rogaining.event",
 			name: row.name,
 			description: row.description ?? undefined,
-			image: row.imageCid ? { cid: row.imageCid } : undefined,
+			image: row.imageCid
+				? { $type: "blob", ref: row.imageCid, mimeType: "image/*", size: 0 }
+				: undefined,
 			startsAt: row.startsAt.toISOString(),
 			endsAt: row.endsAt.toISOString(),
 			approver: row.approverDid,
