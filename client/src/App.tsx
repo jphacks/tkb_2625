@@ -46,10 +46,9 @@ export default function App() {
       <div className="metric score"><span className="metric-label"><Flag size={14}/> 獲得ポイント</span><strong>{points}<small>pt</small></strong><span className="metric-foot">{approved} / {checkpoints.length} チェックポイント達成</span></div>
     </div>}
 
-    <nav className="tab-nav" aria-label="メインナビゲーション"><div className="tab-inner">{tabs.map(({ to, label, en, icon: Icon }) => <NavLink key={to} to={to}><Icon size={18}/><span>{label}<small>{en}</small></span></NavLink>)}</div></nav>
+    {!isAdmin && <nav className="tab-nav" aria-label="メインナビゲーション"><div className="tab-inner">{tabs.map(({ to, label, en, icon: Icon }) => <NavLink key={to} to={to}><Icon size={18}/><span>{label}<small>{en}</small></span></NavLink>)}</div></nav>}
 
     <main id="main" className="main-container">
-      {!isAdmin && <div className="user-team-switch"><label>参加者モックの表示チーム<select value={state.selectedTeamId || ''} disabled={pending || !state.teams.length} onChange={e => { void execute('selectTeam', { id: e.target.value }).catch(reason => setNotice(reason instanceof Error ? reason.message : 'チームを変更できませんでした。')); }}>{!state.teams.length && <option value="">チームなし</option>}{state.teams.map(t => <option key={t.id} value={t.id}>{t.number} / {t.name}</option>)}</select></label><span>{state.teams.length ? '管理画面とチーム・CP・得点を共有しています。' : '管理画面でチームを作成してください。'}</span></div>}
       {notice && <div className="notice" role="status">{notice}<button aria-label="通知を閉じる" onClick={() => setNotice('')}><X size={18}/></button></div>}
       <Routes>
         <Route path="/" element={<Navigate to="/cards" replace/>}/>
