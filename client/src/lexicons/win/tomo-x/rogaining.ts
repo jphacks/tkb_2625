@@ -9,6 +9,8 @@ export * as event from "./rogaining/event.js";
 export * as getCheckpoints from "./rogaining/getCheckpoints.js";
 export * as getEvent from "./rogaining/getEvent.js";
 export * as getRanking from "./rogaining/getRanking.js";
+export * as getTeam from "./rogaining/getTeam.js";
 export * as listEvents from "./rogaining/listEvents.js";
 export * as listSubmissions from "./rogaining/listSubmissions.js";
 export * as submit from "./rogaining/submit.js";
+export * as team from "./rogaining/team.js";

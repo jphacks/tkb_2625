@@ -18,8 +18,8 @@ importers:
         specifier: ^0.7.17
         version: 0.7.17
       '@evex-dev/xrpc-hono':
-        specifier: ^2.1.0
-        version: 2.1.0
+        specifier: ^2.1.1
+        version: 2.1.1
       '@hono/node-server':
         specifier: ^2.1.3
         version: 2.1.5(hono@4.13.13)
@@ -557,8 +557,8 @@ packages:
     cpu: [x64]
     os: [win32]
 
-  '@evex-dev/xrpc-hono@2.1.0':
-    resolution: {integrity: sha512-TmdvCFUWu3aFxFcDk0qvZplE05uXNSpbZeI2JpsRRTzVHcs6ZDxVGHAMqIj+GW3TFy6/iw+w3NrPPzV+efmC2g==}
+  '@evex-dev/xrpc-hono@2.1.1':
+    resolution: {integrity: sha512-x+QWGlexrkF7Q2GXgWYtZmr2urIoUgvdFhoriHExLu/tCLUfULxdgi+G10SAJ94BsFiW/bFxGtiSlAgaVu5VEA==}
     hasBin: true
 
   '@hono/node-server@2.1.5':
@@ -1288,7 +1288,7 @@ snapshots:
   '@esbuild/win32-x64@0.28.2':
     optional: true
 
-  '@evex-dev/xrpc-hono@2.1.0':
+  '@evex-dev/xrpc-hono@2.1.1':
     dependencies:
       '@atproto/lex-cbor': 0.1.7
       '@atproto/lexicon': 0.7.17
