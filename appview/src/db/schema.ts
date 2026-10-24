@@ -46,3 +46,30 @@ export const checkpointsTable = sqliteTable(
     index("checkpoints_event_uri_idx").on(table.eventUri),
   ],
 );
+
+
+export const submitsTable = sqliteTable(
+  "submits",
+  {
+    uri: text("uri").primaryKey(),
+    cid: text("cid").notNull(),
+    authorDid: text("author_did").notNull(),
+    eventUri: text("event_uri").notNull(),
+    eventCid: text("event_cid").notNull(),
+    checkpointUri: text("checkpoint_uri").notNull(),
+    checkpointCid: text("checkpoint_cid").notNull(),
+    photoCid: text("photo_cid").notNull(),
+    photoMimeType: text("photo_mime_type").notNull(),
+    photoSize: integer("photo_size").notNull(),
+    latitude: real("latitude").notNull(),
+    longitude: real("longitude").notNull(),
+    createdAt: integer("created_at", { mode: "timestamp" }).notNull().default(sql`(unixepoch())`),
+    indexedAt: integer("indexed_at", { mode: "timestamp" }).notNull().default(sql`(unixepoch())`),
+  },
+  (table) => [
+    index("submits_event_uri_idx").on(table.eventUri),
+    index("submits_checkpoint_uri_idx").on(table.checkpointUri),
+    index("submits_author_did_idx").on(table.authorDid),
+  ],
+);
+
