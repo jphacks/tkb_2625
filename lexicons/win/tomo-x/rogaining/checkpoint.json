@@ -34,6 +34,22 @@
             "default": 30,
             "minimum": 1,
             "description": "Allowed distance from the location for a valid submission."
+          },
+          "image": {
+            "type": "blob",
+            "accept": ["image/png", "image/jpeg", "image/webp"],
+            "maxSize": 2000000,
+            "description": "Image of the checkpoint."
+          },
+          "internalImages": {
+            "type": "array",
+            "items": {
+              "type": "blob",
+              "accept": ["image/png", "image/jpeg", "image/webp"],
+              "maxSize": 2000000
+            },
+            "maxLength": 10,
+            "description": "Internal images of the checkpoint, not shown to participants."
           }
         }
       },

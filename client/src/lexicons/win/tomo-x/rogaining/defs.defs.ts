@@ -65,11 +65,21 @@ type CheckpointView = { $type?: "win.tomo-x.rogaining.defs#checkpointView";"cid"
   /**
    * The win.tomo-x.rogaining.checkpoint record.
    */
-  "record":l.LexMap;"indexedAt":l.DatetimeString };
+  "record":l.LexMap;"indexedAt":l.DatetimeString;
+
+  /**
+   * URL of the checkpoint image.
+   */
+  "imageUrl"?:l.UriString;
+
+  /**
+   * URLs of the internal images. Only returned to the event's author.
+   */
+  "internalImageUrls"?:(l.UriString)[] };
 
 export type { CheckpointView };
 
-const checkpointView = /*#__PURE__*/ l.typedObject<CheckpointView>($nsid, "checkpointView", /*#__PURE__*/ l.object({"cid":/*#__PURE__*/ l.string({"format":"cid"}),"uri":/*#__PURE__*/ l.string({"format":"at-uri"}),"record":/*#__PURE__*/ l.lexMap(),"indexedAt":/*#__PURE__*/ l.string({"format":"datetime"})}));
+const checkpointView = /*#__PURE__*/ l.typedObject<CheckpointView>($nsid, "checkpointView", /*#__PURE__*/ l.object({"cid":/*#__PURE__*/ l.string({"format":"cid"}),"uri":/*#__PURE__*/ l.string({"format":"at-uri"}),"record":/*#__PURE__*/ l.lexMap(),"indexedAt":/*#__PURE__*/ l.string({"format":"datetime"}),"imageUrl":/*#__PURE__*/ l.optional(/*#__PURE__*/ l.string({"format":"uri"})),"internalImageUrls":/*#__PURE__*/ l.optional(/*#__PURE__*/ l.array(/*#__PURE__*/ l.string({"format":"uri"}), {"maxLength":10}))}));
 
 export { checkpointView };
 

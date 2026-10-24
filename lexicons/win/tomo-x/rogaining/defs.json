@@ -79,7 +79,18 @@
           "type": "unknown",
           "description": "The win.tomo-x.rogaining.checkpoint record."
         },
-        "indexedAt": { "type": "string", "format": "datetime" }
+        "indexedAt": { "type": "string", "format": "datetime" },
+        "imageUrl": {
+          "type": "string",
+          "format": "uri",
+          "description": "URL of the checkpoint image."
+        },
+        "internalImageUrls": {
+          "type": "array",
+          "items": { "type": "string", "format": "uri" },
+          "maxLength": 10,
+          "description": "URLs of the internal images. Only returned to the event's author."
+        }
       }
     },
     "submissionView": {

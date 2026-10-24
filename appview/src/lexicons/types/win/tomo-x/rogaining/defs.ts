@@ -32,6 +32,27 @@ export function validateLocation<V>(v: V) {
   return validate<Location & V>(v, id, hashLocation)
 }
 
+export interface TeamView {
+  $type?: 'win.tomo-x.rogaining.defs#teamView'
+  cid: string
+  uri: string
+  /** The win.tomo-x.rogaining.team record. */
+  record: { [_ in string]: unknown }
+  /** Profiles of the team members. */
+  members: AppBskyActorDefs.ProfileViewBasic[]
+  indexedAt: string
+}
+
+const hashTeamView = 'teamView'
+
+export function isTeamView<V>(v: V) {
+  return is$typed(v, id, hashTeamView)
+}
+
+export function validateTeamView<V>(v: V) {
+  return validate<TeamView & V>(v, id, hashTeamView)
+}
+
 export interface EventView {
   $type?: 'win.tomo-x.rogaining.defs#eventView'
   cid: string
@@ -42,9 +63,9 @@ export interface EventView {
   approver?: AppBskyActorDefs.ProfileViewBasic
   imageUrl?: string
   indexedAt: string
+  teamCount?: number
   checkpointCount?: number
   participantCount?: number
-  teamCount?: number
 }
 
 const hashEventView = 'eventView'
@@ -82,6 +103,10 @@ export interface CheckpointView {
   /** The win.tomo-x.rogaining.checkpoint record. */
   record: { [_ in string]: unknown }
   indexedAt: string
+  /** URL of the checkpoint image. */
+  imageUrl?: string
+  /** URLs of the internal images. Only returned to the event's author. */
+  internalImageUrls?: string[]
 }
 
 const hashCheckpointView = 'checkpointView'
@@ -117,25 +142,4 @@ export function isSubmissionView<V>(v: V) {
 
 export function validateSubmissionView<V>(v: V) {
   return validate<SubmissionView & V>(v, id, hashSubmissionView)
-}
-
-export interface TeamView {
-  $type?: 'win.tomo-x.rogaining.defs#teamView'
-  cid: string
-  uri: string
-  /** The win.tomo-x.rogaining.team record. */
-  record: { [_ in string]: unknown }
-  /** Profiles of the team members. */
-  members: AppBskyActorDefs.ProfileViewBasic[]
-  indexedAt: string
-}
-
-const hashTeamView = 'teamView'
-
-export function isTeamView<V>(v: V) {
-  return is$typed(v, id, hashTeamView)
-}
-
-export function validateTeamView<V>(v: V) {
-  return validate<TeamView & V>(v, id, hashTeamView)
 }

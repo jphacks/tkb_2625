@@ -3770,6 +3770,23 @@ export const schemaDict = {
               description:
                 'Allowed distance from the location for a valid submission.',
             },
+            image: {
+              type: 'blob',
+              accept: ['image/png', 'image/jpeg', 'image/webp'],
+              maxSize: 2000000,
+              description: 'Image of the checkpoint.',
+            },
+            internalImages: {
+              type: 'array',
+              items: {
+                type: 'blob',
+                accept: ['image/png', 'image/jpeg', 'image/webp'],
+                maxSize: 2000000,
+              },
+              maxLength: 10,
+              description:
+                'Internal images of the checkpoint, not shown to participants.',
+            },
           },
         },
         description: 'A checkpoint belonging to a rogaining event.',
@@ -3796,6 +3813,36 @@ export const schemaDict = {
         },
         description:
           'Coordinates as decimal degrees encoded as strings (lexicon has no float type), e.g. "35.681236".',
+      },
+      teamView: {
+        type: 'object',
+        required: ['uri', 'cid', 'record', 'members', 'indexedAt'],
+        properties: {
+          cid: {
+            type: 'string',
+            format: 'cid',
+          },
+          uri: {
+            type: 'string',
+            format: 'at-uri',
+          },
+          record: {
+            type: 'unknown',
+            description: 'The win.tomo-x.rogaining.team record.',
+          },
+          members: {
+            type: 'array',
+            items: {
+              ref: 'lex:app.bsky.actor.defs#profileViewBasic',
+              type: 'ref',
+            },
+            description: 'Profiles of the team members.',
+          },
+          indexedAt: {
+            type: 'string',
+            format: 'datetime',
+          },
+        },
       },
       eventView: {
         type: 'object',
@@ -3829,15 +3876,15 @@ export const schemaDict = {
             type: 'string',
             format: 'datetime',
           },
+          teamCount: {
+            type: 'integer',
+            minimum: 0,
+          },
           checkpointCount: {
             type: 'integer',
             minimum: 0,
           },
           participantCount: {
-            type: 'integer',
-            minimum: 0,
-          },
-          teamCount: {
             type: 'integer',
             minimum: 0,
           },
@@ -3885,6 +3932,21 @@ export const schemaDict = {
             type: 'string',
             format: 'datetime',
           },
+          imageUrl: {
+            type: 'string',
+            format: 'uri',
+            description: 'URL of the checkpoint image.',
+          },
+          internalImageUrls: {
+            type: 'array',
+            items: {
+              type: 'string',
+              format: 'uri',
+            },
+            maxLength: 10,
+            description:
+              "URLs of the internal images. Only returned to the event's author.",
+          },
         },
       },
       submissionView: {
@@ -3925,36 +3987,6 @@ export const schemaDict = {
             type: 'string',
             format: 'at-uri',
             description: 'AT-URI of the approve record, if approved.',
-          },
-        },
-      },
-      teamView: {
-        type: 'object',
-        required: ['uri', 'cid', 'record', 'members', 'indexedAt'],
-        properties: {
-          cid: {
-            type: 'string',
-            format: 'cid',
-          },
-          uri: {
-            type: 'string',
-            format: 'at-uri',
-          },
-          record: {
-            type: 'unknown',
-            description: 'The win.tomo-x.rogaining.team record.',
-          },
-          members: {
-            type: 'array',
-            items: {
-              type: 'ref',
-              ref: 'lex:app.bsky.actor.defs#profileViewBasic',
-            },
-            description: 'Profiles of the team members.',
-          },
-          indexedAt: {
-            type: 'string',
-            format: 'datetime',
           },
         },
       },
@@ -4079,8 +4111,8 @@ export const schemaDict = {
               teams: {
                 type: 'array',
                 items: {
-                  type: 'ref',
                   ref: 'lex:win.tomo-x.rogaining.defs#teamView',
+                  type: 'ref',
                 },
                 description: 'Teams participating in the event.',
               },
@@ -4164,8 +4196,8 @@ export const schemaDict = {
             required: ['team'],
             properties: {
               team: {
-                type: 'ref',
                 ref: 'lex:win.tomo-x.rogaining.defs#teamView',
+                type: 'ref',
               },
             },
           },
@@ -4356,8 +4388,8 @@ export const schemaDict = {
                 type: 'string',
                 format: 'did',
               },
-              minLength: 1,
               maxLength: 100,
+              minLength: 1,
               description: 'DIDs of the team members.',
             },
             createdAt: {
@@ -4374,7 +4406,7 @@ export const schemaDict = {
     lexicon: 1,
   },
 } as const satisfies Record<string, LexiconDoc>
-export const schemas = Object.values(schemaDict) satisfies LexiconDoc[]
+export const schemas: LexiconDoc[] = Object.values(schemaDict)
 export const lexicons: Lexicons = new Lexicons(schemas)
 
 export function validate<T extends { $type: string }>(
