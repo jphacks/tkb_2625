@@ -19,9 +19,5 @@ export const checkpointsTable = sqliteTable(
   },
   (table) => [
     index("checkpoints_event_uri_idx").on(table.eventUri),
-    check("checkpoints_point_nonnegative", sql`${table.point} >= 0`),
-    check("checkpoints_radius_meters_positive", sql`${table.radiusMeters} >= 1`),
-    check("checkpoints_latitude_range",sql`${table.latitude} >= -90 AND ${table.latitude} <= 90`),
-    check("checkpoints_longitude_range",sql`${table.longitude} >= -180 AND ${table.longitude} <= 180`),
   ],
 );
