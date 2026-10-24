@@ -7,11 +7,11 @@ export const eventsTable = sqliteTable("events", {
   cid: text("cid").notNull(),
   authorDid: text("author_did").notNull(),
 
+  record: text("record", { mode: "json" }).notNull(),
+
   name: text("name").notNull(),
   description: text("description"),
   imageCid: text("image_cid"),
-  imageMimeType: text("image_mime_type"),
-  imageSize: integer("image_size"),
   startsAt: integer("starts_at", { mode: "timestamp" }).notNull(),
   endsAt: integer("ends_at", { mode: "timestamp" }).notNull(),
   approverDid: text("approver_did").notNull(),
