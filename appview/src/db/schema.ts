@@ -11,8 +11,12 @@ export const eventsTable = sqliteTable("events", {
   imageCid: text("image_cid"),
   startsAt: integer("starts_at", { mode: "timestamp" }).notNull(),
   endsAt: integer("ends_at", { mode: "timestamp" }).notNull(),
+<<<<<<< HEAD
   approverDid: text("approver_did").notNull(),
 
+=======
+  
+>>>>>>> main
   createdAt: integer("created_at", { mode: "timestamp" })
     .notNull()
     .$defaultFn(() => new Date()),
