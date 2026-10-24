@@ -1,0 +1,11 @@
+{
+	"@context": ["https://www.w3.org/ns/did/v1"],
+	"id": "did:web:rogaining.tomo-x.win",
+	"service": [
+		{
+			"id": "#rogaining_api",
+			"type": "RogainingAppView",
+			"serviceEndpoint": "https://rogaining.tomo-x.win"
+		}
+	]
+}

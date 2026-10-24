@@ -13,6 +13,8 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@atproto/crypto": "^0.5.7",
+    "@atproto/identity": "^0.5.20",
     "@atproto/lexicon": "^0.7.17",
     "@evex-dev/xrpc-hono": "^2.1.0",
     "@hono/node-server": "^2.1.3",
