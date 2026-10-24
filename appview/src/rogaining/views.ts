@@ -1,9 +1,10 @@
 import type { InferSelectModel } from "drizzle-orm";
 import { eventsTable, checkpointsTable, submitsTable } from "../db/schema.js";
-import type { EventView } from "../lexicons/types/win/tomo-x/rogaining/defs.js";
-import type { CheckpointView } from "../lexicons/types/win/tomo-x/rogaining/defs.js";
-import type { SubmissionView } from "../lexicons/types/win/tomo-x/rogaining/defs.js";
-import type { ProfileViewBasic } from "../lexicons/types/app/bsky/actor/defs.js";
+import type { 
+  EventView, 
+  CheckpointView, 
+  SubmissionView 
+} from "../lexicons/types/win/tomo-x/rogaining/defs.js";import type { ProfileViewBasic } from "../lexicons/types/app/bsky/actor/defs.js";
 import { resolveProfileBasic, resolveBlobUrl } from "../resolver.js";
 
 export type EventRow = InferSelectModel<typeof eventsTable>;
