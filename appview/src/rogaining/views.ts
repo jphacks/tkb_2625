@@ -7,8 +7,8 @@ import { resolveDiddoc, resolvePdsUrl } from "../resolver.js";
 export type EventRow = InferSelectModel<typeof eventsTable>;
 
 export interface EventViewContext {
-	profileCache: Map<string, ProfileViewBasic>;
-	blobUrlCache: Map<string, string | undefined>;
+	profileCache: Map<string, Promise<ProfileViewBasic>>;
+	blobUrlCache: Map<string, Promise<string | undefined>>;
 }
 
 export function createEventViewContext(): EventViewContext {
@@ -18,59 +18,60 @@ export function createEventViewContext(): EventViewContext {
 	};
 }
 
-export async function resolveProfileBasic(
+export function resolveProfileBasic(
 	did: string,
 	context: EventViewContext = createEventViewContext(),
 ): Promise<ProfileViewBasic> {
 	const cached = context.profileCache.get(did);
 	if (cached) return cached;
 
-	let result: ProfileViewBasic;
-	try {
-		const doc = await resolveDiddoc(did, false);
-		const handle =
-			doc?.alsoKnownAs?.find(
-				(value): value is string => typeof value === "string" && value.startsWith("at://"),
-			)?.slice("at://".length);
-		if (!handle) {
-			console.warn(`[views] handle not found for ${did}; falling back to DID`);
+	const promise: Promise<ProfileViewBasic> = (async () => {
+		try {
+			const doc = await resolveDiddoc(did, false);
+			const handle =
+				doc?.alsoKnownAs?.find(
+					(value): value is string => typeof value === "string" && value.startsWith("at://"),
+				)?.slice("at://".length);
+			if (!handle) {
+				console.warn(`[views] handle not found for ${did}; falling back to DID`);
+			}
+			return { $type: "app.bsky.actor.defs#profileViewBasic", did, handle: handle ?? did };
+		} catch (error) {
+			console.warn(`[views] failed to resolve profile for ${did}:`, error);
+			return { $type: "app.bsky.actor.defs#profileViewBasic", did, handle: did };
 		}
-		result = { $type: "app.bsky.actor.defs#profileViewBasic", did, handle: handle ?? did };
-	} catch (error) {
-		console.warn(`[views] failed to resolve profile for ${did}:`, error);
-		result = { $type: "app.bsky.actor.defs#profileViewBasic", did, handle: did };
-	}
+	})();
 
-	context.profileCache.set(did, result);
-	return result;
+	context.profileCache.set(did, promise);
+	return promise;
 }
 
-async function resolveBlobUrl(
+function resolveBlobUrl(
 	did: string,
 	cid: string | null,
 	context: EventViewContext,
 ): Promise<string | undefined> {
-	if (!cid) return undefined;
+	if (!cid) return Promise.resolve(undefined);
 	const cacheKey = `${did}:${cid}`;
 	const cached = context.blobUrlCache.get(cacheKey);
-	if (cached !== undefined || context.blobUrlCache.has(cacheKey)) return cached;
+	if (cached) return cached;
 
-	let result: string | undefined;
-	try {
-		const pdsUrl = await resolvePdsUrl(did);
-		if (!pdsUrl) {
-			console.warn(`[views] PDS not found for ${did}; imageUrl omitted`);
-			result = undefined;
-		} else {
-			result = `${pdsUrl.replace(/\/$/, "")}/xrpc/com.atproto.sync.getBlob?did=${encodeURIComponent(did)}&cid=${encodeURIComponent(cid)}`;
+	const promise: Promise<string | undefined> = (async () => {
+		try {
+			const pdsUrl = await resolvePdsUrl(did);
+			if (!pdsUrl) {
+				console.warn(`[views] PDS not found for ${did}; imageUrl omitted`);
+				return undefined;
+			}
+			return `${pdsUrl.replace(/\/$/, "")}/xrpc/com.atproto.sync.getBlob?did=${encodeURIComponent(did)}&cid=${encodeURIComponent(cid)}`;
+		} catch (error) {
+			console.warn(`[views] failed to resolve blob URL for ${did}/${cid}:`, error);
+			return undefined;
 		}
-	} catch (error) {
-		console.warn(`[views] failed to resolve blob URL for ${did}/${cid}:`, error);
-		result = undefined;
-	}
+	})();
 
-	context.blobUrlCache.set(cacheKey, result);
-	return result;
+	context.blobUrlCache.set(cacheKey, promise);
+	return promise;
 }
 
 export function buildEventView(
