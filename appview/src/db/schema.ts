@@ -4,7 +4,7 @@ import { sql } from "drizzle-orm";
 export const checkpointsTable = sqliteTable(
   "checkpoints",
   {
-    uri: text("uri").notNull().unique().primaryKey(),
+    uri: text("uri").notNull().primaryKey(),
     cid: text("cid").notNull(),
     eventUri: text("event_uri").notNull(),
     eventCid: text("event_cid").notNull(),
