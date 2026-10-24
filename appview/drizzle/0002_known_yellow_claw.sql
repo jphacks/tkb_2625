@@ -1,0 +1,1 @@
+ALTER TABLE `events` ADD `indexed_at` integer DEFAULT (unixepoch()) NOT NULL;

@@ -7,6 +7,8 @@ export const eventsTable = sqliteTable("events", {
   cid: text("cid").notNull(),
   authorDid: text("author_did").notNull(),
 
+  record: text("record", { mode: "json" }).notNull(),
+
   name: text("name").notNull(),
   description: text("description"),
   imageCid: text("image_cid"),
@@ -18,6 +20,9 @@ export const eventsTable = sqliteTable("events", {
   createdAt: integer("created_at", { mode: "timestamp" })
     .notNull()
     .$defaultFn(() => new Date()),
+  indexedAt: integer("indexed_at", { mode: "timestamp" })
+    .notNull()
+    .default(sql`(unixepoch())`),
 });
 
 export const approveTable = sqliteTable("approve", {
