@@ -6,7 +6,6 @@ export const approveTable = sqliteTable("approve", {
   submitUri: text("submit_uri").notNull(),
   submitCid: text("submit_cid").notNull(),
   approverDid: text("approver_did").notNull(),
-  createdAt: integer("created_at", { mode: "timestamp" })
+  createdAt: integer("created_at",)
     .notNull()
-    .$defaultFn(() => new Date()),
 });
