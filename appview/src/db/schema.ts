@@ -1,5 +1,6 @@
 import { sqliteTable, text, integer, real, index, check } from "drizzle-orm/sqlite-core";
 import { sql } from "drizzle-orm";
+import { relations } from "drizzle-orm";
 
 export const eventsTable = sqliteTable("events", {
   uri: text("uri").primaryKey(),
@@ -73,3 +74,13 @@ export const submitsTable = sqliteTable(
   ],
 );
 
+export const submitsRelations = relations(submitsTable, ({ one }) => ({
+  event: one(eventsTable, {
+    fields: [submitsTable.eventUri],
+    references: [eventsTable.uri],
+  }),
+  checkpoint: one(checkpointsTable, {
+    fields: [submitsTable.checkpointUri],
+    references: [checkpointsTable.uri],
+  }),
+}));
