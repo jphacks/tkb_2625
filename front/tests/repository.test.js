@@ -1,6 +1,7 @@
 import { test, afterEach } from 'node:test';
 import assert from 'node:assert/strict';
-import { repository, prepareImage } from '../src/repository.js';
+import { repository } from '../src/repository.js';
+import { prepareImage } from '../src/images.js';
 import { createInitialState } from '../src/data.js';
 
 afterEach(() => { delete globalThis.localStorage; });

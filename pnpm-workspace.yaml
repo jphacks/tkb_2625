@@ -1,0 +1,12 @@
+packages:
+  - front
+  - client
+  - appview
+
+injectWorkspacePackages: true
+
+# 既存のclient・appviewで許可していた依存ビルドをルートで管理する。
+allowBuilds:
+  better-sqlite3: true
+  core-js: true
+  esbuild: true

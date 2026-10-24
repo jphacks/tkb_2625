@@ -51,7 +51,7 @@ export function latestSubmission(state, checkpointId) {
 }
 export function checkpointStatus(state, id) { return latestSubmission(state, id)?.status || 'unsubmitted'; }
 export function selectCheckpoints(state, filter = 'all', sort = 'number') {
-  return checkpoints.filter(c => filter === 'all' || checkpointStatus(state, c.id) === filter).sort((a, b) => sort === 'points-desc' ? b.points - a.points : sort === 'points-asc' ? a.points - b.points : sort === 'name' ? a.name.localeCompare(b.name, 'ja') : sort === 'status' ? STATUSES[checkpointStatus(state, a.id)].rank - STATUSES[checkpointStatus(state, b.id)].rank : a.id.localeCompare(b.id));
+  return (state.checkpoints || checkpoints).filter(c => filter === 'all' || checkpointStatus(state, c.id) === filter).sort((a, b) => sort === 'points-desc' ? b.points - a.points : sort === 'points-asc' ? a.points - b.points : sort === 'name' ? a.name.localeCompare(b.name, 'ja') : sort === 'status' ? STATUSES[checkpointStatus(state, a.id)].rank - STATUSES[checkpointStatus(state, b.id)].rank : a.id.localeCompare(b.id));
 }
 export function totalPoints(state) {
   const approved = new Set(state.submissions.filter(s => s.status === 'approved').map(s => s.checkpointId));

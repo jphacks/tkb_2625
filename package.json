@@ -1,0 +1,18 @@
+{
+  "name": "tkb_2625",
+  "private": true,
+  "packageManager": "pnpm@11.0.0",
+  "engines": { "node": ">=24" },
+  "scripts": {
+    "dev": "corepack pnpm --filter roam-rogaining dev",
+    "dev:front": "corepack pnpm --filter roam-rogaining dev",
+    "dev:client": "corepack pnpm --filter client dev",
+    "dev:appview": "corepack pnpm --filter appview dev",
+    "dev:all": "corepack pnpm --parallel --filter roam-rogaining --filter appview run dev",
+    "build": "corepack pnpm -r --if-present run build",
+    "build:front": "corepack pnpm --filter roam-rogaining build",
+    "typecheck": "corepack pnpm -r --if-present run typecheck",
+    "test": "corepack pnpm -r --if-present run test",
+    "preview": "corepack pnpm --filter roam-rogaining preview"
+  }
+}

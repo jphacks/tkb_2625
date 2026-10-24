@@ -3,9 +3,10 @@ import { Link } from 'react-router-dom';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { ArrowUpRight, Compass, Crosshair, MapPin, Navigation, Pause, Play } from 'lucide-react';
-import { checkpoints, checkpointStatus, demoRoute } from './data';
+import { checkpointStatus, demoRoute } from './data';
 
 export default function MapPage({ state }) {
+  const { checkpoints } = state;
   const container = useRef(null);
   const map = useRef(null);
   const layers = useRef(null);

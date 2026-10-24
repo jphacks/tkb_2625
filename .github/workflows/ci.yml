@@ -10,29 +10,15 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v4
-        with:
-          version: 11
       - uses: actions/setup-node@v4
         with:
-          node-version: 24
-
-      - name: appview install
-        working-directory: appview
+          node-version-file: .nvmrc
+      - uses: pnpm/action-setup@v4
+      - name: Install workspace
         run: pnpm install --frozen-lockfile
-      - name: appview typecheck
-        working-directory: appview
+      - name: Test
+        run: pnpm test
+      - name: Typecheck
         run: pnpm typecheck
-      - name: appview build
-        working-directory: appview
-        run: pnpm build
-
-      - name: client install
-        working-directory: client
-        run: pnpm install --frozen-lockfile
-      - name: client typecheck
-        working-directory: client
-        run: pnpm typecheck
-      - name: client build
-        working-directory: client
+      - name: Build
         run: pnpm build

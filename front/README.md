@@ -4,30 +4,30 @@
 
 ## 配置
 
-このディレクトリが参加者向けフロントエンドのルートです。既存の client・appview とは独立した npm プロジェクトとして管理します。以下のコマンドは front 内で実行してください。
+このディレクトリが参加者向けフロントエンドのルートです。client・appview と同じ pnpm workspace に含まれます。依存関係とロックファイルはリポジトリ直下で一元管理します。以下のコマンドはリポジトリ直下で実行してください。
 
 ```powershell
-cd ~/GitHub/tkb_2625/front
+cd ~/GitHub/tkb_2625
 ```
 
 ## 起動
 
-Node.js 22.12以上（動作確認環境：24.20.0）を使用してください。
+Node.js 24 と pnpm 11.0.0 を使用してください。ルートの packageManager・.nvmrc に合わせています。
 
 ```powershell
-npm.cmd ci
-npm.cmd run dev
+corepack.cmd pnpm --filter roam-rogaining install --frozen-lockfile
+corepack.cmd pnpm dev
 ```
 
-表示されたローカルURL（通常は http://localhost:5173 ）をブラウザで開いてください。依存パッケージはインストール済みです。PowerShellの実行ポリシーで `npm.ps1` がブロックされる環境でも使えるよう、コマンドは `npm.cmd` で記載しています。macOS/Linuxでは `npm` に読み替えてください。
+表示されたローカルURL（通常は http://localhost:5173 ）をブラウザで開いてください。依存パッケージはインストール済みです。PowerShellでは corepack.cmd を使えます。macOS/Linuxでは corepack pnpm、pnpmを導入済みなら pnpm に読み替えてください。依存パッケージの追加はリポジトリ直下から pnpm --filter roam-rogaining add <package> を実行します。front 内で npm install は実行しません。
 
 ```powershell
-npm.cmd test
-npm.cmd run build
-npm.cmd run preview
+corepack.cmd pnpm test
+corepack.cmd pnpm build:front
+corepack.cmd pnpm preview
 ```
 
-`build` の成果物は `dist/` に生成します。外部ホスティングには公開していません。静的ホスティングする場合は、`/cards` などのパスを `index.html` にフォールバックする設定が必要です。
+`build:front` の成果物は `front/dist/` に生成します。外部ホスティングには公開していません。静的ホスティングする場合は、`/cards` などのパスを `index.html` にフォールバックする設定が必要です。
 
 ## レビュー手順
 
@@ -56,7 +56,7 @@ npm.cmd run preview
 | 同期 | サーバー接続・複数端末／複数タブの同期なし。レビューは同じタブ内で実施 |
 | 認証 | 未実装。`/admin` は保護されていないデモ画面 |
 
-参加者画面と管理画面は共通の状態を参照します。ポイントは承認済みチェックポイントのIDを重複排除して計算し、再提出前の不承認履歴は保持します。バックエンド導入時は `src/repository.js` の取得・保存境界と、`src/data.js` の提出・審査処理をサーバー側APIへ移してください。大会終了・重複提出・権限の検証もサーバー側で必要です。
+参加者画面と管理画面は共通の状態を参照します。ポイントは承認済みチェックポイントのIDを重複排除して計算し、再提出前の不承認履歴は保持します。バックエンド導入時は `src/service.js` の非同期サービス契約に沿ったAPIアダプターを用意し、`useRogaining` のサービス生成部分を差し替えます。画面は返されたチーム・チェックポイント・確定ポイントを表示します。責務分担と既存lexiconとの差分は [docs/backend-boundary.md](docs/backend-boundary.md) を参照してください。
 
 ## 地図と端末機能
 
@@ -73,18 +73,21 @@ src/
   App.jsx         共通ヘッダー、カード、詳細モーダル、チーム、管理者
   MapPage.jsx     Leaflet地図、GPS・方位センサーと監視解除
   data.js         サンプル、ステータス、提出・審査・ポイント計算
-  repository.js   保存処理、画像形式・容量確認と縮小
+  service.js      非同期の操作境界とデモ実装（提出・審査・確定ポイント）
+  useRogaining.js 読み込み、再試行、操作中の管理と応答の反映
+  repository.js   デモ専用のlocalStorage保存アダプター
+  images.js       ブラウザ側の画像形式・容量確認と縮小
   styles.css      Tailwind読み込み、配色・レイアウト・レスポンシブ
 tests/
   domain.test.js      状態遷移、終了制限、並び替え、重複加算防止
   repository.test.js  保存往復、破損データ、容量不足、無効ファイル
+  service.test.js     非同期操作、同時提出、保存失敗時の状態保持
 ```
 
 React・React Router・Viteを使用し、Tailwind CSSは[公式のViteプラグイン](https://tailwindcss.com/docs/installation/using-vite)で組み込んでいます。
 
-## 検証結果
+## 検証
 
-- `npm.cmd test`：9件成功。提出→不承認→再提出→承認、二重承認・提出防止、終了時刻ちょうどの提出拒否、並び替え、画像を含む保存データの往復、破損・容量不足、ファイル形式・容量の事前検証。
-- `npm.cmd run build`：成功。
-- 開発サーバーの `/cards`・`/team`・`/map`・`/admin`：HTTP 200を確認。これは画面の実表示や操作を検証した結果ではありません。
-- この作業環境に操作可能なブラウザがなく、375px幅の実表示、モーダルのフォーカス、実際の画像デコードと撮影、GPS・方位センサーの実機動作、権限拒否時の画面、地図タイル取得は未確認です。上記のレビュー手順で確認してください。
+リポジトリ直下の `pnpm test` と `pnpm build:front` でフロントエンドを検証できます。CIもルートの共通ロックファイルを使って実行します。
+
+操作可能なブラウザがない環境では、スマートフォンの実表示・モーダルのフォーカス・カメラ・GPS・方位センサー・地図タイルの実取得は未確認です。上記のレビュー手順で確認してください。
