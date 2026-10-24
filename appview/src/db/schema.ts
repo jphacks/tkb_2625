@@ -1,11 +1,10 @@
 import { check, index, integer, real, sqliteTable, text } from "drizzle-orm/sqlite-core";
 import { sql } from "drizzle-orm";
 
-export const checkpoints = sqliteTable(
+export const checkpointsTable = sqliteTable(
   "checkpoints",
   {
-    id: text("id").primaryKey(),
-    uri: text("uri").notNull().unique(),
+    uri: text("uri").notNull().unique().primaryKey(),
     cid: text("cid").notNull(),
     eventUri: text("event_uri").notNull(),
     eventCid: text("event_cid").notNull(),
