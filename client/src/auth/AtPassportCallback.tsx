@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { errorMessage } from '../utils';
+import { errorMessage } from '../lib/utils';
+import { empty } from '../lib/ui';
 import { readAtPassportCallback } from './atpassport';
 import { useAuth, type LoginLocationState } from './AuthProvider';
 
@@ -24,5 +25,5 @@ export default function AtPassportCallback() {
     });
   }, [navigate, signIn]);
 
-  return <main className="empty" role="status">ログイン画面へ移動しています…</main>;
+  return <main className={empty} role="status">ログイン画面へ移動しています…</main>;
 }
