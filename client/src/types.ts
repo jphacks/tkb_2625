@@ -19,6 +19,7 @@ export interface Submission {
   reason: string;
   image: string;
   submittedAt: string;
+  location: { lat: number; lon: number };
 }
 export interface DemoState {
   version: number;
@@ -49,7 +50,7 @@ export interface DemoRepository {
   save(state: DemoState): void | DemoState | Promise<void | DemoState>;
 }
 export interface CommandPayloads {
-  submitPhoto: { checkpointId: string; image: string };
+  submitPhoto: { checkpointId: string; image: string; location: { lat: number; lon: number }; createdAt: string };
   reviewSubmission: { id: string; decision: SubmissionStatus; reason?: string };
   endDemo: undefined;
   resetDemo: undefined;

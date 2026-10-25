@@ -11,7 +11,7 @@ export function createDemoService(storage: DemoRepository = repository, clock = 
   let warning = '';
   let queue = Promise.resolve();
   const handlers: Handlers = {
-    submitPhoto: ({ checkpointId, image }) => state => submitPhoto(state, checkpointId, image, clock()),
+    submitPhoto: ({ checkpointId, image, location, createdAt }) => state => submitPhoto(state, checkpointId, image, location, createdAt),
     reviewSubmission: ({ id, decision, reason = '' }) => state => reviewSubmission(state, id, decision, reason),
     endDemo: () => state => ({ ...state, endsAt: new Date(clock() - 1000).toISOString() }),
     resetDemo: () => () => createInitialState(clock()),

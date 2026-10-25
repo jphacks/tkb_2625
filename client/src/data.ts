@@ -66,7 +66,7 @@ export function toSnapshot(state: DemoState): Snapshot {
 }
 
 export function createInitialState(now = Date.now()): DemoState {
-  const entry = (id: string, checkpointId: string, status: SubmissionStatus, minutes: number, reason = ''): Submission => ({ id, checkpointId, status, reason, teamId: 'team-014', image: checkpoints.find(c => c.id === checkpointId)!.image, submittedAt: new Date(now - minutes * 60000).toISOString() });
+  const entry = (id: string, checkpointId: string, status: SubmissionStatus, minutes: number, reason = ''): Submission => { const cp = checkpoints.find(c => c.id === checkpointId)!; return { id, checkpointId, status, reason, teamId: 'team-014', image: cp.image, location: { lat: cp.lat, lon: cp.lng }, submittedAt: new Date(now - minutes * 60000).toISOString() }; };
   return {
     version: 2,
     ...createRoster(now),
@@ -88,14 +88,18 @@ export function totalPoints(state: DemoState, teamId: string | null) {
   return state.checkpoints.filter(c => approved.has(c.id)).reduce((sum, c) => sum + c.points, 0);
 }
 
-export function submitPhoto(state: DemoState, checkpointId: string, image: string, now = Date.now(), id: string = createId()): DemoState {
+export function submitPhoto(state: DemoState, checkpointId: string, image: string, location: { lat: number; lon: number }, createdAt: string, id: string = createId()): DemoState {
   if (!state.selectedTeamId || !state.teams.some(t => t.id === state.selectedTeamId)) throw new Error('参加するチームを選択してください。');
-  if (now >= Date.parse(state.endsAt)) throw new Error('大会が終了したため、提出できません。');
+  if (Date.parse(createdAt) >= Date.parse(state.endsAt)) throw new Error('大会が終了したため、提出できません。');
   if (!state.checkpoints.some(c => c.id === checkpointId)) throw new Error('チェックポイントが見つかりません。');
   if (['pending', 'approved'].includes(checkpointStatus(state, checkpointId, state.selectedTeamId))) throw new Error('このチェックポイントは提出済みです。');
   if (!image) throw new Error('画像を選択してください。');
-  return { ...state, submissions: [...state.submissions, { id, teamId: state.selectedTeamId, checkpointId, image, status: 'pending', reason: '', submittedAt: new Date(now).toISOString() }] };
+  if (!validSubmissionLocation(location) || !Number.isFinite(Date.parse(createdAt))) throw new Error('位置または作成日時が正しくありません。');
+  if (state.submissions.some(submission => submission.id === id)) throw new Error('提出レコードIDが重複しました。もう一度お試しください。');
+  return { ...state, submissions: [...state.submissions, { id, teamId: state.selectedTeamId, checkpointId, image, location, status: 'pending', reason: '', submittedAt: createdAt }] };
 }
+
+function validSubmissionLocation(location: { lat: number; lon: number }) { return Number.isFinite(location.lat) && Math.abs(location.lat) <= 90 && Number.isFinite(location.lon) && Math.abs(location.lon) <= 180; }
 
 export function reviewSubmission(state: DemoState, id: string, decision: SubmissionStatus, reason = ''): DemoState {
   const submission = state.submissions.find(s => s.id === id);
