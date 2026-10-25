@@ -4,6 +4,7 @@ import { BrowserRouter, Route, Routes } from 'react-router-dom'
 import './index.css'
 import App from './App'
 import LoginPage from './LoginPage'
+import { EventCreatePage } from './EventCreatePage'
 import { LexClientProvider } from './lexClient'
 
 const RankingPage = lazy(() => import('./RankingPage'))
@@ -14,6 +15,7 @@ createRoot(document.getElementById('root')!).render(
       <BrowserRouter>
         <Routes>
           <Route path="/login" element={<LoginPage />} />
+          <Route path="/admin/events/new" element={<EventCreatePage />} />
           <Route path="/ranking" element={<Suspense fallback={<main className="empty" role="status">ランキングを読み込んでいます…</main>}><RankingPage /></Suspense>} />
           <Route path="*" element={<App />} />
         </Routes>

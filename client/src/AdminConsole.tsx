@@ -19,6 +19,7 @@ export default function AdminConsole(props: Props & { review: ReactNode }) {
     { to: '/admin/checkpoints', label: 'CP管理', icon: Flag },
     { to: '/admin/map', label: 'チーム位置', icon: MapPin },
     { to: '/admin/review', label: '写真審査', icon: ShieldCheck },
+    { to: '/admin/events/new', label: 'イベント作成', icon: Plus },
   ];
   return <div className="admin-console">
     <div className="admin-heading"><div><span className="eyebrow">ROAM / EVENT OPERATIONS</span><h2>大会管理</h2><p>チームの一歩も、新しい発見も。大会のいまを、ここから。</p></div></div>
