@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link, Outlet, useOutletContext } from 'react-router-dom';
-import { Compass, Flag, Sprout, X } from 'lucide-react';
+import { Compass, X } from 'lucide-react';
 import type { AtUriString } from '@atproto/lex';
 import ParticipantNav from '../../components/ParticipantNav';
 import Countdown, { useExpired } from '../../components/Countdown';
@@ -8,8 +8,8 @@ import { useCheckpoints, useEvent, useSubmissions } from '../../hooks/useRogaini
 import { useEventUri } from '../../lib/eventUri';
 import { useLexClient } from '../../lib/lexClient';
 import { cn } from '../../lib/cn';
-import { button, buttonPrimary, empty, errorPanel, eyebrow, iconButton, liveDot, mainContainer, notice as noticeClass } from '../../lib/ui';
-import { HeaderLabel, SiteFooter, SiteHeader, SkipLink } from '../../components/SiteChrome';
+import { button, buttonPrimary, empty, errorPanel, iconButton, liveDot, mainContainer, notice as noticeClass } from '../../lib/ui';
+import { SiteHeader, SkipLink } from '../../components/SiteChrome';
 import { eventDate, eventName, eventOrganizer } from '../../lib/eventPresentation';
 import { approvedPoints, checkpointIsGoal, checkpointStatus, eventRecord, findTeamOf, latestSubmissionByCheckpoint, profileName, submissionCreatedAt, teamName, type CheckpointStatus } from '../../lib/rogaining';
 import type { CheckpointView, EventView, SubmissionView, TeamView } from '../../lexicons/win/tomo-x/rogaining/defs';
@@ -80,8 +80,8 @@ export default function EventLayout() {
     return () => clearTimeout(timer);
   }, [derived.waiting, submissions.loading, submissions.updatedAt]); // retry は毎回作り直される関数なので依存に含めない
 
-  if (event.loading || checkpoints.loading) return <main className={empty} role="status"><Compass size={32}/><p>大会データを読み込んでいます…</p></main>;
-  if (!event.data || !checkpoints.data) return <main className={empty}><h1>大会データを取得できませんでした</h1><p role="alert">{event.error || checkpoints.error}</p><div className="flex flex-wrap gap-2.5"><button className={buttonPrimary} onClick={() => { if (event.error) event.retry(); if (checkpoints.error) checkpoints.retry(); }}>再試行する</button><Link className={button} to="/events">イベント一覧へ</Link></div></main>;
+  if (event.loading || checkpoints.loading) return <main className={empty} role="status"><Compass size={20}/><p>読み込み中…</p></main>;
+  if (!event.data || !checkpoints.data) return <main className={empty}><h1>大会データを取得できませんでした</h1><p role="alert">{event.error || checkpoints.error}</p><div className="flex flex-wrap gap-2"><button className={buttonPrimary} onClick={() => { if (event.error) event.retry(); if (checkpoints.error) checkpoints.retry(); }}>再試行</button><Link className={button} to="/events">イベント一覧へ</Link></div></main>;
 
   const context: EventContext = {
     uri, event: event.data.event, teams: event.data.teams, team, checkpoints: checkpoints.data,
@@ -94,25 +94,37 @@ export default function EventLayout() {
   const scored = checkpoints.data.filter(cp => !checkpointIsGoal(cp)).length;
   const startsAt = Date.parse(record?.startsAt ?? '');
 
+  const live = started && !ended;
+  const organizer = eventOrganizer(event.data.event);
+
   return <div>
     <SkipLink target="main"/>
-    <SiteHeader to="/events" label="ROAM イベント一覧">
-      <HeaderLabel className="flex items-center gap-[9px] text-ink max-sm:gap-1.5 max-xs:hidden"><span className={cn(liveDot, !(started && !ended) && 'bg-[#b4b5a3]')}/> {eventName(event.data.event)} {Number.isFinite(startsAt) && <span className="border-l border-line pl-4 text-muted max-md:hidden">{eventDate(startsAt)}</span>}</HeaderLabel>
+    <SiteHeader to="/events">
+      <span className="flex min-w-0 items-center gap-2 text-[13px] font-bold">{live && <><span className={cn(liveDot, 'bg-bg')} aria-hidden="true"/><span className="sr-only">開催中</span></>}<span className="truncate">{eventName(event.data.event)}</span></span>
+      <span className="truncate text-[11px] text-bg/70 max-md:hidden">{Number.isFinite(startsAt) && `${eventDate(startsAt)} · `}主催 {organizer}</span>
     </SiteHeader>
 
-    <div className="mx-auto grid max-w-[1160px] grid-cols-[1fr_245px_220px] items-center gap-[30px] p-8 max-md:grid-cols-[1fr_190px_170px] max-md:gap-[15px] max-sm:grid-cols-2 max-sm:gap-x-0 max-sm:gap-y-[22px] max-sm:px-[18px] max-sm:pt-6 max-sm:pb-[21px]">
-      <div className="max-sm:col-span-full"><span className={eyebrow}>{team ? 'YOUR TEAM' : 'NO TEAM'}</span><h1 className="mt-2 mb-2.5 flex items-center gap-[15px] text-[26px] font-semibold tracking-[2px] max-sm:mb-2 max-sm:text-2xl">{team ? teamName(team) : 'チーム未所属'}<Sprout size={22}/></h1><span className="text-[11px] tracking-[.6px] text-muted max-sm:text-[10px]">{team ? team.members.map(profileName).join('・') : 'チームに登録されると写真を提出できます。'}</span></div>
-      {record && <Countdown endsAt={record.endsAt} startsAt={record.startsAt}/>}
-      <div className="border-l border-line pl-[35px] max-md:pl-5 max-sm:pl-6"><span className="flex items-center gap-[7px] text-[11px] tracking-[1px] text-[#737d6b] max-sm:text-[10px]"><Flag size={14}/> 獲得ポイント</span><strong className="block text-[38px] leading-[1.45] font-medium tracking-[1.5px] tabular-nums max-md:text-[34px] max-sm:text-[30px] max-sm:leading-[1.5]">{derived.points}<small className="ml-[9px] text-[15px] font-normal tracking-[0] max-sm:text-xs">pt</small></strong><span className="text-[10px] text-muted max-sm:text-[8px]">{derived.count} / {scored} チェックポイント達成</span></div>
+    <div className="border-b border-fg/10">
+      <div className="mx-auto flex max-w-[1200px] flex-wrap items-center gap-x-4 gap-y-0.5 px-4 py-1.5 max-sm:px-3">
+        <div className="flex min-w-0 flex-1 items-baseline gap-2">
+          {team ? <><strong className="shrink-0 text-[14px] font-bold">{teamName(team)}</strong><span className="truncate text-[11px] text-fg/60 max-sm:hidden">{team.members.map(profileName).join('・')}</span></> : <span className="text-[13px] text-fg/60">チーム未所属</span>}
+        </div>
+        {record && <div className="[&_strong]:text-[15px] [&>div]:flex-row [&>div]:items-baseline [&>div]:gap-1.5">
+          <Countdown endsAt={record.endsAt} startsAt={record.startsAt}/>
+        </div>}
+        <div className="flex items-baseline gap-2 tabular-nums">
+          <strong className="text-[15px] font-bold text-accent"><span className="sr-only">獲得ポイント </span>{derived.points}<small className="ml-0.5 text-[11px]">pt</small></strong>
+          <span className="text-[11px] text-fg/60"><span className="sr-only">達成チェックポイント </span>{derived.count}/{scored}</span>
+        </div>
+      </div>
     </div>
 
     <ParticipantNav/>
 
     <main id="main" className={mainContainer}>
-      {notice && <div className={noticeClass} role="status">{notice}<button className={iconButton} aria-label="通知を閉じる" onClick={() => setNotice('')}><X size={18}/></button></div>}
-      {submissions.error && !fetched && <div className={errorPanel} role="alert"><p>提出状況を取得できませんでした。{submissions.error}</p><button className={button} onClick={submissions.retry}>再試行する</button></div>}
+      {notice && <div className={noticeClass} role="status">{notice}<button className={cn(iconButton, 'hover:not-disabled:bg-bg/15')} aria-label="通知を閉じる" onClick={() => setNotice('')}><X size={18}/></button></div>}
+      {submissions.error && !fetched && <div className={errorPanel} role="alert"><p>提出状況を取得できませんでした。{submissions.error}</p><button className={button} onClick={submissions.retry}>再試行</button></div>}
       <Outlet context={context}/>
     </main>
-    <SiteFooter><span>主催：{eventOrganizer(event.data.event)}</span></SiteFooter>
   </div>;
 }

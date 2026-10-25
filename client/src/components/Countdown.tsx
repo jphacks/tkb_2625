@@ -1,6 +1,4 @@
 import { useEffect, useState } from 'react';
-import { Clock3 } from 'lucide-react';
-import { cn } from '../lib/cn';
 
 export function useExpired(endsAt: string) {
   const [expiredAt, setExpiredAt] = useState('');
@@ -28,5 +26,5 @@ export default function Countdown({ endsAt, startsAt }: { endsAt: string; starts
   const before = startsAt !== undefined && now < Date.parse(startsAt);
   const remaining = Math.max(0, Math.ceil((Date.parse(before ? startsAt : endsAt) - now) / 1000));
   const duration = [Math.floor(remaining / 3600), Math.floor(remaining % 3600 / 60), remaining % 60].map(n => String(n).padStart(2, '0')).join(':');
-  return <div className="border-l border-line pl-[35px] max-md:pl-5 max-sm:border-0 max-sm:pl-0"><span className="flex items-center gap-[7px] text-[11px] tracking-[1px] text-[#737d6b] max-sm:text-[10px]"><Clock3 size={14}/>{before ? '開始まで' : remaining ? '残り時間' : '大会終了'}</span><strong className={cn('block text-[34px] leading-[1.45] font-medium tracking-[1.5px] tabular-nums max-md:text-[29px] max-sm:text-[30px] max-sm:leading-[1.5]', !remaining && 'text-[#986c4f]')}>{duration}</strong><span className="text-[10px] text-muted max-sm:text-[8px]">{before ? 'スタートまで、もう少し。' : remaining ? '自分たちのペースで、楽しもう。' : 'おつかれさまでした。'}</span></div>;
+  return <div className="flex flex-col"><span className="text-[11px] font-bold text-fg/60">{before ? '開始まで' : remaining ? '残り' : '終了'}</span><strong className="text-[22px] leading-tight font-bold tabular-nums max-sm:text-[18px]">{duration}</strong></div>;
 }

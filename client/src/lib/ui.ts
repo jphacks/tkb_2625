@@ -1,23 +1,30 @@
-// 複数の画面で使う Tailwind のクラス。上書きしたいときは cn(button, 'text-[11px]') のように後ろに足す
+// 複数の画面で使う Tailwind のクラス。上書きしたいときは cn(button, 'h-8') のように後ろに足す
+// 色は bg / fg / accent のみ。角丸・影は使わない
 
-const buttonBase = 'inline-flex min-h-11 items-center justify-center gap-2 border px-[17px] py-[11px] text-center text-xs leading-[1.4] disabled:cursor-not-allowed disabled:opacity-50';
-export const button = `${buttonBase} border-[#cdd3be] bg-[#faf9f3] hover:not-disabled:bg-[#e9ecdf]`;
-export const buttonPrimary = `${buttonBase} border-olive bg-olive text-[#f7f6ef] hover:not-disabled:bg-[#5c6d50]`;
-export const iconButton = 'inline-grid min-h-11 min-w-11 place-items-center';
-export const textButton = 'inline-flex items-center gap-[5px] p-0 text-olive disabled:cursor-default';
+const buttonBase = 'inline-flex h-9 items-center justify-center gap-1.5 border px-3 text-center text-[13px] leading-none whitespace-nowrap disabled:cursor-not-allowed disabled:opacity-40';
+export const button = `${buttonBase} border-fg/25 bg-bg text-fg hover:not-disabled:bg-fg/5`;
+export const buttonPrimary = `${buttonBase} border-accent bg-accent font-bold text-bg hover:not-disabled:bg-accent/90`;
+export const iconButton = 'inline-grid size-9 place-items-center hover:not-disabled:bg-fg/5';
+export const textButton = 'inline-flex items-center gap-1 p-0 text-accent hover:underline disabled:cursor-default';
 
-export const eyebrow = 'block text-[10px] font-semibold tracking-[1.8px] text-muted';
-export const liveDot = 'inline-block size-1.5 shrink-0 rounded-full bg-[#7d8f62]';
-export const skipLink = 'fixed -top-[100px] left-4 z-[1000] bg-olive p-[15px] text-white focus:top-2.5';
+/** 小見出し・ラベル */
+export const eyebrow = 'block text-[11px] font-bold text-fg/60';
+export const liveDot = 'inline-block size-2 shrink-0 bg-accent';
+export const skipLink = 'fixed -top-[100px] left-4 z-[1000] bg-accent p-3 text-bg focus:top-2';
 
-export const mainContainer = 'mx-auto min-h-[60vh] max-w-[1160px] px-8 pt-[30px] pb-[45px] xl:pt-9 max-sm:px-3.5 max-sm:pt-5 max-sm:pb-[30px]';
-export const empty = 'flex flex-col items-center gap-[18px] px-5 py-[60px] text-center text-muted [&_h3]:text-base [&_h3]:font-medium [&_p]:text-xs';
+export const mainContainer = 'mx-auto w-full max-w-[1200px] px-4 py-4 max-sm:px-3 max-sm:py-3';
+export const empty = 'flex flex-col items-center gap-3 px-4 py-12 text-center text-fg/60 [&_h1]:text-[15px] [&_h1]:font-bold [&_h1]:text-fg [&_h2]:text-[15px] [&_h2]:font-bold [&_h2]:text-fg [&_h3]:text-[14px] [&_h3]:font-bold';
 
-const panel = 'my-[18px] items-center gap-[9px] px-[17px] py-[15px] text-xs leading-[1.8] max-sm:p-3 max-sm:text-[11px]';
-export const infoPanel = `${panel} flex bg-[#e9eddf] text-[#687554]`;
-export const successPanel = `${panel} flex bg-[#e3ecdc] text-[#506c40]`;
-export const errorPanel = `${panel} block bg-[#f0e4d9] text-[#8c624e] [&_strong]:font-medium`;
-export const errorText = 'mt-3 text-xs leading-[1.8] text-[#a1533b]';
-export const notice = 'mb-5 flex items-center justify-between gap-3 border-l-3 border-olive bg-[#e6ecde] px-[15px] py-2.5 text-[13px] whitespace-pre-line max-sm:px-2.5 max-sm:py-2 max-sm:text-[11px]';
+/** 一覧のテーブル */
+export const table = 'w-full border-collapse text-[13px] [&_td]:border-b [&_td]:border-fg/10 [&_td]:px-2 [&_td]:py-1.5 [&_th]:border-b [&_th]:border-fg [&_th]:px-2 [&_th]:py-1.5 [&_th]:text-left [&_th]:text-[11px] [&_th]:font-bold [&_th]:whitespace-nowrap [&_th]:text-fg/60';
 
-export const input = 'w-full border border-line bg-paper px-2.5 py-2 text-xs text-ink';
+const panel = 'my-3 items-center gap-2 border-l-4 px-3 py-2 text-[13px]';
+export const infoPanel = `${panel} flex border-fg/30 bg-fg/5`;
+export const successPanel = `${panel} flex border-accent bg-accent/10`;
+export const errorPanel = `${panel} block border-fg bg-fg/5 font-bold [&_*]:font-normal`;
+export const errorText = 'mt-2 text-[13px] font-bold text-fg';
+export const notice = 'mb-3 flex items-center justify-between gap-3 bg-accent px-3 py-1 text-[13px] whitespace-pre-line text-bg';
+
+export const input = 'h-9 w-full border border-fg/25 bg-bg px-2 text-[13px] text-fg';
+export const textarea = 'w-full border border-fg/25 bg-bg px-2 py-1.5 text-[13px] text-fg';
+export const fieldLabel = 'mb-1 block text-[11px] font-bold text-fg/60';
