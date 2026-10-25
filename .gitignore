@@ -32,3 +32,9 @@ data
 .env
 
 mylexicons
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+judgman/model/features.npz

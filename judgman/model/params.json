@@ -1,0 +1,28 @@
+{
+  "threshold": 0.3732890762312028,
+  "threshold_multi": 0.5414250617859302,
+  "blend": 1.0,
+  "fusion": true,
+  "feature_names": [
+    "embed_cos",
+    "embed_cos_center",
+    "phash_sim",
+    "dhash_sim",
+    "hist_corr",
+    "match_good",
+    "match_inlier_ratio",
+    "match_inliers",
+    "match_coverage",
+    "match_overlap",
+    "dino_match",
+    "dino_inlier_ratio",
+    "dino_inliers",
+    "dino_coverage",
+    "dino_overlap",
+    "dino_cls_cos"
+  ],
+  "val_f1": 0.8442437923250564,
+  "val_acc": 0.8528138528138528,
+  "n_train": 810,
+  "n_val": 462
+}
