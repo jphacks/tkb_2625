@@ -32,7 +32,6 @@ class DINOv2Result:
 @dataclass
 class EvaluationResult:
     verdict: str
-    best_ref_path: str
     sift_result: SIFTResult
     dino_result: DINOv2Result
     details: str
@@ -99,7 +98,7 @@ class SIFTMatcher:
 
 class DINOv2Extractor:
     def __init__(self, model_name: str = 'dinov2_vits14', device: Optional[str] = None):
-        self.device = device or ('cuda' if torch.cuda.is_available() else 'cpu')
+        self.device = 'cpu'
         self.model = torch.hub.load('facebookresearch/dinov2', model_name)
         self.model.eval().to(self.device)
 
@@ -141,17 +140,36 @@ class HybridLocationVerifier:
         self.dino_sim_match_thresh = dino_sim_match_thresh
         self.dino_sim_mismatch_thresh = dino_sim_mismatch_thresh
 
-    def verify(self, refs: List[bytes], query: bytes) -> EvaluationResult:
-        query_pil = Image.open(query)
-        query_bgr = self.image_converter(query)
+    def verify(self, refs, query) -> EvaluationResult:
+        from io import BytesIO
+
+        def _open_img(x):
+            if isinstance(x, (bytes, bytearray)):
+                return Image.open(BytesIO(bytes(x)))
+            if isinstance(x, str):
+                with open(x, "rb") as f:
+                    return Image.open(BytesIO(f.read()))
+            return Image.open(x)
+
+        def _to_bytes(x):
+            if isinstance(x, (bytes, bytearray)):
+                return bytes(x)
+            if isinstance(x, str):
+                with open(x, "rb") as f:
+                    return f.read()
+            return x
+
+        query_bytes = _to_bytes(query)
+        query_pil = _open_img(query)
+        query_bgr = self.image_converter(query_bytes)
 
         best_sift_res = SIFTResult(0, 0, 0, 0, 0.0, False)
         best_dino_res = DINOv2Result(-1.0)
-        best_ref_path = ""
 
         for ref in refs:
-            ref_pil = Image.open(ref)
-            ref_bgr = self.image_converter(ref)
+            ref_bytes = _to_bytes(ref)
+            ref_pil = _open_img(ref)
+            ref_bgr = self.image_converter(ref_bytes)
 
             sift_res = self.sift_matcher.match(ref_bgr, query_bgr)
             dino_res = self.dino_extractor.compare(ref_pil, query_pil)
@@ -165,7 +183,6 @@ class HybridLocationVerifier:
         verdict = self._determine_verdict(best_sift_res, best_dino_res)
 
         details = (
-            f"Best Reference: {os.path.basename(best_ref_path)} | "
             f"SIFT Inliers: {best_sift_res.num_inliers} (Ratio: {best_sift_res.inlier_ratio:.2f}) | "
             f"DINOv2 Cosine Sim: {best_dino_res.cosine_similarity:.4f}"
         )
@@ -202,8 +219,7 @@ class HybridLocationVerifier:
             err = Exception("画像のデコードに失敗しました")
             logger.exception(err)
             raise err
-        img_rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-        return img_rgb
+        return image
 
 def get_ref_images_from_dir(point_dir: str) -> List[str]:
     valid_exts = ('.jpg', '.jpeg', '.png', '.webp', '.bmp', '.JPG', '.JPEG', '.PNG', '.WEBP', '.BMP')

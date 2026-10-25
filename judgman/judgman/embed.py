@@ -12,7 +12,7 @@ from torchvision.models import ResNet50_Weights, resnet50
 class Embedder:
     def __init__(self) -> None:
         w = ResNet50_Weights.IMAGENET1K_V2
-        net = resnet50(weights=w).eval()
+        net = resnet50(weights=w).eval().to("cpu")
         net.fc = torch.nn.Identity()
         self.net = net
         t = w.transforms()

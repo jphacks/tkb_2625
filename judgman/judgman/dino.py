@@ -12,7 +12,7 @@ from .features import _coverage, _overlap
 
 class DinoMatcher:
     def __init__(self, size: int = 518, thresh: float = 0.7) -> None:
-        self.model = torch.hub.load("facebookresearch/dinov2", "dinov2_vits14").eval()
+        self.model = torch.hub.load("facebookresearch/dinov2", "dinov2_vits14").eval().to("cpu")
         self.size = size
         self.thresh = thresh
         self._cache: dict[Hashable, tuple[np.ndarray, np.ndarray]] = {}
