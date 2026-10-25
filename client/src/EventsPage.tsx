@@ -7,10 +7,9 @@ import { useRemoteQuery } from './useRemoteQuery';
 import { eventDate, eventDates, eventFilter, eventImage, eventName, eventOrganizer, eventStatus } from './eventPresentation';
 import { formatDate } from './utils';
 import ParticipantNav from './ParticipantNav';
+import EventStatusTabs, { eventStatusTabId } from './EventStatusTabs';
 import type { EventView } from './lexicons/win/tomo-x/rogaining/defs';
 import './events.css';
-
-const filters = [{ value: 'all', label: 'すべて' }, { value: 'upcoming', label: '開催予定' }, { value: 'ongoing', label: '開催中' }, { value: 'ended', label: '終了' }];
 
 function EventCover({ event }: { event: EventView }) {
   const src = eventImage(event.imageUrl);
@@ -50,9 +49,9 @@ export default function EventsPage() {
     <main id="events-main" className="main-container">
       <section className="events-intro"><div><span className="eyebrow">YOUR NEXT ADVENTURE</span><h1>次の発見に、<br/>出会うイベントを。</h1><p>街を歩いて、景色を集める。<br/>気になる大会を見つけよう。</p></div><div className="events-intro-art" aria-hidden="true"><Compass size={124} strokeWidth={0.55}/><span>WALK · DISCOVER · CONNECT</span></div></section>
       <div className="events-section-heading"><div><span className="eyebrow">EVENT DIRECTORY</span><h2>イベント一覧</h2></div><button className="button" onClick={events.retry} disabled={events.loading}><RefreshCw size={15}/>更新</button></div>
-      <div className="events-controls"><div className="events-filters" role="group" aria-label="開催状況で絞り込み">{filters.map(filter => <button key={filter.value} type="button" aria-pressed={status === filter.value} className={status === filter.value ? 'active' : ''} onClick={() => setSearchParams(previous => { const next = new URLSearchParams(previous); if (filter.value === 'all') next.delete('status'); else next.set('status', filter.value); return next; })}>{filter.label}</button>)}</div><label className="events-search"><Search size={16}/><span className="sr-only">イベント名・主催者を検索</span><input type="search" value={search} onChange={e => setSearch(e.target.value)} placeholder="イベント名・主催者を検索"/></label></div>
+      <div className="events-controls"><EventStatusTabs value={status} panelId="events-panel" onChange={value => setSearchParams(previous => { const next = new URLSearchParams(previous); if (value === 'all') next.delete('status'); else next.set('status', value); return next; })}/><label className="events-search"><Search size={16}/><span className="sr-only">イベント名・主催者を検索</span><input type="search" value={search} onChange={e => setSearch(e.target.value)} placeholder="イベント名・主催者を検索"/></label></div>
       <div className="events-results-meta"><span>{events.loading ? '読み込み中' : events.error ? '取得できませんでした' : `${visible.length}件のイベント`}</span>{events.updatedAt && <span>更新 {formatDate(events.updatedAt)}</span>}</div>
-      <section className="events-results" aria-label="イベント一覧" aria-busy={events.loading}>
+      <section className="events-results" id="events-panel" role="tabpanel" aria-labelledby={eventStatusTabId(status)} aria-busy={events.loading} tabIndex={0}>
         {events.loading ? <div className="empty" role="status"><CalendarDays size={32}/><p>イベントを読み込んでいます…</p></div> : events.error ? <div className="error-panel" role="alert"><p>イベント一覧を取得できませんでした。{events.error}</p><p>接続先とログイン状態を確認し、再試行してください。</p><button className="button" onClick={events.retry}>再試行する</button></div> : visible.length ? <div className="events-grid">{visible.map(event => <EventCard key={event.uri} event={event} now={now}/>)}</div> : <div className="empty"><CalendarDays size={32}/><h3>{events.data?.length ? '検索に一致するイベントはありません' : '該当するイベントはありません'}</h3><p>{events.data?.length ? 'イベント名や主催者名を変えて検索してください。' : '別の開催状況を選ぶか、時間をおいて更新してください。'}</p>{search && <button className="button" onClick={() => setSearch('')}>検索をクリア</button>}</div>}
       </section>
       <p className="events-footnote">開催状況・参加数は最終更新時点の情報です。日程は日本時間で表示しています。</p>
