@@ -29,7 +29,7 @@ const REFRESH_DELAYS = [1500, 4000];
 export default function AdminEventLayout() {
   const uri = useEventUri();
   // 別のイベントに移ったら状態を作り直す
-  return <OrganizerShell><AdminEvent key={uri} uri={uri} /></OrganizerShell>;
+  return <OrganizerShell participant={eventPath(uri)}><AdminEvent key={uri} uri={uri} /></OrganizerShell>;
 }
 
 function AdminEvent({ uri }: { uri: AtUriString }) {
@@ -82,6 +82,7 @@ function AdminEvent({ uri }: { uri: AtUriString }) {
     { to: 'review', label: '写真審査' },
     { to: 'checkpoints', label: 'CP管理' },
     { to: 'teams', label: 'チーム管理' },
+    { to: 'ranking', label: 'ランキング' },
   ];
 
   const metrics = [
@@ -102,8 +103,6 @@ function AdminEvent({ uri }: { uri: AtUriString }) {
     {errors.length > 0 && <p className={errorBox} role="alert">一部のデータを更新できませんでした：{errors[0]} <button className={textButton} onClick={() => retry('event', 'checkpoints', 'submissions')}>再試行</button></p>}
     <nav className="mb-3 flex overflow-x-auto border-b border-fg/10" aria-label="管理者メニュー">
       {tabs.map(({ to, label }) => <NavLink key={to} to={to} className={({ isActive }) => cn(tab, isActive && tabActive)}>{label}</NavLink>)}
-      <Link className={tab} to={`/ranking?event=${encodeURIComponent(uri)}`}>ランキング</Link>
-      <Link className={tab} to={eventPath(uri)}>参加者画面</Link>
     </nav>
     <Outlet context={context} />
   </main>;

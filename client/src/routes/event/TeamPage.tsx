@@ -3,6 +3,7 @@ import { RefreshCw, Trophy, Users } from 'lucide-react';
 import { useEventContext } from './EventLayout';
 import { Photo, Status } from '../../components/Status';
 import { useRanking } from '../../hooks/useRogainingQuery';
+import { eventPath } from '../../lib/eventUri';
 import { cn } from '../../lib/cn';
 import { useLexClient } from '../../lib/lexClient';
 import { button, empty, errorText, eyebrow, iconButton, textButton } from '../../lib/ui';
@@ -21,7 +22,7 @@ export default function TeamPage() {
   const { uri, team, checkpoints, submissions, points, approvedCount, submissionsState } = useEventContext();
   const client = useLexClient();
   const ranking = useRanking(uri);
-  if (!team) return <div className={empty}><Users size={20}/><h3>チームに所属していません</h3><p>主催者がチームを登録すると表示されます。</p><Link className={button} to={`/ranking?${new URLSearchParams({ event: uri })}`}>ランキングを見る</Link></div>;
+  if (!team) return <div className={empty}><Users size={20}/><h3>チームに所属していません</h3><p>主催者がチームを登録すると表示されます。</p><Link className={button} to={eventPath(uri, 'ranking')}>ランキングを見る</Link></div>;
   const mine = ranking.data?.find(entry => entry.team.uri === team.uri);
   const scored = checkpoints.filter(cp => !checkpointIsGoal(cp)).length;
   const checkpointOf = (submissionUri: string | undefined) => { const index = checkpoints.findIndex(cp => cp.uri === submissionUri); return index < 0 ? undefined : { cp: checkpoints[index], number: checkpointNumber(index) }; };

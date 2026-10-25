@@ -11,7 +11,9 @@ import { ATPASSPORT_CALLBACK_PATH } from './auth/atpassport'
 import AtPassportCallback from './auth/AtPassportCallback'
 
 const EventsPage = lazy(() => import('./routes/EventsPage'))
-const RankingPage = lazy(() => import('./routes/RankingPage'))
+const RankingRedirect = lazy(() => import('./routes/RankingRedirect'))
+const RankingPage = lazy(() => import('./routes/event/RankingPage'))
+const AdminRankingPage = lazy(() => import('./routes/admin/RankingPage'))
 const EventLayout = lazy(() => import('./routes/event/EventLayout'))
 const CardsPage = lazy(() => import('./routes/event/CardsPage'))
 const TeamPage = lazy(() => import('./routes/event/TeamPage'))
@@ -37,13 +39,15 @@ createRoot(document.getElementById('root')!).render(
           <Route element={<RequireAuth />}>
             <Route path="/" element={<Navigate to="/events" replace />} />
             <Route path="/events" element={page(<EventsPage />)} />
-            <Route path="/ranking" element={page(<RankingPage />)} />
+            {/* 旧 URL。大会画面のランキングタブへ転送する */}
+            <Route path="/ranking" element={page(<RankingRedirect />)} />
             {/* イベントは at-uri の did / rkey で指定する (lib/eventUri.ts) */}
             <Route path="/events/:did/:rkey" element={page(<EventLayout />)}>
               <Route index element={<Navigate to="cards" replace />} />
               <Route path="cards" element={page(<CardsPage />)} />
               <Route path="team" element={page(<TeamPage />)} />
               <Route path="map" element={page(<MapPage />)} />
+              <Route path="ranking" element={page(<RankingPage />)} />
             </Route>
             <Route path="/admin" element={page(<AdminHomePage />)} />
             <Route path="/admin/events/new" element={page(<EventCreatePage />)} />
@@ -52,6 +56,7 @@ createRoot(document.getElementById('root')!).render(
               <Route path="review" element={page(<ReviewPage />)} />
               <Route path="checkpoints" element={page(<CheckpointsPage />)} />
               <Route path="teams" element={page(<TeamsPage />)} />
+              <Route path="ranking" element={page(<AdminRankingPage />)} />
             </Route>
             <Route path="*" element={<NotFoundPage />} />
           </Route>

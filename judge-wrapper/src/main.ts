@@ -69,7 +69,7 @@ for await (const event of jetstream.live({ collections })) {
 				)),
 			])
 			// 判定NGは非ゼロ終了なので、例外にせず終了コードで判断する
-			const result = await execa(JUDGE_CMD[0], [...JUDGE_CMD.slice(1), ...imageUrls], { reject: false })
+			const result = await execa(JUDGE_CMD[0], [...JUDGE_CMD.slice(1), ...imageUrls], { reject: false,stdio:"inherit" })
 			if (result.exitCode === 0) {
 				await approverClient.create(r.approve, {
 					submit,

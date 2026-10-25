@@ -25,6 +25,11 @@ export function SiteHeader({ to, children }: { to: string; children?: ReactNode 
   </header>;
 }
 
+/** 画面の外 (参加者画面 ⇄ 主催者画面) へのリンクを置く小さなフッター */
+export function SiteFooter({ to, children }: { to: string; children: ReactNode }) {
+  return <footer className="mx-auto max-w-[1200px] px-4 pt-6 pb-3 text-right text-[11px] max-sm:px-3"><Link to={to} className="text-fg/40 hover:text-fg hover:underline">{children}</Link></footer>;
+}
+
 /** 必要なときだけ開く説明。画面には ? ボタンだけを置く */
 export function HelpButton({ title, children, className }: { title: string; children: ReactNode; className?: string }) {
   const [open, setOpen] = useState(false);

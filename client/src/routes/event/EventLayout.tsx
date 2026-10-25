@@ -1,15 +1,15 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link, Outlet, useOutletContext } from 'react-router-dom';
-import { Compass, X } from 'lucide-react';
+import { ChevronLeft, Compass, X } from 'lucide-react';
 import type { AtUriString } from '@atproto/lex';
 import ParticipantNav from '../../components/ParticipantNav';
 import Countdown, { useExpired } from '../../components/Countdown';
 import { useCheckpoints, useEvent, useSubmissions } from '../../hooks/useRogainingQuery';
-import { useEventUri } from '../../lib/eventUri';
+import { adminEventPath, useEventUri } from '../../lib/eventUri';
 import { useLexClient } from '../../lib/lexClient';
 import { cn } from '../../lib/cn';
 import { button, buttonPrimary, empty, errorPanel, iconButton, liveDot, mainContainer, notice as noticeClass } from '../../lib/ui';
-import { SiteHeader, SkipLink } from '../../components/SiteChrome';
+import { SiteFooter, SiteHeader, SkipLink } from '../../components/SiteChrome';
 import { eventDate, eventName, eventOrganizer } from '../../lib/eventPresentation';
 import { approvedPoints, checkpointIsGoal, checkpointStatus, eventRecord, findTeamOf, latestSubmissionByCheckpoint, profileName, submissionCreatedAt, teamName, type CheckpointStatus } from '../../lib/rogaining';
 import type { CheckpointView, EventView, SubmissionView, TeamView } from '../../lexicons/win/tomo-x/rogaining/defs';
@@ -100,6 +100,7 @@ export default function EventLayout() {
   return <div>
     <SkipLink target="main"/>
     <SiteHeader to="/events">
+      <Link to="/events" className={cn(iconButton, '-mx-2 hover:not-disabled:bg-bg/15')} aria-label="イベント一覧" title="イベント一覧"><ChevronLeft size={18}/></Link>
       <span className="flex min-w-0 items-center gap-2 text-[13px] font-bold">{live && <><span className={cn(liveDot, 'bg-bg')} aria-hidden="true"/><span className="sr-only">開催中</span></>}<span className="truncate">{eventName(event.data.event)}</span></span>
       <span className="truncate text-[11px] text-bg/70 max-md:hidden">{Number.isFinite(startsAt) && `${eventDate(startsAt)} · `}主催 {organizer}</span>
     </SiteHeader>
@@ -119,12 +120,13 @@ export default function EventLayout() {
       </div>
     </div>
 
-    <ParticipantNav/>
+    <ParticipantNav uri={uri}/>
 
     <main id="main" className={mainContainer}>
       {notice && <div className={noticeClass} role="status">{notice}<button className={cn(iconButton, 'hover:not-disabled:bg-bg/15')} aria-label="通知を閉じる" onClick={() => setNotice('')}><X size={18}/></button></div>}
       {submissions.error && !fetched && <div className={errorPanel} role="alert"><p>提出状況を取得できませんでした。{submissions.error}</p><button className={button} onClick={submissions.retry}>再試行</button></div>}
       <Outlet context={context}/>
     </main>
+    <SiteFooter to={event.data.event.author.did === client.did ? adminEventPath(uri) : '/admin'}>主催者画面</SiteFooter>
   </div>;
 }
