@@ -21,7 +21,7 @@ export function validateState(value: unknown): DemoState {
   if (data.participants.some(p => typeof p.name !== 'string' || !hasTeam(p.teamId))) throw new Error('Invalid participants');
   if (data.checkpoints.some(cp => !/^\d{1,4}$/.test(cp.id) || Number(cp.id) < 1 || typeof cp.name !== 'string' || typeof cp.area !== 'string' || typeof cp.description !== 'string' || typeof cp.image !== 'string' || !Number.isSafeInteger(cp.points) || cp.points < 0 || !validCoordinate(cp.lat, cp.lng))) throw new Error('Invalid checkpoints');
   if (new Set(data.checkpoints.map(cp => Number(cp.id))).size !== data.checkpoints.length) throw new Error('Duplicate CP numbers');
-  if (data.submissions.some(s => typeof s.teamId !== 'string' || !hasTeam(s.teamId) || !data.checkpoints.some(cp => cp.id === s.checkpointId) || !['pending', 'approved', 'rejected'].includes(s.status) || typeof s.image !== 'string' || typeof s.reason !== 'string' || !validDate(s.submittedAt))) throw new Error('Invalid submissions');
+  if (data.submissions.some(s => typeof s.teamId !== 'string' || !hasTeam(s.teamId) || !data.checkpoints.some(cp => cp.id === s.checkpointId) || !['pending', 'approved', 'rejected'].includes(s.status) || typeof s.image !== 'string' || typeof s.reason !== 'string' || !validDate(s.submittedAt) || !s.location || !validCoordinate(s.location.lat, s.location.lon))) throw new Error('Invalid submissions');
   return data;
 }
 
@@ -31,7 +31,7 @@ export function upgradeState(state: DemoState): DemoState {
   return validateState({ ...state,
     teams: state.teams.map(t => ({ ...t, demoRoute: t.demoRoute ?? samples.teams.find(sample => sample.id === t.id)?.demoRoute ?? [] })),
     checkpoints: state.checkpoints.map(cp => ({ ...cp, id: normalizeNumber(cp.id) })),
-    submissions: state.submissions.map(s => ({ ...s, checkpointId: normalizeNumber(s.checkpointId), reason: s.status === 'approved' ? '' : s.reason })),
+    submissions: state.submissions.map(s => { const checkpointId = normalizeNumber(s.checkpointId); const cp = state.checkpoints.find(item => normalizeNumber(item.id) === checkpointId); return { ...s, checkpointId, location: s.location ?? { lat: cp?.lat ?? 0, lon: cp?.lng ?? 0 }, reason: s.status === 'approved' ? '' : s.reason }; }),
   });
 }
 

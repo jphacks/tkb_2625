@@ -100,7 +100,17 @@ function PhotoModal({ cp, state, execute, ended, close, notify }: PageProps & { 
   }
   async function submit() {
     setError(''); setBusy(true);
-    try { await execute('submitPhoto', { checkpointId: cp.id, image: preview }); notify(`${cp.name}の写真を提出しました。`); if (mounted.current) close(); } catch (e) { if (mounted.current) setError(errorMessage(e)); }
+    try {
+      const position = await new Promise<GeolocationPosition>((resolve, reject) => {
+        if (!navigator.geolocation) return reject(new Error('この端末では位置情報を利用できません。'));
+        navigator.geolocation.getCurrentPosition(resolve, () => reject(new Error('位置情報を取得できませんでした。位置情報を許可して再度お試しください。')), { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 });
+      });
+      const location = { lat: position.coords.latitude, lon: position.coords.longitude };
+      const createdAt = new Date().toISOString();
+      await execute('submitPhoto', { checkpointId: cp.id, image: preview, location, createdAt });
+      notify(`${cp.name}の提出レコードを作成しました。\ncreatedAt: ${createdAt}\n位置: ${location.lat.toFixed(6)}, ${location.lon.toFixed(6)}`);
+      if (mounted.current) close();
+    } catch (e) { if (mounted.current) setError(errorMessage(e)); }
     finally { if (mounted.current) setBusy(false); }
   }
   return <dialog onClose={onClose} ref={dialog} className="photo-dialog" aria-labelledby="photo-title" onCancel={e => { e.preventDefault(); if (!busy) close(); }} onClick={e => { if (e.target === dialog.current && !busy) close(); }}><div className="dialog-content"><div className="dialog-header"><span className="eyebrow">CHECKPOINT {cp.id}</span><button className="icon-button" aria-label="詳細を閉じる" onClick={close} disabled={busy}><X/></button></div><div className="dialog-title"><h2 id="photo-title">{cp.name}</h2><strong>{cp.points}<small>pt</small></strong></div><div className="detail-meta"><Status value={status}/><span><MapPin size={14}/>{cp.area}</span></div><p className="detail-description">{cp.description}</p><div className="photo-comparison"><figure><figcaption>01 / 目標画像 <span>デモイラスト</span></figcaption><Photo src={cp.image} alt={`${cp.name}の撮影目標`}/></figure><figure><figcaption>02 / {preview ? '提出前のプレビュー' : '提出画像'}</figcaption>{preview || latest?.image ? <Photo src={preview || latest?.image} alt={preview ? '選択した写真のプレビュー' : '最後に提出した画像'}/> : <div className="photo-placeholder"><ImagePlus size={30}/><span>まだ画像がありません</span></div>}</figure></div>
