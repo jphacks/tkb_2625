@@ -7,7 +7,7 @@ type Review = { uri: string; reason: string | null };
 
 export type SubmissionWithReview = {
   submit: SubmitRow;
-  checkpoint: { point: number; latitude: number; longitude: number };
+  checkpoint: { point: number; latitude: number; longitude: number; isGoal: boolean };
   approval: Review | undefined;
   rejection: Review | undefined;
 };
@@ -57,6 +57,7 @@ export async function findSubmissions(
         point: checkpointsTable.point,
         latitude: checkpointsTable.latitude,
         longitude: checkpointsTable.longitude,
+        isGoal: checkpointsTable.isGoal,
       },
     })
     .from(submitsTable)
