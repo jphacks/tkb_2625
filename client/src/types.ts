@@ -34,6 +34,7 @@ export interface Team {
   number: string;
   name: string;
   position: { lat: number; lng: number; updatedAt: string } | null;
+  demoRoute: [number, number][];
 }
 export interface Participant { id: string; name: string; teamId: string | null }
 export interface TeamView extends Team { members: string[]; points: number; rank: number }
@@ -45,7 +46,7 @@ export interface Snapshot extends DemoState {
 }
 export interface DemoRepository {
   load(): { state: DemoState; warning: string } | Promise<{ state: DemoState; warning: string }>;
-  save(state: DemoState): unknown;
+  save(state: DemoState): void | DemoState | Promise<void | DemoState>;
 }
 export interface CommandPayloads {
   submitPhoto: { checkpointId: string; image: string };

@@ -1,3 +1,6 @@
+import { errorMessage, formatDate } from './utils';
+import { useAction } from './useAction';
+import Photo from './Photo';
 import { useMemo, useState } from 'react';
 import type { FormEvent, ReactNode } from 'react';
 import { Link, NavLink, Navigate, Route, Routes } from 'react-router-dom';
@@ -8,19 +11,6 @@ import type { Execute, Snapshot } from './types';
 import './admin.css';
 
 type Props = { state: Snapshot; execute: Execute; pending: boolean; notify: (message: string) => void };
-const errorMessage = (e: unknown) => e instanceof Error ? e.message : '処理に失敗しました。';
-const formatDate = (value: string) => new Date(value).toLocaleString('ja-JP', { month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' });
-
-function useAction({ execute, notify }: Props) {
-  const [error, setError] = useState('');
-  async function run(args: Parameters<Execute>, message: string) {
-    setError('');
-    try { await execute(...args); notify(message); return true; }
-    catch (e) { setError(errorMessage(e)); return false; }
-  }
-  return { run, error };
-}
-
 export default function AdminConsole(props: Props & { review: ReactNode }) {
   const { state } = props;
   const links = [
@@ -127,7 +117,7 @@ function CheckpointManagement(props: Props) {
         <label>エリア名（任意）<input maxLength={60} value={draft.area} onChange={e => field('area', e.target.value)} /></label>
         <label>撮影案内（任意）<textarea maxLength={500} value={draft.description} onChange={e => field('description', e.target.value)} /></label>
         <label>見本写真 <small>JPEG / PNG / WebP · 8MBまで</small><input key={formKey} type="file" accept="image/jpeg,image/png,image/webp" disabled={busy} onChange={e => { const file = e.target.files?.[0]; if (file) void upload(file); e.target.value = ''; }} /></label>
-        {image && <img className="admin-upload-preview" src={image} alt="登録するCPの見本写真" />}
+        {image && <Photo className="admin-upload-preview" src={image} alt="登録するCPの見本写真" />}
         {imageBusy && <p role="status">見本写真を処理しています…</p>}
         <div className="admin-form-pair"><label>緯度<input type="number" min="-90" max="90" step="any" required value={draft.lat} onChange={e => { field('lat', e.target.value); setSelected(null); }} /></label><label>経度<input type="number" min="-180" max="180" step="any" required value={draft.lng} onChange={e => { field('lng', e.target.value); setSelected(null); }} /></label></div>
         <button className="button primary" disabled={busy}><Plus size={17}/>CPを登録する</button>
@@ -135,7 +125,7 @@ function CheckpointManagement(props: Props) {
       <div className="admin-picker"><div className="admin-picker-label"><MapPin size={16}/>地図をクリックしてCPの位置を選択</div><AdminMap checkpoints={state.checkpoints} selected={selected} focus={focus} onPick={(lat, lng) => { setDraft(previous => ({ ...previous, lat: lat.toFixed(6), lng: lng.toFixed(6) })); setSelected([lat, lng]); }} /><p className="admin-footnote" aria-live="polite">{selected ? `選択位置：${selected[0].toFixed(6)}, ${selected[1].toFixed(6)}` : '既存CPは番号付きで表示しています。地図が取得できない場合も座標を入力できます。'}</p></div>
     </div>
     <SectionTitle title={`登録済みCP / ${state.checkpoints.length}件`} text="削除すると、そのCPの提出履歴と各チームの獲得ポイントも削除されます。" />
-    <div className="admin-cp-list">{state.checkpoints.map(cp => <article key={cp.id}><img src={cp.image} alt={`${cp.name}の見本写真`} /><div><span className="eyebrow">CP {cp.id}</span><h4>{cp.name}</h4><p>{cp.area || 'エリア未設定'}</p><button type="button" className="admin-coordinate" onClick={() => { setFocus([cp.lat, cp.lng]); }}><MapPin size={13}/>{cp.lat.toFixed(5)}, {cp.lng.toFixed(5)}</button></div><strong>{cp.points}<small>pt</small></strong><button type="button" className="icon-button danger" disabled={busy} aria-label={`${cp.name}を削除`} onClick={() => { if (window.confirm(`CP ${cp.id}「${cp.name}」を削除しますか？ 全チームのこのCPの提出履歴と獲得ポイントも削除されます。`)) void run(['deleteCheckpoint', { id: cp.id }], 'CPと関連する提出履歴を削除し、得点を更新しました。'); }}><Trash2 size={18}/></button></article>)}</div>
+    <div className="admin-cp-list">{state.checkpoints.map(cp => <article key={cp.id}><Photo src={cp.image} alt={`${cp.name}の見本写真`} /><div><span className="eyebrow">CP {cp.id}</span><h4>{cp.name}</h4><p>{cp.area || 'エリア未設定'}</p><button type="button" className="admin-coordinate" onClick={() => { setFocus([cp.lat, cp.lng]); }}><MapPin size={13}/>{cp.lat.toFixed(5)}, {cp.lng.toFixed(5)}</button></div><strong>{cp.points}<small>pt</small></strong><button type="button" className="icon-button danger" disabled={busy} aria-label={`${cp.name}を削除`} onClick={() => { if (window.confirm(`CP ${cp.id}「${cp.name}」を削除しますか？ 全チームのこのCPの提出履歴と獲得ポイントも削除されます。`)) void run(['deleteCheckpoint', { id: cp.id }], 'CPと関連する提出履歴を削除し、得点を更新しました。'); }}><Trash2 size={18}/></button></article>)}</div>
     {!state.checkpoints.length && <div className="empty">CPがありません。上のフォームから登録してください。</div>}
   </section>;
 }

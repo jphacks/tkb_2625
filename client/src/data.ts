@@ -1,4 +1,5 @@
 import type { Checkpoint, CheckpointStatus, DemoState, Submission, SubmissionStatus, Snapshot, TeamView } from './types';
+import { createId } from './utils';
 
 export const STATUSES: Record<CheckpointStatus, { label: string; symbol: string; rank: number }> = {
   unsubmitted: { label: '未提出', symbol: '○', rank: 0 },
@@ -43,9 +44,9 @@ function createRoster(now: number) {
   return {
     selectedTeamId: 'team-014',
     teams: [
-      { id: 'team-014', number: '014', name: team.name, position: { lat: 35.6718, lng: 139.6965, updatedAt: new Date(now - 60000).toISOString() } },
-      { id: 'team-015', number: '015', name: '木漏れ日ウォーカーズ', position: { lat: 35.6752, lng: 139.7001, updatedAt: new Date(now - 180000).toISOString() } },
-      { id: 'team-016', number: '016', name: 'よりみち探検隊', position: null },
+      { id: 'team-014', number: '014', name: team.name, demoRoute: demoRoute.map(p => [...p] as [number, number]), position: { lat: 35.6718, lng: 139.6965, updatedAt: new Date(now - 60000).toISOString() } },
+      { id: 'team-015', number: '015', name: '木漏れ日ウォーカーズ', demoRoute: [], position: { lat: 35.6752, lng: 139.7001, updatedAt: new Date(now - 180000).toISOString() } },
+      { id: 'team-016', number: '016', name: 'よりみち探検隊', demoRoute: [], position: null },
     ],
     participants: [...team.members, '田中 りく', '山本 かえで', '高橋 あお', '伊藤 なぎ', '小林 みどり'].map((name, i) => ({
       id: `participant-${i + 1}`, name, teamId: i < 3 ? 'team-014' : i < 5 ? 'team-015' : i < 7 ? 'team-016' : null,
@@ -57,10 +58,10 @@ export function toSnapshot(state: DemoState): Snapshot {
   const sorted = state.teams.map(t => ({
     ...t,
     members: state.participants.filter(p => p.teamId === t.id).map(p => p.name),
-    points: totalPoints({ ...state, selectedTeamId: t.id }),
+    points: totalPoints(state, t.id),
   })).sort((a, b) => b.points - a.points || a.number.localeCompare(b.number, 'ja', { numeric: true }));
   const teams: TeamView[] = sorted.map(t => ({ ...t, rank: sorted.findIndex(other => other.points === t.points) + 1 }));
-  const selected = teams.find(t => t.id === state.selectedTeamId) || { id: '', number: '—', name: 'チーム未選択', position: null, members: [], points: 0, rank: 0 };
+  const selected = teams.find(t => t.id === state.selectedTeamId) || { id: '', number: '—', name: 'チーム未選択', position: null, demoRoute: [], members: [], points: 0, rank: 0 };
   return { ...state, teams, team: selected, points: selected.points, allSubmissions: state.submissions, submissions: state.submissions.filter(s => s.teamId === selected.id) };
 }
 
@@ -75,23 +76,23 @@ export function createInitialState(now = Date.now()): DemoState {
   };
 }
 
-export function latestSubmission(state: DemoState, checkpointId: string) {
-  return state.submissions.filter(s => s.checkpointId === checkpointId && s.teamId === state.selectedTeamId).at(-1);
+export function latestSubmission(state: DemoState, checkpointId: string, teamId: string | null) {
+  return state.submissions.filter(s => s.checkpointId === checkpointId && s.teamId === teamId).at(-1);
 }
-export function checkpointStatus(state: DemoState, id: string): CheckpointStatus { return latestSubmission(state, id)?.status || 'unsubmitted'; }
-export function selectCheckpoints(state: DemoState & { checkpoints?: Checkpoint[] }, filter = 'all', sort = 'number') {
-  return (state.checkpoints || checkpoints).filter(c => filter === 'all' || checkpointStatus(state, c.id) === filter).sort((a, b) => sort === 'points-desc' ? b.points - a.points : sort === 'points-asc' ? a.points - b.points : sort === 'name' ? a.name.localeCompare(b.name, 'ja') : sort === 'status' ? STATUSES[checkpointStatus(state, a.id)].rank - STATUSES[checkpointStatus(state, b.id)].rank : a.id.localeCompare(b.id));
+export function checkpointStatus(state: DemoState, id: string, teamId: string | null): CheckpointStatus { return latestSubmission(state, id, teamId)?.status || 'unsubmitted'; }
+export function selectCheckpoints(state: DemoState, teamId: string | null, filter = 'all', sort = 'number') {
+  return state.checkpoints.filter(c => filter === 'all' || checkpointStatus(state, c.id, teamId) === filter).sort((a, b) => sort === 'points-desc' ? b.points - a.points : sort === 'points-asc' ? a.points - b.points : sort === 'name' ? a.name.localeCompare(b.name, 'ja') : sort === 'status' ? STATUSES[checkpointStatus(state, a.id, teamId)].rank - STATUSES[checkpointStatus(state, b.id, teamId)].rank : Number(a.id) - Number(b.id));
 }
-export function totalPoints(state: DemoState) {
-  const approved = new Set(state.submissions.filter(s => s.status === 'approved' && s.teamId === state.selectedTeamId).map(s => s.checkpointId));
+export function totalPoints(state: DemoState, teamId: string | null) {
+  const approved = new Set(state.submissions.filter(s => s.status === 'approved' && s.teamId === teamId).map(s => s.checkpointId));
   return state.checkpoints.filter(c => approved.has(c.id)).reduce((sum, c) => sum + c.points, 0);
 }
 
-export function submitPhoto(state: DemoState, checkpointId: string, image: string, now = Date.now(), id: string = crypto.randomUUID()): DemoState {
+export function submitPhoto(state: DemoState, checkpointId: string, image: string, now = Date.now(), id: string = createId()): DemoState {
   if (!state.selectedTeamId || !state.teams.some(t => t.id === state.selectedTeamId)) throw new Error('参加するチームを選択してください。');
   if (now >= Date.parse(state.endsAt)) throw new Error('大会が終了したため、提出できません。');
   if (!state.checkpoints.some(c => c.id === checkpointId)) throw new Error('チェックポイントが見つかりません。');
-  if (['pending', 'approved'].includes(checkpointStatus(state, checkpointId))) throw new Error('このチェックポイントは提出済みです。');
+  if (['pending', 'approved'].includes(checkpointStatus(state, checkpointId, state.selectedTeamId))) throw new Error('このチェックポイントは提出済みです。');
   if (!image) throw new Error('画像を選択してください。');
   return { ...state, submissions: [...state.submissions, { id, teamId: state.selectedTeamId, checkpointId, image, status: 'pending', reason: '', submittedAt: new Date(now).toISOString() }] };
 }
@@ -101,5 +102,5 @@ export function reviewSubmission(state: DemoState, id: string, decision: Submiss
   if (!submission || submission.status !== 'pending') throw new Error('審査済み、または存在しない提出です。');
   if (!['approved', 'rejected'].includes(decision)) throw new Error('無効な審査結果です。');
   if (decision === 'rejected' && !reason.trim()) throw new Error('不承認の理由を入力してください。');
-  return { ...state, submissions: state.submissions.map(s => s.id === id ? { ...s, status: decision, reason: reason.trim() } : s) };
+  return { ...state, submissions: state.submissions.map(s => s.id === id ? { ...s, status: decision, reason: decision === 'rejected' ? reason.trim() : '' } : s) };
 }

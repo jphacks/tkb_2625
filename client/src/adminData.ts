@@ -1,4 +1,5 @@
 import type { CommandPayloads, DemoState } from './types';
+import { createId, normalizeNumber } from './utils';
 
 export function addTeam(state: DemoState, draft: CommandPayloads['addTeam']): DemoState {
   const name = draft.name.trim();
@@ -6,8 +7,8 @@ export function addTeam(state: DemoState, draft: CommandPayloads['addTeam']): De
   if (!name || name.length > 60) throw new Error('チーム名を60文字以内で入力してください。');
   if (!/^\d{1,4}$/.test(number) || Number(number) < 1) throw new Error('チーム番号は1〜9999で入力してください。');
   if (state.teams.some(t => Number(t.number) === Number(number))) throw new Error('このチーム番号は使用されています。');
-  const id = crypto.randomUUID();
-  return { ...state, selectedTeamId: state.selectedTeamId || id, teams: [...state.teams, { id, name, number: number.padStart(3, '0'), position: null }] };
+  const id = createId();
+  return { ...state, selectedTeamId: state.selectedTeamId || id, teams: [...state.teams, { id, name, number: normalizeNumber(number, 3), position: null, demoRoute: [] }] };
 }
 
 export function deleteTeam(state: DemoState, id: string): DemoState {
@@ -34,7 +35,7 @@ export function addCheckpoint(state: DemoState, draft: CommandPayloads['addCheck
   if (!Number.isSafeInteger(draft.points) || draft.points < 0 || draft.points > 100000) throw new Error('配点は0〜100000の整数で入力してください。');
   if (!Number.isFinite(draft.lat) || Math.abs(draft.lat) > 90 || !Number.isFinite(draft.lng) || Math.abs(draft.lng) > 180) throw new Error('有効な緯度・経度を入力してください。');
   if (!/^data:image\/(jpeg|png|webp);base64,/.test(draft.image)) throw new Error('見本写真を選択してください。');
-  const checkpoint = { ...draft, id: draft.id.padStart(2, '0'), name: draft.name.trim(), area: draft.area.trim(), description: draft.description.trim(), kind: 'photo' };
+  const checkpoint = { ...draft, id: normalizeNumber(draft.id), name: draft.name.trim(), area: draft.area.trim(), description: draft.description.trim(), kind: 'photo' };
   return { ...state, checkpoints: [...state.checkpoints, checkpoint] };
 }
 

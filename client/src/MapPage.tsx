@@ -1,9 +1,9 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import L from 'leaflet';
-import 'leaflet/dist/leaflet.css';
+import { useLeafletMap } from './useLeafletMap';
 import { ArrowUpRight, Compass, Crosshair, MapPin, Navigation, Pause, Play } from 'lucide-react';
-import { checkpointStatus, demoRoute } from './data';
+import { checkpointStatus } from './data';
 import type { Snapshot } from './types';
 
 type CompassEvent = DeviceOrientationEvent & { webkitCompassHeading?: number };
@@ -11,36 +11,23 @@ type CompassConstructor = typeof DeviceOrientationEvent & { requestPermission?: 
 
 export default function MapPage({ state }: { state: Snapshot }) {
   const { checkpoints } = state;
-  const container = useRef<HTMLDivElement>(null);
-  const map = useRef<L.Map>(null);
-  const layers = useRef<L.LayerGroup>(null);
+  const { container, map, layers, tileError } = useLeafletMap();
   const [mode, setMode] = useState<'demo' | 'live'>('demo');
   const [recording, setRecording] = useState(false);
   const [route, setRoute] = useState<[number, number][]>([]);
   const [position, setPosition] = useState<[number, number] | null>(null);
   const demoMessage = state.team.position ? '選択チームのモック位置とチェックポイントを表示しています。管理画面と共通の位置です。' : 'このチームの位置は未取得です。チェックポイントのみ表示しています。';
   const [message, setMessage] = useState(demoMessage);
-  const [tileError, setTileError] = useState(false);
   const [heading, setHeading] = useState<number | null>(null);
   const [orientationEnabled, setOrientationEnabled] = useState(false);
-  const displayRoute = mode === 'demo' ? (state.team.id === 'team-014' ? demoRoute : []) : route;
+  const displayRoute = mode === 'demo' ? state.team.demoRoute : route;
   const displayPosition: [number, number] | null = mode === 'demo' ? (state.team.position ? [state.team.position.lat, state.team.position.lng] : null) : position;
-  useEffect(() => {
-    if (!container.current) return;
-    const instance = L.map(container.current, { center: [35.6727, 139.6963], zoom: 15, scrollWheelZoom: false });
-    map.current = instance;
-    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors' }).on('tileerror', () => setTileError(true)).addTo(instance);
-    layers.current = L.layerGroup().addTo(instance);
-    const observer = new ResizeObserver(() => instance.invalidateSize());
-    observer.observe(container.current);
-    return () => { observer.disconnect(); instance.remove(); map.current = null; };
-  }, []);
   useEffect(() => {
     const group = layers.current;
     if (!group) return;
     group.clearLayers();
     checkpoints.forEach(cp => {
-      const approved = checkpointStatus(state, cp.id) === 'approved';
+      const approved = checkpointStatus(state, cp.id, state.selectedTeamId) === 'approved';
       const marker = L.marker([cp.lat, cp.lng], { icon: L.divIcon({ className: 'cp-pin', html: `<span class="${approved ? 'is-approved' : ''}">${approved ? '✓' : cp.id}</span>`, iconSize: [34, 40], iconAnchor: [17, 40] }) });
       const content = document.createElement('div');
       content.textContent = `CP ${cp.id} · ${cp.name} / ${cp.points}pt${approved ? ' · 達成済み' : ''}`;
@@ -53,16 +40,21 @@ export default function MapPage({ state }: { state: Snapshot }) {
     if (!recording || mode !== 'live') return;
     if (!navigator.geolocation) { setMessage('このブラウザは位置情報に対応していません。デモ表示をお使いください。'); setRecording(false); return; }
     if (!window.isSecureContext) { setMessage('位置情報にはHTTPSまたはlocalhostが必要です。デモ表示をお使いください。'); setRecording(false); return; }
+    let active = true;
+    let centered = false;
     const watch = navigator.geolocation.watchPosition(result => {
+      if (!active) return;
       const next: [number, number] = [result.coords.latitude, result.coords.longitude];
-      setPosition(previous => { if (!previous) map.current?.setView(next, 16); return next; });
+      if (!centered) { map.current?.setView(next, 16); centered = true; }
+      setPosition(next);
       setRoute(previous => [...previous, next]);
       setMessage(`GPS記録中 · 位置精度 約${Math.round(result.coords.accuracy)}m。画面を閉じると記録が停止します。`);
     }, error => {
-      setRecording(false);
-      setMessage(error.code === 1 ? '位置情報が許可されていません。ブラウザの設定で許可するか、デモ表示をお使いください。' : '位置情報を取得できませんでした。屋外で再試行するか、デモ表示をお使いください。');
+      if (!active) return;
+      if (error.code === 1) setRecording(false);
+      setMessage(error.code === 1 ? '位置情報が許可されていません。ブラウザの設定で許可するか、デモ表示をお使いください。' : '一時的に位置情報を取得できません。記録は継続し、次の測位を待っています。');
     }, { enableHighAccuracy: true, timeout: 15000, maximumAge: 2000 });
-    return () => navigator.geolocation.clearWatch(watch);
+    return () => { active = false; navigator.geolocation.clearWatch(watch); };
   }, [recording, mode]);
   useEffect(() => {
     if (!orientationEnabled) return;
