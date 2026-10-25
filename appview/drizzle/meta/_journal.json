@@ -57,6 +57,13 @@
       "when": 1792895637327,
       "tag": "0007_goal_scoring",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "6",
+      "when": 1792903801668,
+      "tag": "0008_fantastic_vapor",
+      "breakpoints": true
     }
   ]
 }
