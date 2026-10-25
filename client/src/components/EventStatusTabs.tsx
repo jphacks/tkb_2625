@@ -29,7 +29,7 @@ export default function EventStatusTabs({ value, onChange, panelId }: {
     buttons.current[next]?.focus();
     onChange(options[next].value);
   }
-  return <div className="flex flex-wrap gap-1 max-sm:justify-between max-sm:gap-0.5" role="tablist" aria-label="開催状況" aria-orientation="horizontal">
-    {options.map((option, index) => <button key={option.value} ref={element => { buttons.current[index] = element; }} type="button" role="tab" id={eventStatusTabId(option.value)} aria-controls={panelId} aria-selected={value === option.value} tabIndex={value === option.value ? 0 : -1} className="min-h-11 border border-transparent px-[18px] py-2.5 text-xs text-muted aria-selected:bg-olive aria-selected:text-[#f7f6ef] max-sm:px-3.5 max-sm:py-[9px] max-sm:text-[11px]" onClick={() => onChange(option.value)} onKeyDown={event => navigate(event, index)}>{option.label}</button>)}
+  return <div className="flex border border-fg/25 max-sm:w-full" role="tablist" aria-label="開催状況" aria-orientation="horizontal">
+    {options.map((option, index) => <button key={option.value} ref={element => { buttons.current[index] = element; }} type="button" role="tab" id={eventStatusTabId(option.value)} aria-controls={panelId} aria-selected={value === option.value} tabIndex={value === option.value ? 0 : -1} className="h-9 px-3 text-[13px] not-first:border-l not-first:border-fg/25 hover:bg-fg/5 aria-selected:bg-accent aria-selected:font-bold aria-selected:text-bg max-sm:flex-1 max-sm:px-1" onClick={() => onChange(option.value)} onKeyDown={event => navigate(event, index)}>{option.label}</button>)}
   </div>;
 }

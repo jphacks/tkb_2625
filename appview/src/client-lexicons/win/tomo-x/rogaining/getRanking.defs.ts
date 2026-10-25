@@ -20,7 +20,7 @@ export const $output = /*#__PURE__*/ l.jsonPayload({"ranking":/*#__PURE__*/ l.ar
 export type $Output<B = l.BinaryData> = l.InferPayload<typeof $output, B>;
 export type $OutputBody<B = l.BinaryData> = l.InferPayloadBody<typeof $output, B>;
 
-/** Get the leaderboard of an event. Total points are approved non-goal checkpoint points plus finish-time bonus points. */
+/** Get the leaderboard of an event. Total points are the sum of approved non-goal checkpoint points (each checkpoint counts once per team) and a finish-time bonus of 30, 20, 10, 5, 3, 2, or 1 points for the first through seventh finish positions. Goal finish time is the server indexedAt timestamp; tied finishers share points. Teams without a goal submission receive no finish-time bonus. */
 const main = /*#__PURE__*/ l.query($nsid, $params, $output, ["EventNotFound"]);
 
 export { main };

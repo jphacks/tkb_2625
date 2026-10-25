@@ -11,7 +11,7 @@ type $nsid = typeof $nsid;
 
 export { $nsid };
 
-/** An event approver's rejection of a participant's checkpoint submission. Only valid when created by the DID in the event's approver field. An approve record for the same submission takes precedence. */
+/** An event approver's rejection of a participant's checkpoint submission. Only valid when created by the DID in the event's approver field or by the event's author. See submissionView.status for how approve and reject records are resolved. */
 type Main = { $type: "win.tomo-x.rogaining.reject";
 
   /**
@@ -31,7 +31,7 @@ type Main = { $type: "win.tomo-x.rogaining.reject";
 
 export type { Main };
 
-/** An event approver's rejection of a participant's checkpoint submission. Only valid when created by the DID in the event's approver field. An approve record for the same submission takes precedence. */
+/** An event approver's rejection of a participant's checkpoint submission. Only valid when created by the DID in the event's approver field or by the event's author. See submissionView.status for how approve and reject records are resolved. */
 const main = /*#__PURE__*/ l.record<"tid", Main>("tid", $nsid, /*#__PURE__*/ l.object({"submit":/*#__PURE__*/ l.ref<RepoStrongRef.Main>((() => RepoStrongRef.main) as any),"reason":/*#__PURE__*/ l.optional(/*#__PURE__*/ l.string({"maxLength":3000,"maxGraphemes":300})),"createdAt":/*#__PURE__*/ l.string({"format":"datetime"})}));
 
 export { main };

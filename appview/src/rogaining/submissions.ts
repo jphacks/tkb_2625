@@ -24,7 +24,8 @@ export class InvalidCursorError extends Error {}
 /**
  * 指定した参加者たちのイベントへの提出を新しい順に返す。
  * - チェックポイントはイベント作成者が作ったものだけ有効
- * - approve / reject はイベントの approver が、提出の今のバージョン (cid) に対して作ったものだけ有効
+ * - approve / reject はイベントの approver か作成者が、提出の今のバージョン (cid) に対して作ったものだけ有効
+ * - 有効な審査が複数あれば、作成者のものを approver のものより優先し、同じ人の中では新しいものを優先する
  */
 export async function findSubmissions(
   event: EventRow,
@@ -76,37 +77,61 @@ export async function findSubmissions(
   const hasMore = page !== undefined && rows.length > page.limit;
   if (hasMore) rows.pop();
 
-  const [approvals, rejections] = await Promise.all([
-    findReviews(approveTable, event, rows),
-    findReviews(rejectTable, event, rows),
-  ]);
-  const submissions = rows.map((row) => ({
-    ...row,
-    approval: approvals.get(row.submit.uri),
-    rejection: rejections.get(row.submit.uri),
-  }));
+  const decisions = await findDecisions(event, rows);
+  const submissions = rows.map((row) => {
+    const decision = decisions.get(row.submit.uri);
+    return {
+      ...row,
+      approval: decision?.kind === "approval" ? decision.review : undefined,
+      rejection: decision?.kind === "rejection" ? decision.review : undefined,
+    };
+  });
   const last = rows.at(-1);
   return { submissions, cursor: hasMore && last ? encodeCursor(last.submit) : undefined };
 }
 
-async function findReviews(
-  table: typeof approveTable | typeof rejectTable,
-  event: EventRow,
-  rows: { submit: SubmitRow }[],
-): Promise<Map<string, Review>> {
-  const result = new Map<string, Review>();
+type Decision = { kind: "approval" | "rejection"; review: Review };
+
+/** 提出ごとに、ステータスを決める審査を1つ選ぶ */
+async function findDecisions(event: EventRow, rows: { submit: SubmitRow }[]): Promise<Map<string, Decision>> {
+  const result = new Map<string, Decision>();
   if (rows.length === 0) return result;
   const cidByUri = new Map(rows.map((row) => [row.submit.uri, row.submit.cid]));
-  const reviews = await db
-    .select({ uri: table.uri, submitUri: table.submitUri, submitCid: table.submitCid, reason: table.reason })
-    .from(table)
-    .where(and(inArray(table.submitUri, [...cidByUri.keys()]), eq(table.approverDid, event.approverDid)))
-    .orderBy(table.createdAt, table.uri);
-  for (const review of reviews) {
-    if (cidByUri.get(review.submitUri) !== review.submitCid || result.has(review.submitUri)) continue;
-    result.set(review.submitUri, { uri: review.uri, reason: review.reason });
+  const [approvals, rejections] = await Promise.all([
+    findReviews(approveTable, event, [...cidByUri.keys()]),
+    findReviews(rejectTable, event, [...cidByUri.keys()]),
+  ]);
+  const candidates = [
+    ...approvals.map((review) => ({ ...review, kind: "approval" as const })),
+    ...rejections.map((review) => ({ ...review, kind: "rejection" as const })),
+  ]
+    .filter((review) => cidByUri.get(review.submitUri) === review.submitCid)
+    // 作成者 > approver、同じ人なら新しい順 (createdAt が同じなら uri で決める)
+    .sort(
+      (a, b) =>
+        Number(b.approverDid === event.authorDid) - Number(a.approverDid === event.authorDid) ||
+        b.createdAt.getTime() - a.createdAt.getTime() ||
+        (a.uri < b.uri ? 1 : a.uri > b.uri ? -1 : 0),
+    );
+  for (const { kind, submitUri, uri, reason } of candidates) {
+    if (result.has(submitUri)) continue;
+    result.set(submitUri, { kind, review: { uri, reason } });
   }
   return result;
+}
+
+function findReviews(table: typeof approveTable | typeof rejectTable, event: EventRow, submitUris: string[]) {
+  return db
+    .select({
+      uri: table.uri,
+      submitUri: table.submitUri,
+      submitCid: table.submitCid,
+      approverDid: table.approverDid,
+      reason: table.reason,
+      createdAt: table.createdAt,
+    })
+    .from(table)
+    .where(and(inArray(table.submitUri, submitUris), inArray(table.approverDid, [event.approverDid, event.authorDid])));
 }
 
 const encodeCursor = (submit: SubmitRow) => `${submit.createdAt.getTime()}::${submit.uri}`;

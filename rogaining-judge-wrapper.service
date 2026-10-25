@@ -1,0 +1,24 @@
+[Unit]
+Description=rogaining judge-wrapper
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+# JUDGE_WRAPPER_DIR / JUDGMAN_DIR に合わせる。User もサーバー側のユーザーに変える
+WorkingDirectory=/srv/rogaining/judge-wrapper
+ExecStart=/usr/bin/node dist/main.js
+Restart=always
+# ログイン失敗などで即落ちしたときに連続で叩かないように
+RestartSec=10
+User=rogaining
+Environment=NODE_ENV=production
+# 末尾に [query, ...refs] の画像URLが付けられる。先頭の 0 はモデル番号 (0: SNN, 1: SIFT)
+Environment="JUDGE_CMD=/srv/rogaining/judgman/.venv/bin/python /srv/rogaining/judgman/main.py 0"
+# torch.hub (dinov2) と torchvision の重みのダウンロード先。/var/cache/rogaining-judge が User 所有で作られる
+CacheDirectory=rogaining-judge
+Environment=TORCH_HOME=/var/cache/rogaining-judge/torch
+# DID / PASSWORD (承認者アカウント) と HOST (PDS, 省略時 https://bsky.social) を書く
+EnvironmentFile=/srv/rogaining/judge-wrapper.env
+
+[Install]
+WantedBy=multi-user.target

@@ -30,6 +30,9 @@ type Main = { $type: "win.tomo-x.rogaining.checkpoint";"name":string;
    */
   "radiusMeters"?:number;
 
+  /**
+   * Whether this checkpoint is the event finish. Goal submissions are not judged.
+   */
   "isGoal"?:boolean;
 
   /**

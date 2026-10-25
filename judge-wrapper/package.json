@@ -2,8 +2,10 @@
   "name": "judge-wrapper",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
   "scripts": {
+    "build": "tsc",
+    "start": "node dist/main.js",
+    "typecheck": "tsc --noEmit",
     "gen:lexicon": "lex build --lexicons ../lexicons --out ./src/lexicons --override --clear"
   },
   "keywords": [],
@@ -26,5 +28,9 @@
     "@isaacs/ttlcache": "^2.1.5",
     "execa": "^10.2.0",
     "p-queue": "^10.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.5",
+    "typescript": "^7.0.2"
   }
 }

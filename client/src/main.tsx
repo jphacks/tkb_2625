@@ -3,6 +3,7 @@ import { createRoot } from 'react-dom/client'
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
 import './index.css'
 import LoginPage from './routes/LoginPage'
+import { empty } from './lib/ui'
 import NotFoundPage from './routes/NotFoundPage'
 import { AuthProvider, RequireAuth } from './auth/AuthProvider'
 import { CALLBACK_PATH } from './auth/clientMetadata'
@@ -22,7 +23,7 @@ const ReviewPage = lazy(() => import('./routes/admin/ReviewPage'))
 const CheckpointsPage = lazy(() => import('./routes/admin/CheckpointsPage'))
 const TeamsPage = lazy(() => import('./routes/admin/TeamsPage'))
 
-const page = (element: ReactNode) => <Suspense fallback={<main className="empty" role="status">読み込んでいます…</main>}>{element}</Suspense>
+const page = (element: ReactNode) => <Suspense fallback={<main className={empty} role="status">読み込んでいます…</main>}>{element}</Suspense>
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>

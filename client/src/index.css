@@ -1,32 +1,39 @@
 @import "tailwindcss";
 
-/* 旧 CSS のデザイントークンとブレークポイント (max-xs: ≤350px, max-sm: <640px, max-md: <900px, xl: ≥1280px) */
+/* UI の色は bg / fg / accent の 3 色だけ。濃淡が必要なときは fg/60 のように透過度で作る
+   ブレークポイント: max-xs: ≤350px, max-sm: <640px, max-md: <900px, xl: ≥1280px */
 @theme {
-  --font-sans: "Helvetica Neue", "Noto Sans JP", "Yu Gothic", Meiryo, sans-serif;
-  --font-mincho: "Yu Mincho", "Hiragino Mincho ProN", serif;
+  --font-sans: "Helvetica Neue", Arial, "Noto Sans JP", "Yu Gothic", Meiryo, sans-serif;
   --breakpoint-xs: 22rem;
   --breakpoint-md: 56.25rem;
-  --color-olive: #46563b;
-  --color-ink: #354032;
-  --color-muted: #7b8174;
-  --color-line: #dedfd3;
-  --color-paper: #f6f5ef;
-  --color-sand: #ebe8db;
-  --color-accent: #a17855;
+  --color-*: initial;
+  --color-bg: #ffffff;
+  --color-fg: #222222;
+  --color-accent: #1e7b45;
+  --color-transparent: transparent;
+  --color-current: currentColor;
+  --radius-*: initial;
+  --shadow-*: initial;
 }
 
 @layer base {
   html { font-synthesis: none; -webkit-tap-highlight-color: transparent; }
-  body { @apply bg-paper font-sans text-ink; }
+  body { @apply bg-bg font-sans text-[13px] leading-normal text-fg; }
   button, a { touch-action: manipulation; }
   button:not(:disabled), [role="button"]:not(:disabled) { cursor: pointer; }
-  button:disabled { @apply cursor-not-allowed opacity-50; }
+  button:disabled { @apply cursor-not-allowed opacity-40; }
   svg { flex-shrink: 0; }
-  :is(button, a, input, select, textarea):focus-visible, label:has(input:focus-visible) { outline: 2px solid #8d653f; outline-offset: 4px; }
+  :is(button, a, input, select, textarea):focus-visible, label:has(input:focus-visible) { outline: 2px solid var(--color-accent); outline-offset: 1px; }
+  dialog::backdrop { background: color-mix(in srgb, var(--color-fg) 50%, transparent); }
   @media (prefers-reduced-motion: reduce) {
     *, ::before, ::after { transition: none !important; scroll-behavior: auto !important; }
   }
 }
 
-/* Leaflet が生成する DOM はクラスを付けられないので、ここで上書きする */
+/* Leaflet が生成する DOM はクラスを付けられないので、ここで上書きする (角丸・影を消す) */
+.leaflet-container { font-family: inherit; }
+.leaflet-bar, .leaflet-bar a, .leaflet-control-layers, .leaflet-popup-content-wrapper, .leaflet-popup-tip, .leaflet-tooltip { border-radius: 0 !important; box-shadow: none !important; }
+.leaflet-bar, .leaflet-control-layers, .leaflet-popup-content-wrapper, .leaflet-popup-tip, .leaflet-tooltip { border: 1px solid var(--color-fg) !important; }
+.leaflet-bar a { color: var(--color-fg) !important; }
+.leaflet-popup-content { margin: 8px 10px; font-size: 12px; }
 .leaflet-control-attribution { font-size: 9px !important; }

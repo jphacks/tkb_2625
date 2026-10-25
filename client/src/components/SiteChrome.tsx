@@ -1,33 +1,43 @@
-import type { ReactNode } from 'react';
+import { useState, type ReactNode } from 'react';
 import { Link } from 'react-router-dom';
-import { Compass } from 'lucide-react';
+import { CircleHelp, LogOut, X } from 'lucide-react';
+import { useAuth } from '../auth/AuthProvider';
+import { useDialog } from '../hooks/useDialog';
 import { cn } from '../lib/cn';
-import { skipLink } from '../lib/ui';
+import { iconButton, skipLink } from '../lib/ui';
+
+export const APP_NAME = 'AtRogaining';
 
 /** 本文へのスキップリンク */
 export function SkipLink({ target }: { target: string }) {
   return <a className={skipLink} href={`#${target}`}>本文へ移動</a>;
 }
 
-/** ROAM のロゴとサイトヘッダー。children はロゴの右側に並ぶ */
-export function SiteHeader({ to, label, children }: { to: string; label: string; children?: ReactNode }) {
-  return <header className="border-b border-line">
-    <div className="mx-auto flex min-h-[86px] max-w-[1160px] items-center gap-[30px] px-8 max-sm:min-h-[69px] max-sm:gap-3.5 max-sm:px-[18px]">
-      <Link to={to} className="flex min-h-11 items-center gap-[11px] [&>svg]:max-sm:w-[27px]" aria-label={label}><Compass size={31} strokeWidth={1.5}/><span className="text-[28px] leading-none font-bold tracking-[4px] max-sm:text-2xl">ROAM<span className="mt-2 block text-[7px] font-medium tracking-[1.65px] max-sm:text-[6px] max-sm:tracking-[1.1px]">ROGAINING FIELD NOTES</span></span></Link>
-      {children}
+/** サイトヘッダー。children はロゴの右側に並ぶ。ログイン中は右端にログアウトを出す */
+export function SiteHeader({ to, children }: { to: string; children?: ReactNode }) {
+  const { session, signOut } = useAuth();
+  return <header className="bg-accent text-bg">
+    <div className="mx-auto flex h-11 max-w-[1200px] items-center gap-3 px-4 max-sm:px-3">
+      <Link to={to} className="shrink-0 text-[15px] font-bold">{APP_NAME}</Link>
+      <div className="flex min-w-0 flex-1 items-center gap-3">{children}</div>
+      {session && <button type="button" className={cn(iconButton, 'hover:not-disabled:bg-bg/15')} title="ログアウト" aria-label="ログアウト" onClick={() => void signOut()}><LogOut size={16}/></button>}
     </div>
   </header>;
 }
 
-/** ヘッダー右端のラベル (EXPLORE THE EVENTS など) */
-export function HeaderLabel({ children, className }: { children: ReactNode; className?: string }) {
-  return <span className={cn('ml-auto text-[10px] tracking-[1.5px] text-muted max-sm:text-[7px] max-sm:tracking-[.9px]', className)}>{children}</span>;
+/** 必要なときだけ開く説明。画面には ? ボタンだけを置く */
+export function HelpButton({ title, children, className }: { title: string; children: ReactNode; className?: string }) {
+  const [open, setOpen] = useState(false);
+  return <>
+    <button type="button" className={cn(iconButton, 'size-7 text-fg/60', className)} aria-label={`${title}のヘルプ`} title="ヘルプ" onClick={() => setOpen(true)}><CircleHelp size={16}/></button>
+    {open && <HelpDialog title={title} close={() => setOpen(false)}>{children}</HelpDialog>}
+  </>;
 }
 
-/** サイトフッター。children は右側に並ぶ */
-export function SiteFooter({ children }: { children?: ReactNode }) {
-  return <footer className="mx-auto flex max-w-[1160px] items-center justify-between gap-5 border-t border-line px-8 py-6 text-[8px] tracking-[.7px] text-[#929783] max-sm:flex-col max-sm:items-start max-sm:gap-[15px] max-sm:px-[18px] max-sm:py-5 max-sm:text-[7px]">
-    <span className="flex items-center gap-[9px] text-xs tracking-[1px]"><Compass size={17}/> ROAM <small className="ml-2.5 text-[9px] tracking-[.4px] max-sm:text-[8px]">歩いた分だけ、街が好きになる。</small></span>
-    {children}
-  </footer>;
+function HelpDialog({ title, children, close }: { title: string; children: ReactNode; close: () => void }) {
+  const { dialog, onClose } = useDialog(title, close);
+  return <dialog ref={dialog} onClose={onClose} className="m-auto w-[min(480px,calc(100%-24px))] border border-fg bg-bg p-0 text-fg" aria-labelledby="help-title" onClick={e => { if (e.target === e.currentTarget) dialog.current?.close(); }}>
+    <div className="flex h-10 items-center justify-between border-b border-fg/10 pl-4"><h2 id="help-title" className="text-[14px] font-bold">{title}</h2><button type="button" className={iconButton} aria-label="閉じる" onClick={() => dialog.current?.close()}><X size={16}/></button></div>
+    <div className="space-y-2 p-4 text-[13px] leading-relaxed [&_li]:ml-4 [&_li]:list-disc">{children}</div>
+  </dialog>;
 }

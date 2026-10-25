@@ -1,30 +1,35 @@
 import { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
 import L from 'leaflet';
-import { ArrowUpRight, Compass, Crosshair, MapPin, Navigation, Pause, Play } from 'lucide-react';
+import { Crosshair, Navigation, Pause, Play } from 'lucide-react';
 import { useEventContext } from './EventLayout';
-import { PageHeading } from '../../components/Status';
+import { Status } from '../../components/Status';
+import { HelpButton } from '../../components/SiteChrome';
 import { useLeafletMap } from '../../hooks/useLeafletMap';
 import { cn } from '../../lib/cn';
-import { eventPath } from '../../lib/eventUri';
-import { button, buttonPrimary, errorPanel, eyebrow, iconButton, liveDot } from '../../lib/ui';
-import { checkpointBounds, checkpointIsGoal, checkpointLocation, checkpointName, checkpointNumber, checkpointPoint, STATUSES } from '../../lib/rogaining';
+import { button, buttonPrimary, errorPanel, iconButton, liveDot } from '../../lib/ui';
+import { checkpointBounds, checkpointIsGoal, checkpointLocation, checkpointName, checkpointNumber, checkpointPoint, STATUSES, type CheckpointStatus } from '../../lib/rogaining';
 
 // Leaflet の divIcon に渡す HTML 文字列なので、クラスは文字列のまま書く
-const pin = "relative grid size-8 place-items-center border-2 border-[#87966b] bg-[#f8f5e9] text-[11px] font-bold text-[#63734e] shadow-[0_2px_4px_#0002] after:absolute after:-bottom-[7px] after:left-[9px] after:border-x-[5px] after:border-t-[6px] after:border-x-transparent after:border-t-[#87966b] after:content-['']";
-const pinApproved = 'bg-[#5e704b] text-white';
-const actionSize = 'max-sm:px-3 max-sm:text-[11px]';
+// AdminMap の pinClass と同じ形。未提出 = accent、審査中・不可 = fg、承認済み = fg/30
+const pin = "relative grid size-7 place-items-center border-2 border-bg bg-accent text-[11px] font-bold text-bg after:absolute after:-bottom-[7px] after:left-[9px] after:border-x-[5px] after:border-t-6 after:border-x-transparent after:border-t-accent after:content-['']";
+const pinStatus: Record<CheckpointStatus, string> = {
+  unsubmitted: '',
+  pending: 'bg-fg after:border-t-fg',
+  rejected: 'bg-fg after:border-t-fg',
+  approved: 'bg-fg/30 after:border-t-fg/30',
+};
+const bigButton = 'h-11 text-[14px]';
 
 type CompassEvent = DeviceOrientationEvent & { webkitCompassHeading?: number };
 type CompassConstructor = typeof DeviceOrientationEvent & { requestPermission?: () => Promise<string> };
 
 export default function MapPage() {
-  const { uri, checkpoints, statusOf } = useEventContext();
+  const { checkpoints, statusOf } = useEventContext();
   const { container, map, layers, tileError } = useLeafletMap();
   const [recording, setRecording] = useState(false);
   const [route, setRoute] = useState<[number, number][]>([]);
   const [position, setPosition] = useState<[number, number] | null>(null);
-  const [message, setMessage] = useState('「記録開始」を押すと位置情報の利用を求め、現在位置と移動経路を表示します。');
+  const [message, setMessage] = useState('');
   const [heading, setHeading] = useState<number | null>(null);
   const [orientationEnabled, setOrientationEnabled] = useState(false);
   const located = checkpoints.map((cp, i) => ({ cp, number: checkpointNumber(i), location: checkpointLocation(cp) }));
@@ -41,15 +46,14 @@ export default function MapPage() {
     located.forEach(({ cp, number, location }) => {
       if (!location) return;
       const status = statusOf(cp);
-      const approved = status === 'approved';
-      const label = approved ? '✓' : checkpointIsGoal(cp) ? 'G' : number;
-      const marker = L.marker([location.lat, location.lng], { icon: L.divIcon({ className: '', html: `<span class="${cn(pin, approved && pinApproved)}">${label}</span>`, iconSize: [34, 40], iconAnchor: [17, 40] }) });
+      const label = status === 'approved' ? '✓' : checkpointIsGoal(cp) ? 'G' : number;
+      const marker = L.marker([location.lat, location.lng], { icon: L.divIcon({ className: '', html: `<span class="${cn(pin, pinStatus[status])}">${label}</span>`, iconSize: [34, 40], iconAnchor: [17, 40] }) });
       const content = document.createElement('div');
       content.textContent = `${checkpointIsGoal(cp) ? 'GOAL' : `CP ${number}`} · ${checkpointName(cp)} / ${checkpointPoint(cp)}pt · ${STATUSES[status].label}`;
       marker.bindPopup(content).addTo(group);
     });
-    if (route.length > 1) L.polyline(route, { color: '#4f6952', weight: 4 }).addTo(group);
-    if (position) L.circleMarker(position, { radius: 8, color: '#fff', fillColor: '#426c96', fillOpacity: 1, weight: 3 }).bindTooltip('現在位置（GPS）').addTo(group);
+    if (route.length > 1) L.polyline(route, { color: '#222222', weight: 4, opacity: 0.7 }).addTo(group);
+    if (position) L.circleMarker(position, { radius: 8, color: '#222222', fillColor: '#1e7b45', fillOpacity: 1, weight: 3 }).bindTooltip('現在位置（GPS）').addTo(group);
   }, [checkpoints, statusOf, route, position]);
   useEffect(() => {
     if (!recording) return;
@@ -63,11 +67,11 @@ export default function MapPage() {
       if (!centered) { map.current?.setView(next, 16); centered = true; }
       setPosition(next);
       setRoute(previous => [...previous, next]);
-      setMessage(`GPS記録中 · 位置精度 約${Math.round(result.coords.accuracy)}m。画面を閉じると記録が停止します。`);
+      setMessage(`記録中 · 精度 約${Math.round(result.coords.accuracy)}m`);
     }, error => {
       if (!active) return;
       if (error.code === 1) setRecording(false);
-      setMessage(error.code === 1 ? '位置情報が許可されていません。ブラウザの設定で許可してください。' : '一時的に位置情報を取得できません。記録は継続し、次の測位を待っています。');
+      setMessage(error.code === 1 ? '位置情報が許可されていません。ブラウザの設定で許可してください。' : '位置情報を一時的に取得できません。測位を待っています…');
     }, { enableHighAccuracy: true, timeout: 15000, maximumAge: 2000 });
     return () => { active = false; navigator.geolocation.clearWatch(watch); };
   }, [recording]);
@@ -82,18 +86,46 @@ export default function MapPage() {
     return () => { window.removeEventListener('deviceorientation', update); window.removeEventListener('deviceorientationabsolute', update); };
   }, [orientationEnabled]);
   async function enableCompass() {
-    if (!window.DeviceOrientationEvent) { setMessage('端末の方位センサーは利用できません。地図の上側が北です。'); return; }
+    if (!window.DeviceOrientationEvent) { setMessage('方位センサーを利用できません。'); return; }
     try {
       const orientation = DeviceOrientationEvent as CompassConstructor;
       if (typeof orientation.requestPermission === 'function' && await orientation.requestPermission() !== 'granted') throw new Error();
       setOrientationEnabled(true);
-      setMessage('方位情報を待っています。対応端末でもセンサー値を取得できない場合があります。地図の上側は常に北です。');
-    } catch { setMessage('方位センサーの利用が許可されませんでした。地図の上側が北です。'); }
+      setMessage('方位を取得中…');
+    } catch { setMessage('方位センサーが許可されませんでした。'); }
   }
   function recenter() {
     if (position) map.current?.setView(position, 16);
-    else if (bounds) { map.current?.fitBounds(bounds, { padding: [40, 40], maxZoom: 17 }); setMessage('現在位置はまだありません。「記録開始」で位置情報を取得してください。'); }
-    else setMessage('現在位置はまだありません。「記録開始」で位置情報を取得してください。');
+    else if (bounds) { map.current?.fitBounds(bounds, { padding: [40, 40], maxZoom: 17 }); setMessage('現在位置がありません。記録開始で取得します。'); }
+    else setMessage('現在位置がありません。記録開始で取得します。');
   }
-  return <><PageHeading eyebrow="FIND YOUR OWN WAY" title="街を探索する" text="次の発見は、どの道の先に？"/><div className="grid grid-cols-[minmax(0,1fr)_280px] items-start gap-6 max-md:grid-cols-[minmax(0,1fr)_230px] max-md:gap-[15px] max-sm:grid-cols-1"><section className="min-w-0 border border-line bg-[#fcfbf6]"><div className="flex items-center justify-between gap-2.5 p-3 max-sm:p-[9px]"><span className={eyebrow}>LIVE GPS</span><span className="flex items-center gap-1.5 pr-[5px] text-[9px] text-muted max-sm:text-[8px]"><Navigation size={16}/> N / 地図の北</span></div><div className="relative"><div ref={container} className="z-0 h-[470px] bg-[#e5e8da] [font-family:inherit] max-sm:h-[390px]" aria-label="チェックポイントと移動経路の地図"/><span className="pointer-events-none absolute top-3 right-3 z-[400] bg-[#e5eddfed] px-[11px] py-2 text-[9px] tracking-[.4px] text-[#496840] max-sm:px-[9px] max-sm:py-[7px] max-sm:text-[8px]">{recording ? 'GPS / 記録中' : 'GPS / 記録停止中'}</span><button className={cn(iconButton, 'absolute right-3 bottom-7 z-[400] border border-line bg-[#faf9f0] shadow-[0_1px_5px_#0002]')} onClick={recenter} aria-label="現在位置へ戻る"><Crosshair size={22}/></button></div><div className="flex items-center gap-2 p-4 text-[11px] leading-[1.8] text-muted max-sm:items-start max-sm:text-[10px]" role="status"><span className={cn(liveDot, !recording && 'bg-[#b4b5a3]', 'max-sm:mt-1.5')}/>{message}</div>{tileError && <p className={errorPanel} role="alert">背景地図を読み込めませんでした。ネットワークを確認してください。チェックポイントと経路は引き続き表示しています。</p>}<div className="flex flex-wrap gap-2.5 px-4 pb-4 max-sm:px-3 max-sm:pb-[15px]"><button className={cn(buttonPrimary, actionSize)} onClick={() => { setRecording(v => !v); if (recording) setMessage('GPS記録を停止しました。記録済みの経路はこの画面内で保持します。'); }}>{recording ? <Pause size={17}/> : <Play size={17}/>}{recording ? '記録停止' : '記録開始'}</button><button className={cn(button, actionSize)} onClick={enableCompass}><Compass size={17}/>端末の方位を確認</button><span className="w-full text-[10px] text-muted max-sm:text-[9px]">{heading === null ? '端末の方位：未取得' : `端末の向き：${Math.round(heading)}°（北=0°）`}</span></div></section><aside className="border border-line bg-[#efefe5] p-[22px] max-md:p-4 max-sm:p-5"><span className={eyebrow}>ON YOUR ROUTE</span><h3 className="my-3 text-lg font-medium">チェックポイント</h3><p className="text-[10px] leading-[1.8] text-muted">番号を押すと地図で場所を確認できます。</p><div className="my-[18px] max-sm:grid max-sm:grid-cols-2 max-sm:gap-x-4 max-xs:grid-cols-1">{located.map(({ cp, number, location }) => <button key={cp.uri} className="flex w-full items-center gap-2.5 border-b border-line py-[13px] text-left hover:bg-[#e5e8d9] max-sm:gap-2" disabled={!location} onClick={() => { if (location) map.current?.setView([location.lat, location.lng], 17); }}><span className="border border-[#bfc8b0] p-[7px] text-[10px] text-olive max-sm:p-[5px] max-sm:text-[9px]">{checkpointIsGoal(cp) ? 'G' : number}</span><span><strong className="block text-[11px] font-medium max-sm:text-[10px]">{checkpointName(cp)}</strong><small className="mt-1 block text-[8px] font-normal text-muted max-sm:text-[7px]">{location ? STATUSES[statusOf(cp)].label : '位置情報なし'}</small></span><b className="ml-auto text-[15px] font-medium max-sm:text-[13px]">{checkpointPoint(cp)}<small className="ml-0.5 inline text-[8px] font-normal text-muted max-sm:text-[7px]">pt</small></b></button>)}{!located.length && <p className="text-muted">チェックポイントはまだありません。</p>}</div><Link to={eventPath(uri, 'cards')} className={cn(button, 'w-full text-[10px]')}>カードから写真を提出<ArrowUpRight size={16}/></Link></aside></div><div className="mt-[30px] flex items-center gap-3.5 border-y border-line px-[3px] py-[19px] text-[#7b866d] max-sm:mt-[23px] max-sm:items-start max-sm:gap-2.5 max-sm:px-0.5 max-sm:py-4 max-sm:[&>svg]:mt-[3px] max-sm:[&>svg]:w-[17px]"><MapPin size={20}/><p className="flex flex-col gap-1.5 text-[10px] leading-[1.7] max-sm:gap-1 max-sm:text-[9px]"><strong className="text-[11px] font-medium text-[#626f54] max-sm:text-[10px]">GPS経路はこの端末の中だけで表示します。</strong><span>経路はどこにも送信されず、この画面を離れると消去されます。</span></p></div></>;
+  function focus(location: { lat: number; lng: number }) {
+    map.current?.setView([location.lat, location.lng], 17);
+    container.current?.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+  }
+  return <div className="grid grid-cols-[minmax(0,1fr)_260px] items-start gap-3 max-md:grid-cols-[minmax(0,1fr)_220px] max-sm:grid-cols-1">
+    <section className="min-w-0 border border-fg/25">
+      <div className="relative">
+        <div ref={container} className="z-0 h-[calc(100dvh-230px)] min-h-[360px] bg-fg/5 [font-family:inherit] max-sm:h-[calc(100dvh-260px)] max-sm:min-h-[300px]" role="region" aria-label="チェックポイントと移動経路の地図"/>
+        <span className="pointer-events-none absolute top-2 right-2 z-[400] flex items-center gap-1.5 border border-fg/10 bg-bg px-2 py-1 text-[11px] font-bold"><span className={cn(liveDot, !recording && 'bg-fg/30')}/>{recording ? '記録中' : '停止中'}</span>
+        <button className={cn(iconButton, 'absolute right-2 bottom-6 z-[400] size-11 border border-fg/25 bg-bg')} onClick={recenter} aria-label="現在位置へ戻る" title="現在位置へ戻る"><Crosshair size={22}/></button>
+      </div>
+      {tileError && <p className={errorPanel} role="alert">背景地図を読み込めません。CPと経路は表示しています。</p>}
+      <div className="flex flex-wrap items-center gap-2 border-t border-fg/10 p-2">
+        <button className={cn(recording ? button : buttonPrimary, bigButton, 'max-sm:flex-1')} onClick={() => { setRecording(v => !v); if (recording) setMessage('記録を停止しました。'); }}>{recording ? <Pause size={18}/> : <Play size={18}/>}{recording ? '記録停止' : '記録開始'}</button>
+        <button className={cn(button, bigButton)} onClick={enableCompass} title="端末の方位を確認"><Navigation size={18} style={heading === null ? undefined : { transform: `rotate(${heading}deg)` }}/><span className="tabular-nums">{heading === null ? '方位' : <><span className="sr-only">端末の向き </span>{Math.round(heading)}°</>}</span></button>
+        <HelpButton title="マップ" className="size-11"><ul><li>「記録開始」で位置情報の利用を許可すると、現在位置と移動経路を表示します。</li><li>経路はこの端末の中だけで表示し、どこにも送信しません。画面を離れると消去されます。</li><li>地図の上側が北です。方位ボタンで端末の向き (北=0°) を表示します。</li><li>リストの行を押すと、そのチェックポイントの場所へ移動します。</li></ul></HelpButton>
+        <p className="w-full text-[12px] text-fg/60 empty:hidden" role="status">{message}</p>
+      </div>
+    </section>
+    <aside className="min-w-0 border border-fg/25 sm:max-h-[calc(100dvh-170px)] sm:overflow-y-auto" aria-label="チェックポイント">
+      {located.map(({ cp, number, location }) => <button key={cp.uri} className="flex h-10 w-full items-center gap-2 border-b border-fg/10 px-2 text-left last:border-0 hover:not-disabled:bg-fg/5 disabled:opacity-40" disabled={!location} onClick={() => { if (location) focus(location); }}>
+        <span className="w-9 shrink-0 bg-fg text-center text-[11px] leading-[18px] font-bold text-bg tabular-nums">{checkpointIsGoal(cp) ? 'GOAL' : number}</span>
+        <span className="min-w-0 flex-1 truncate text-[13px]">{checkpointName(cp)}</span>
+        {location ? <Status value={statusOf(cp)}/> : <span className="text-[11px] text-fg/60">位置なし</span>}
+        <b className="w-10 shrink-0 text-right text-[13px] font-bold tabular-nums">{checkpointPoint(cp)}<small className="text-[11px] font-normal text-fg/60">pt</small></b>
+      </button>)}
+      {!located.length && <p className="p-3 text-[13px] text-fg/60">チェックポイントはありません。</p>}
+    </aside>
+  </div>;
 }

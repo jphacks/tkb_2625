@@ -15,8 +15,6 @@ export type AdminEventContext = {
   me: DidString;
   /** イベントの作成者か (CP・チームを作成できるのは作成者だけ) */
   isAuthor: boolean;
-  /** イベントの承認者か (approve / reject が有効になるのは承認者だけ) */
-  isApprover: boolean;
   /** すぐに再取得する */
   retry: (...targets: AdminEventResource[]) => void;
   /** レコード作成後用。appview の反映待ちを考慮して、すぐと数秒後に再取得する */

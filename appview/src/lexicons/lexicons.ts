@@ -3725,7 +3725,7 @@ export const schemaDict = {
           },
         },
         description:
-          "An event approver's approval of a participant's checkpoint submission. Only valid when created by the DID in the event's approver field.",
+          "An event approver's approval of a participant's checkpoint submission. Only valid when created by the DID in the event's approver field or by the event's author. See submissionView.status for how approve and reject records are resolved.",
       },
     },
     $type: 'com.atproto.lexicon.schema',
@@ -4009,7 +4009,7 @@ export const schemaDict = {
           status: {
             type: 'string',
             description:
-              "approved when a valid approve record by the event's approver exists, otherwise rejected when a valid reject record by the approver exists, otherwise pending. Only approved submissions count for the ranking.",
+              "Decided by one valid approve or reject record for the submission's current cid, made by the event's author or approver. The author's records take precedence over the approver's; among one account's records, the one with the newest createdAt wins. approved or rejected by that record, otherwise pending. Only approved submissions count for the ranking.",
             knownValues: ['pending', 'approved', 'rejected'],
           },
           photoUrl: {
@@ -4028,8 +4028,7 @@ export const schemaDict = {
           rejectionUri: {
             type: 'string',
             format: 'at-uri',
-            description:
-              'AT-URI of the reject record, if rejected by the approver.',
+            description: 'AT-URI of the reject record, if rejected.',
           },
           reason: {
             type: 'string',
@@ -4409,6 +4408,14 @@ export const schemaDict = {
               type: 'string',
               format: 'at-uri',
             },
+            checkpoint: {
+              type: 'string',
+              format: 'at-uri',
+            },
+            participant: {
+              type: 'string',
+              format: 'did',
+            },
             limit: {
               type: 'integer',
               minimum: 1,
@@ -4457,7 +4464,7 @@ export const schemaDict = {
           },
         },
         description:
-          "An event approver's rejection of a participant's checkpoint submission. Only valid when created by the DID in the event's approver field. An approve record for the same submission takes precedence.",
+          "An event approver's rejection of a participant's checkpoint submission. Only valid when created by the DID in the event's approver field or by the event's author. See submissionView.status for how approve and reject records are resolved.",
       },
     },
     $type: 'com.atproto.lexicon.schema',
