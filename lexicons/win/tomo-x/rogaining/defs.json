@@ -62,11 +62,15 @@
       "properties": {
         "rank": { "type": "integer", "minimum": 1 },
         "team": { "ref": "win.tomo-x.rogaining.defs#teamView", "type": "ref" },
-        "totalPoints": { "type": "integer", "minimum": 0 },
+        "totalPoints": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Sum of approved checkpoint points and the team's finish-time bonus."
+        },
         "approvedCount": {
           "type": "integer",
           "minimum": 0,
-          "description": "Number of distinct checkpoints with an approved submission."
+          "description": "Number of distinct non-goal checkpoints with an approved submission."
         }
       }
     },
