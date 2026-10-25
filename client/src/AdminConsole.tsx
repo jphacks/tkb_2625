@@ -21,7 +21,7 @@ export default function AdminConsole(props: Props & { review: ReactNode }) {
     { to: '/admin/review', label: '写真審査', icon: ShieldCheck },
   ];
   return <div className="admin-console">
-    <div className="admin-heading"><div><span className="eyebrow">ROAM / EVENT OPERATIONS</span><h2>大会管理</h2><p>チームの一歩も、新しい発見も。大会のいまを、ここから。</p></div></div>
+    <div className="admin-heading"><div><span className="eyebrow">AtRogaining / EVENT OPERATIONS</span><h2>大会管理</h2><p>チームの一歩も、新しい発見も。大会のいまを、ここから。</p></div></div>
     <div className="user-team-switch"><label>参加者モックの表示チーム<select value={state.selectedTeamId || ''} disabled={props.pending || !state.teams.length} onChange={e => { void props.execute('selectTeam', { id: e.target.value }).catch(reason => props.notify(errorMessage(reason))); }}>{!state.teams.length && <option value="">チームなし</option>}{state.teams.map(t => <option key={t.id} value={t.id}>{t.number} / {t.name}</option>)}</select></label><span>{state.teams.length ? `参加者画面の表示対象：${state.team.members.length}名 / ${state.points}pt` : 'チーム管理でチームを作成してください。'}</span></div>
     <p className="admin-demo-note"><ShieldCheck size={17} /> フロントエンドのモックです。変更は同じタブの参加者画面にも反映され、ブラウザに保存されます。チーム位置はサンプルです。</p>
     <div className="admin-metrics">

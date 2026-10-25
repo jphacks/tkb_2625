@@ -32,7 +32,7 @@ export default function App() {
     <a className="skip-link" href="#main">本文へ移動</a>
     <header className="site-header">
       <div className="header-inner">
-        <Link to={isAdmin ? '/admin' : '/cards'} className="brand" aria-label={isAdmin ? 'ROAM 管理者ホーム' : 'ROAM ホーム'}><Compass size={31} strokeWidth={1.5}/><span>ROAM<span className="brand-sub">ROGAINING FIELD NOTES</span></span></Link>
+        <Link to={isAdmin ? '/admin' : '/cards'} className="brand" aria-label={isAdmin ? 'AtRogaining 管理者ホーム' : 'AtRogaining ホーム'}><Compass size={31} strokeWidth={1.5}/><span>AtRogaining<span className="brand-sub">ROGAINING FIELD NOTES</span></span></Link>
         <div className="event-name"><span className="live-dot"/> YOYOGI ROGAINING <span className="edition">2026 / AUTUMN</span></div>
         <span className="demo-tag">DEMO</span>
       </div>
@@ -57,7 +57,7 @@ export default function App() {
         <Route path="*" element={<div className="empty"><Compass/><h2>道に迷いましたか？</h2><Link to="/cards" className="button primary">カード画面へ戻る</Link></div>}/>
       </Routes>
     </main>
-    <footer className="site-footer"><span><Compass size={17}/> ROAM <small>歩いた分だけ、街が好きになる。</small></span><span>YOYOGI, TOKYO <span className="footer-dot">·</span> デモ大会 / 位置・画像はサンプル</span></footer>
+    <footer className="site-footer"><span><Compass size={17}/> AtRogaining <small>歩いた分だけ、街が好きになる。</small></span><span>YOYOGI, TOKYO <span className="footer-dot">·</span> デモ大会 / 位置・画像はサンプル</span></footer>
   </div>;
 }
 

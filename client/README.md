@@ -1,4 +1,4 @@
-# ROAM client
+# AtRogaining client
 
 React・TypeScript・Viteで実装した、ロゲイニングの参加者画面と管理者モックです。
 

@@ -9,7 +9,7 @@ export default function LoginPage() {
     <a className="skip-link" href="#login-main">本文へ移動</a>
     <header className="site-header">
       <div className="header-inner">
-        <div className="brand" aria-label="ROAM"><Compass size={31} strokeWidth={1.5}/><span>ROAM<span className="brand-sub">ROGAINING FIELD NOTES</span></span></div>
+        <div className="brand" aria-label="AtRogaining"><Compass size={31} strokeWidth={1.5}/><span>AtRogaining<span className="brand-sub">ROGAINING FIELD NOTES</span></span></div>
         <div className="event-name"><span className="live-dot"/> YOYOGI ROGAINING <span className="edition">2026 / AUTUMN</span></div>
         <span className="demo-tag">DEMO</span>
       </div>
@@ -39,6 +39,6 @@ export default function LoginPage() {
       </section>
     </main>
 
-    <footer className="site-footer"><span><Compass size={17}/> ROAM <small>歩いた分だけ、街が好きになる。</small></span><span>YOYOGI, TOKYO <span className="footer-dot">·</span> デモ大会</span></footer>
+    <footer className="site-footer"><span><Compass size={17}/> AtRogaining <small>歩いた分だけ、街が好きになる。</small></span><span>YOYOGI, TOKYO <span className="footer-dot">·</span> デモ大会</span></footer>
   </div>;
 }
