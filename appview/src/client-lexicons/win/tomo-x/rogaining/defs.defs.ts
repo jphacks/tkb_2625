@@ -52,10 +52,15 @@ const eventView = /*#__PURE__*/ l.typedObject<EventView>($nsid, "eventView", /*#
 
 export { eventView };
 
-type RankingEntry = { $type?: "win.tomo-x.rogaining.defs#rankingEntry";"rank":number;"team":TeamView;"totalPoints":number;
+type RankingEntry = { $type?: "win.tomo-x.rogaining.defs#rankingEntry";"rank":number;"team":TeamView;
 
   /**
-   * Number of distinct checkpoints with an approved submission.
+   * Sum of approved checkpoint points and the team's finish-time bonus.
+   */
+  "totalPoints":number;
+
+  /**
+   * Number of distinct non-goal checkpoints with an approved submission.
    */
   "approvedCount":number };
 

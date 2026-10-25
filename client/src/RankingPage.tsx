@@ -1,4 +1,5 @@
 import ParticipantNav from './ParticipantNav';
+import { eventName } from './eventPresentation';
 import { useCallback, useMemo, useRef } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { Compass, Flag, RefreshCw, Trophy, Users } from 'lucide-react';
@@ -6,12 +7,9 @@ import { useLexClient } from './lexClient';
 import { r } from './lex';
 import { useRemoteQuery } from './useRemoteQuery';
 import { formatDate } from './utils';
-import type { EventView, RankingEntry } from './lexicons/win/tomo-x/rogaining/defs';
+import type { RankingEntry } from './lexicons/win/tomo-x/rogaining/defs';
 import './ranking.css';
 
-function eventName(event: EventView) {
-  return typeof event.record.name === 'string' && event.record.name.trim() ? event.record.name : '名前のない大会';
-}
 export function teamName(entry: RankingEntry) {
   return typeof entry.team.record.name === 'string' && entry.team.record.name.trim() ? entry.team.record.name : '名前のないチーム';
 }

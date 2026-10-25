@@ -35,9 +35,16 @@ for await (const event of jetstream.live({ collections })) {
 			const eventRecord = await getRecord(record.event.uri, r.event.main)
 			if (eventRecord.data.approver !== DID) return
 
+			const checkpoint = await getRecord(record.checkpoint.uri, r.checkpoint.main)
+			if (checkpoint.data.isGoal) return
+
 			const imageUrls = await Promise.all([
 				getBlobUrl(event.did, record.photo),
-				...(await getCheckpointImages(record.checkpoint.uri)),
+				...(await Promise.all(
+					(checkpoint.data.internalImages ?? []).map((blobRef) =>
+						getBlobUrl(checkpoint.did, blobRef),
+					),
+				)),
 			])
 			// 判定NGは非ゼロ終了なので、例外にせず終了コードで判断する
 			const result = await execa("hogehoge.py", imageUrls, { reject: false })
@@ -55,15 +62,6 @@ for await (const event of jetstream.live({ collections })) {
 			console.error(`Failed to process submit from ${event.did}:`, err)
 		}
 	})
-}
-
-async function getCheckpointImages(uri: string): Promise<string[]> {
-	const checkpoint = await getRecord(uri, r.checkpoint.main)
-	return Promise.all(
-		(checkpoint.data.internalImages ?? []).map((blobRef) =>
-			getBlobUrl(checkpoint.did, blobRef),
-		),
-	)
 }
 
 const resolver = new DidResolver({ timeout: 60 * 1000 }, new MemoryCache())

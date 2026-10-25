@@ -5,6 +5,8 @@ import type { Server } from "../lexicons/index.js";
 import { findSubmissions } from "./submissions.js";
 import { findEvent, loadEventTeams, toTeamView } from "./views.js";
 
+const goalTimePoints = [30, 20, 10, 5, 3, 2, 1];
+
 export default function getRanking(server: Server<AppviewEnv>, auth: ServiceAuth) {
   server.win.tomoX.rogaining.getRanking({
     auth,
@@ -17,22 +19,45 @@ export default function getRanking(server: Server<AppviewEnv>, auth: ServiceAuth
       const { teams, teamOf, membersOf } = await loadEventTeams(event);
       const { submissions } = await findSubmissions(event, [...teamOf.keys()]);
 
-      // 同じチェックポイントはチームごとに1回だけ数える
+      // 同じチェックポイントはチームごとに1回だけ数え、ゴールは通常得点に含めない
       const pointsByTeam = new Map<string, Map<string, number>>(teams.map((team) => [team.uri, new Map()]));
+      const goalTimeByTeam = new Map<string, Date>();
       for (const { submit, checkpoint, approval } of submissions) {
+        const teamUri = teamOf.get(submit.authorDid)!.uri;
+        if (checkpoint.isGoal) {
+          const current = goalTimeByTeam.get(teamUri);
+          if (!current || submit.indexedAt.getTime() < current.getTime()) {
+            goalTimeByTeam.set(teamUri, submit.indexedAt);
+          }
+          continue;
+        }
         if (!approval) continue;
-        pointsByTeam.get(teamOf.get(submit.authorDid)!.uri)!.set(submit.checkpointUri, checkpoint.point);
+        pointsByTeam.get(teamUri)!.set(submit.checkpointUri, checkpoint.point);
+      }
+
+      const timePointsByTeam = new Map<string, number>();
+      const finishers = [...goalTimeByTeam.entries()].sort((a, b) => a[1].getTime() - b[1].getTime());
+      let previousFinishTime: number | undefined;
+      let currentRank = 0;
+      for (let i = 0; i < finishers.length; i++) {
+        const [teamUri, finishTime] = finishers[i]!;
+        const finishTimeMs = finishTime.getTime();
+        if (finishTimeMs !== previousFinishTime) currentRank = i + 1;
+        timePointsByTeam.set(teamUri, goalTimePoints[currentRank - 1] ?? 0);
+        previousFinishTime = finishTimeMs;
       }
 
       const totals = teams.map((team) => {
         const checkpoints = pointsByTeam.get(team.uri)!;
+        const checkpointPoints = [...checkpoints.values()].reduce((sum, point) => sum + point, 0);
+        const timePoints = timePointsByTeam.get(team.uri) ?? 0;
         return {
           team,
-          totalPoints: [...checkpoints.values()].reduce((sum, point) => sum + point, 0),
+          totalPoints: checkpointPoints + timePoints,
           approvedCount: checkpoints.size,
         };
       });
-      // 同点のときは作成順を保つ (sort は安定)
+      // 同点のときは承認数と作成順を保つ (sort は安定)
       totals.sort((a, b) => b.totalPoints - a.totalPoints || b.approvedCount - a.approvedCount);
 
       const ranking: RankingEntry[] = await Promise.all(

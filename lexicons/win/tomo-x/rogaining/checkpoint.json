@@ -35,6 +35,11 @@
             "minimum": 1,
             "description": "Allowed distance from the location for a valid submission."
           },
+          "isGoal": {
+            "type": "boolean",
+            "default": false,
+            "description": "Whether this checkpoint is the event finish. Goal submissions are not judged."
+          },
           "image": {
             "type": "blob",
             "accept": ["image/png", "image/jpeg", "image/webp"],

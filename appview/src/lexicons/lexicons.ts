@@ -3784,6 +3784,12 @@ export const schemaDict = {
               description:
                 'Allowed distance from the location for a valid submission.',
             },
+            isGoal: {
+              type: 'boolean',
+              default: false,
+              description:
+                'Whether this checkpoint is the event finish. Goal submissions are not judged.',
+            },
             image: {
               type: 'blob',
               accept: ['image/png', 'image/jpeg', 'image/webp'],
@@ -3919,12 +3925,14 @@ export const schemaDict = {
           totalPoints: {
             type: 'integer',
             minimum: 0,
+            description:
+              "Sum of approved checkpoint points and the team's finish-time bonus.",
           },
           approvedCount: {
             type: 'integer',
             minimum: 0,
             description:
-              'Number of distinct checkpoints with an approved submission.',
+              'Number of distinct non-goal checkpoints with an approved submission.',
           },
         },
       },
@@ -4277,7 +4285,7 @@ export const schemaDict = {
           },
         },
         description:
-          'Get the leaderboard of an event, computed from approved submissions (each checkpoint counts once per team).',
+          'Get the leaderboard of an event. Total points are the sum of approved non-goal checkpoint points (each checkpoint counts once per team) and a finish-time bonus of 30, 20, 10, 5, 3, 2, or 1 points for the first through seventh finish positions. Goal finish time is the server indexedAt timestamp; tied finishers share points. Teams without a goal submission receive no finish-time bonus.',
       },
     },
     $type: 'com.atproto.lexicon.schema',
