@@ -8,7 +8,7 @@
     "build": "vite build",
 	"typecheck": "tsc -b --noEmit",
     "preview": "vite preview",
-    "gen:lexicon": "lex build --lexicons ../lexicons --out ./src/lexicons"
+    "gen:lexicon": "lex build --lexicons ../lexicons --out ./src/lexicons --override --clear"
   },
   "dependencies": {
     "@atproto/lex": "^0.4.2",

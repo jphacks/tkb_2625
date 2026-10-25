@@ -9,7 +9,8 @@ ExecStart=/usr/bin/node dist/index.js
 Restart=always
 User=rogaining
 Environment=NODE_ENV=production
-# EnvironmentFile=/srv/rogaining/appview.env
+# DB_FILE_NAME / JETSTREAM_URL などを上書きしたいときに使う (無くてもよい)
+EnvironmentFile=-/srv/rogaining/appview.env
 
 [Install]
 WantedBy=multi-user.target

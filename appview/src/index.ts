@@ -3,6 +3,11 @@ import { Hono } from "hono";
 import { createServer } from "./lexicons/index.js";
 import { createServiceAuth } from "./auth.js";
 import registerRogaining from "./rogaining/index.js";
+import { startJetstream } from "./ingest/jetstream.js";
+import { runMigrations } from "./db/migrate.js";
+
+// 起動時に未適用のマイグレーションを当てる
+runMigrations();
 
 const app = new Hono();
 const server = createServer({});
@@ -19,3 +24,5 @@ serve(
     console.log(`Server is running on http://localhost:${info.port}`);
   },
 );
+
+void startJetstream();

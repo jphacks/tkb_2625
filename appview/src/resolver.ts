@@ -29,11 +29,11 @@ export async function resolveProfileBasic(did: string): Promise<ProfileViewBasic
 		if (!res.ok) {
 			throw new Error(`profile not found for DID: ${did} (status ${res.status})`);
 		}
-		const data = (await res.json()) as { handle?: string; avatar?: string };
+		const data = (await res.json()) as { handle?: string; displayName?: string; avatar?: string };
 		if (!data.handle) {
 			throw new Error(`handle not found for DID: ${did}`);
 		}
-		return { did, handle: data.handle, avatar: data.avatar };
+		return { did, handle: data.handle, displayName: data.displayName, avatar: data.avatar };
 	})();
 
 	profileCache.set(did, promise);
@@ -59,4 +59,34 @@ export async function resolveBlobUrl(did: string, cid: string | null): Promise<s
 	blobUrlCache.set(cacheKey, promise);
 	promise.catch(() => blobUrlCache.delete(cacheKey));
 	return promise;
+}
+
+// プロフィールが取れなくてもレスポンス全体を失敗させない
+export async function resolveProfileBasicOrFallback(did: string): Promise<ProfileViewBasic> {
+	return resolveProfileBasic(did).catch((err) => {
+		console.warn(err);
+		return { did, handle: "handle.invalid" };
+	});
+}
+
+// DID が解決できない場合は URL なしとして扱う
+export async function resolveBlobUrlOrUndefined(did: string, cid: string | null): Promise<string | undefined> {
+	return resolveBlobUrl(did, cid).catch((err) => {
+		console.warn(`failed to resolve blob url for ${did}:`, err);
+		return undefined;
+	});
+}
+
+export type FetchedRecord = { uri: string; cid: string; value: unknown };
+
+export async function fetchRecord(did: string, collection: string, rkey: string): Promise<FetchedRecord | null> {
+	const pdsUrl = await resolvePdsUrl(did);
+	if (!pdsUrl) return null;
+	const url = new URL("/xrpc/com.atproto.repo.getRecord", pdsUrl);
+	url.search = new URLSearchParams({ repo: did, collection, rkey }).toString();
+	const res = await fetch(url, { signal: AbortSignal.timeout(10_000) });
+	if (!res.ok) return null;
+	const data = (await res.json()) as Partial<FetchedRecord>;
+	if (typeof data.uri !== "string" || typeof data.cid !== "string" || data.value == null) return null;
+	return { uri: data.uri, cid: data.cid, value: data.value };
 }

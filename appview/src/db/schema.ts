@@ -1,4 +1,4 @@
-import { sqliteTable, text, integer, real, index, check } from "drizzle-orm/sqlite-core";
+import { sqliteTable, text, integer, real, index, check, primaryKey } from "drizzle-orm/sqlite-core";
 import { sql } from "drizzle-orm";
 import { relations } from "drizzle-orm";
 
@@ -25,14 +25,31 @@ export const eventsTable = sqliteTable("events", {
     .default(sql`(unixepoch())`),
 });
 
-export const approveTable = sqliteTable("approve", {
-  uri: text("uri").primaryKey(),
-  submitUri: text("submit_uri").notNull(),
-  submitCid: text("submit_cid").notNull(),
-  approverDid: text("approver_did").notNull(),
-  createdAt: integer("created_at",{ mode: "timestamp" })
-    .notNull()
-});
+export const approveTable = sqliteTable(
+  "approve",
+  {
+    uri: text("uri").primaryKey(),
+    submitUri: text("submit_uri").notNull(),
+    submitCid: text("submit_cid").notNull(),
+    approverDid: text("approver_did").notNull(),
+    reason: text("reason"),
+    createdAt: integer("created_at", { mode: "timestamp" }).notNull(),
+  },
+  (table) => [index("approve_submit_uri_idx").on(table.submitUri)],
+);
+
+export const rejectTable = sqliteTable(
+  "reject",
+  {
+    uri: text("uri").primaryKey(),
+    submitUri: text("submit_uri").notNull(),
+    submitCid: text("submit_cid").notNull(),
+    approverDid: text("approver_did").notNull(),
+    reason: text("reason"),
+    createdAt: integer("created_at", { mode: "timestamp" }).notNull(),
+  },
+  (table) => [index("reject_submit_uri_idx").on(table.submitUri)],
+);
 
 export const checkpointsTable = sqliteTable(
   "checkpoints",
@@ -40,7 +57,9 @@ export const checkpointsTable = sqliteTable(
     uri: text("uri").notNull().primaryKey(),
     cid: text("cid").notNull(),
     eventUri: text("event_uri").notNull(),
+    authorDid: text("author_did").notNull(),
     eventCid: text("event_cid").notNull(),
+    record: text("record", { mode: "json" }).notNull(),
     name: text("name").notNull(),
     point: integer("point").notNull(),
     latitude: real("latitude").notNull(),
@@ -68,6 +87,7 @@ export const submitsTable = sqliteTable(
     eventCid: text("event_cid").notNull(),
     checkpointUri: text("checkpoint_uri").notNull().references(() => checkpointsTable.uri),
     checkpointCid: text("checkpoint_cid").notNull(),
+    record: text("record", { mode: "json" }).notNull(),
     photoCid: text("photo_cid").notNull(),
     photoMimeType: text("photo_mime_type").notNull(),
     photoSize: integer("photo_size").notNull(),
@@ -82,6 +102,43 @@ export const submitsTable = sqliteTable(
     index("submits_author_did_idx").on(table.authorDid),
   ],
 );
+
+export const teamsTable = sqliteTable(
+  "teams",
+  {
+    uri: text("uri").primaryKey(),
+    cid: text("cid").notNull(),
+    authorDid: text("author_did").notNull(),
+    eventUri: text("event_uri").notNull(),
+    eventCid: text("event_cid").notNull(),
+    record: text("record", { mode: "json" }).notNull(),
+    name: text("name").notNull(),
+    members: text("members", { mode: "json" }).$type<string[]>().notNull(),
+    createdAt: integer("created_at", { mode: "timestamp" }).notNull(),
+    indexedAt: integer("indexed_at", { mode: "timestamp" }).notNull().default(sql`(unixepoch())`),
+  },
+  (table) => [index("teams_event_uri_idx").on(table.eventUri)],
+);
+
+// teams.members を引くための索引用テーブル。チームの保存・削除と一緒に更新する
+export const teamMembersTable = sqliteTable(
+  "team_members",
+  {
+    teamUri: text("team_uri").notNull().references(() => teamsTable.uri, { onDelete: "cascade" }),
+    eventUri: text("event_uri").notNull(),
+    memberDid: text("member_did").notNull(),
+  },
+  (table) => [
+    primaryKey({ columns: [table.teamUri, table.memberDid] }),
+    index("team_members_member_did_idx").on(table.memberDid),
+  ],
+);
+
+// Jetstream (v2) の再接続用カーソル (seq)。1行だけ使う
+export const jetstreamCursorTable = sqliteTable("jetstream_cursor", {
+  id: integer("id").primaryKey(),
+  cursor: integer("cursor").notNull(),
+});
 
 export const submitsRelations = relations(submitsTable, ({ one }) => ({
   event: one(eventsTable, {
