@@ -15,7 +15,6 @@
 .login-button{width:100%;margin-top:30px;padding:16px 12px;min-height:56px;font-size:12px;gap:10px}
 .login-button>span{flex:1;text-align:left;letter-spacing:.2px}
 .login-help{font-size:10px;color:var(--muted);line-height:1.8;margin-top:13px}
-.login-message{min-height:22px;font-size:11px;color:#687554;line-height:1.8;margin-top:15px}
 .login-panel-footer{display:flex;justify-content:center;align-items:center;gap:8px;border-top:1px solid var(--line);padding-top:21px;margin-top:18px;color:#7a846f;font-size:9px;letter-spacing:.6px}
 @media(max-width:800px){.login-main{gap:32px;grid-template-columns:minmax(0,1fr) minmax(0,360px);padding:45px 24px}.login-intro h1{font-size:30px;letter-spacing:2px}.login-intro>p{font-size:11px}.login-panel{padding:26px}}
 @media(max-width:640px){.login-main{grid-template-columns:1fr;gap:28px;padding:34px 20px 40px;max-width:460px}.login-intro{padding:0}.login-intro>.eyebrow{font-size:8px}.login-intro h1{font-size:28px;line-height:1.5;margin:14px 0 12px}.login-intro>p{font-size:11px}.login-field-art,.login-field-note{display:none}.login-panel{padding:23px}.login-emblem{margin:20px auto;width:60px;height:60px}.login-emblem svg{width:30px}.login-panel h2{font-size:25px}.login-button{font-size:12px;margin-top:24px}.login-description{font-size:11px}.login-panel-footer{font-size:8px}}

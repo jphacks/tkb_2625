@@ -1,10 +1,7 @@
-import { useState } from 'react';
 import { ArrowRight, Compass, Leaf, LogIn, Sprout } from 'lucide-react';
 import './login.css';
 
 export default function LoginPage() {
-  const [message, setMessage] = useState('');
-
   return <div className="app-shell login-shell">
     <a className="skip-link" href="#login-main">本文へ移動</a>
     <header className="site-header">
@@ -32,9 +29,8 @@ export default function LoginPage() {
         <div className="login-emblem" aria-hidden="true"><Sprout size={36} strokeWidth={1.3}/></div>
         <h2 id="login-title">ログイン</h2>
         <p className="login-description">あなたのアカウントで、<br/>今日の冒険をはじめましょう。</p>
-        <button type="button" className="button primary login-button" aria-describedby="login-help" onClick={() => setMessage('ログイン機能は準備中です。')}><LogIn size={19}/><span>AT Protocolでログイン</span><ArrowRight size={18}/></button>
+        <button type="button" className="button primary login-button" aria-describedby="login-help"><LogIn size={19}/><span>AT Protocolでログイン</span><ArrowRight size={18}/></button>
         <p id="login-help" className="login-help">AT Protocolのアカウントを使用します。</p>
-        <p className="login-message" role="status">{message || '\u00a0'}</p>
         <div className="login-panel-footer"><Compass size={15}/><span>一歩先に、まだ知らない景色。</span></div>
       </section>
     </main>
