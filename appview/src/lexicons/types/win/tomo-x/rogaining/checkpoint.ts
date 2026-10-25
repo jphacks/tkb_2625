@@ -27,6 +27,8 @@ export interface Record {
   description?: string
   /** Allowed distance from the location for a valid submission. */
   radiusMeters: number
+  /** Whether this checkpoint is the event finish. Goal submissions are not judged. */
+  isGoal: boolean
   /** Image of the checkpoint. */
   image: BlobRef
   /** Internal images of the checkpoint, not shown to participants. */

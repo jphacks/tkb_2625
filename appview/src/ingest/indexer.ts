@@ -55,6 +55,7 @@ export async function putCheckpoint({ uri, did, cid, record }: RecordPut<r.check
 		point: record.point,
 		latitude: location.latitude,
 		longitude: location.longitude,
+		isGoal: record.isGoal ?? false,
 		radiusMeters: record.radiusMeters ?? 30,
 		description: record.description ?? null,
 		imageCid: getBlobCidString(record.image) ?? null,

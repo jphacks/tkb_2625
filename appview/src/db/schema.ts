@@ -64,6 +64,7 @@ export const checkpointsTable = sqliteTable(
     point: integer("point").notNull(),
     latitude: real("latitude").notNull(),
     longitude: real("longitude").notNull(),
+    isGoal: integer("is_goal", { mode: "boolean" }).notNull().default(false),
     radiusMeters: integer("radius_meters").notNull().default(30),
     description: text("description"),
     imageCid: text("image_cid"),
