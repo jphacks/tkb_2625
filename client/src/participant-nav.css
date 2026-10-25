@@ -1,2 +1,0 @@
-.participant-nav .tab-inner>a{flex:1;min-width:0}
-@media(max-width:640px){.participant-nav .tab-inner>a:not(.admin-link){flex-direction:column;padding:9px 2px;gap:5px;min-height:67px}.participant-nav .tab-inner>a span{font-size:10px;text-align:center;letter-spacing:0}.participant-nav .tab-inner>a small{font-size:5px;letter-spacing:.3px}.participant-nav .tab-inner>a svg{width:17px}}

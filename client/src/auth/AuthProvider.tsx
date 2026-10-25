@@ -1,8 +1,9 @@
 import type { OAuthSession } from '@atproto/oauth-client-browser';
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
 import { Navigate, Outlet, useLocation, useNavigate } from 'react-router-dom';
-import { LexClientProvider } from '../lexClient';
-import { errorMessage } from '../utils';
+import { LexClientProvider } from '../lib/lexClient';
+import { errorMessage } from '../lib/utils';
+import { empty } from '../lib/ui';
 import { initOAuth, oauthClient, onSessionDeleted } from './oauth';
 
 type AuthContextValue = {
@@ -52,7 +53,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [session]);
   const value = useMemo(() => ({ session, signIn, signOut }), [session, signIn, signOut]);
 
-  if (!ready) return <main className="empty" role="status">ログイン状態を確認しています…</main>;
+  if (!ready) return <main className={empty} role="status">ログイン状態を確認しています…</main>;
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
 

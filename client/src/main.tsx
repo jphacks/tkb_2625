@@ -1,17 +1,28 @@
-import { lazy, StrictMode, Suspense } from 'react'
+import { lazy, StrictMode, Suspense, type ReactNode } from 'react'
 import { createRoot } from 'react-dom/client'
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
 import './index.css'
-import App from './App'
-import LoginPage from './LoginPage'
-import { EventCreatePage } from './EventCreatePage'
+import LoginPage from './routes/LoginPage'
+import NotFoundPage from './routes/NotFoundPage'
 import { AuthProvider, RequireAuth } from './auth/AuthProvider'
 import { CALLBACK_PATH } from './auth/clientMetadata'
 import { ATPASSPORT_CALLBACK_PATH } from './auth/atpassport'
 import AtPassportCallback from './auth/AtPassportCallback'
 
-const RankingPage = lazy(() => import('./RankingPage'))
-const EventsPage = lazy(() => import('./EventsPage'))
+const EventsPage = lazy(() => import('./routes/EventsPage'))
+const RankingPage = lazy(() => import('./routes/RankingPage'))
+const EventLayout = lazy(() => import('./routes/event/EventLayout'))
+const CardsPage = lazy(() => import('./routes/event/CardsPage'))
+const TeamPage = lazy(() => import('./routes/event/TeamPage'))
+const MapPage = lazy(() => import('./routes/event/MapPage'))
+const AdminHomePage = lazy(() => import('./routes/admin/AdminHomePage'))
+const EventCreatePage = lazy(() => import('./routes/admin/EventCreatePage'))
+const AdminEventLayout = lazy(() => import('./routes/admin/AdminEventLayout'))
+const ReviewPage = lazy(() => import('./routes/admin/ReviewPage'))
+const CheckpointsPage = lazy(() => import('./routes/admin/CheckpointsPage'))
+const TeamsPage = lazy(() => import('./routes/admin/TeamsPage'))
+
+const page = (element: ReactNode) => <Suspense fallback={<main className="empty" role="status">読み込んでいます…</main>}>{element}</Suspense>
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
@@ -23,10 +34,25 @@ createRoot(document.getElementById('root')!).render(
           {/* コールバックは AuthProvider が処理して遷移するので、ここに来るのは処理済みの URL を開き直したときだけ */}
           <Route path={CALLBACK_PATH} element={<Navigate to="/" replace />} />
           <Route element={<RequireAuth />}>
-            <Route path="/events" element={<Suspense fallback={<main className="empty" role="status">イベントを読み込んでいます…</main>}><EventsPage /></Suspense>} />
-            <Route path="/admin/events/new" element={<EventCreatePage />} />
-            <Route path="/ranking" element={<Suspense fallback={<main className="empty" role="status">ランキングを読み込んでいます…</main>}><RankingPage /></Suspense>} />
-            <Route path="*" element={<App />} />
+            <Route path="/" element={<Navigate to="/events" replace />} />
+            <Route path="/events" element={page(<EventsPage />)} />
+            <Route path="/ranking" element={page(<RankingPage />)} />
+            {/* イベントは at-uri の did / rkey で指定する (lib/eventUri.ts) */}
+            <Route path="/events/:did/:rkey" element={page(<EventLayout />)}>
+              <Route index element={<Navigate to="cards" replace />} />
+              <Route path="cards" element={page(<CardsPage />)} />
+              <Route path="team" element={page(<TeamPage />)} />
+              <Route path="map" element={page(<MapPage />)} />
+            </Route>
+            <Route path="/admin" element={page(<AdminHomePage />)} />
+            <Route path="/admin/events/new" element={page(<EventCreatePage />)} />
+            <Route path="/admin/events/:did/:rkey" element={page(<AdminEventLayout />)}>
+              <Route index element={<Navigate to="review" replace />} />
+              <Route path="review" element={page(<ReviewPage />)} />
+              <Route path="checkpoints" element={page(<CheckpointsPage />)} />
+              <Route path="teams" element={page(<TeamsPage />)} />
+            </Route>
+            <Route path="*" element={<NotFoundPage />} />
           </Route>
         </Routes>
       </AuthProvider>
