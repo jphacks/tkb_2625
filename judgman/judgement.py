@@ -8,16 +8,10 @@ from PIL import Image
 from dataclasses import dataclass
 from typing import List, Optional
 
-
-# ==========================================
-# 0. データ構造の定義
-# ==========================================
-
 class Verdict:
     MATCH = "一致"
     MISMATCH = "不一致"
     UNCERTAIN = "判定保留"
-
 
 @dataclass
 class SIFTResult:
@@ -28,11 +22,9 @@ class SIFTResult:
     inlier_ratio: float
     homography_found: bool
 
-
 @dataclass
 class DINOv2Result:
     cosine_similarity: float
-
 
 @dataclass
 class EvaluationResult:
@@ -41,11 +33,6 @@ class EvaluationResult:
     sift_result: SIFTResult
     dino_result: DINOv2Result
     details: str
-
-
-# ==========================================
-# 局所特徴量マッチング (SIFT + RANSAC)
-# ==========================================
 
 class SIFTMatcher:
     def __init__(self, ratio_thresh: float = 0.80, ransac_reproj_thresh: float = 8.0):
@@ -107,11 +94,6 @@ class SIFTMatcher:
             homography_found=(H is not None and inliers_count >= 4)
         )
 
-
-# ==========================================
-# 深層学習ベース画像埋め込み (DINOv2)
-# ==========================================
-
 class DINOv2Extractor:
     def __init__(self, model_name: str = 'dinov2_vits14', device: Optional[str] = None):
         self.device = device or ('cuda' if torch.cuda.is_available() else 'cpu')
@@ -137,19 +119,14 @@ class DINOv2Extractor:
         cos_sim = float(torch.dot(vec_ref, vec_query).item())
         return DINOv2Result(cosine_similarity=cos_sim)
 
-
-# ==========================================
-# 組み合わせて判定
-# ==========================================
-
 class HybridLocationVerifier:
     def __init__(
         self,
-        sift_inlier_match_thresh: int = 8,       # 15 -> 8 に緩和
-        sift_ratio_match_thresh: float = 0.15,   # 0.25 -> 0.15 に緩和
-        sift_inlier_mismatch_thresh: int = 3,   # 5 -> 3 に緩和
-        dino_sim_match_thresh: float = 0.65,     # 0.75 -> 0.65 に緩和
-        dino_sim_mismatch_thresh: float = 0.45,   # 0.50 -> 0.45 に緩和
+        sift_inlier_match_thresh: int = 8,
+        sift_ratio_match_thresh: float = 0.15,
+        sift_inlier_mismatch_thresh: int = 3,
+        dino_sim_match_thresh: float = 0.65,
+        dino_sim_mismatch_thresh: float = 0.45,
         device: Optional[str] = None
     ):
         self.sift_matcher = SIFTMatcher()
@@ -217,11 +194,6 @@ class HybridLocationVerifier:
 
         return Verdict.UNCERTAIN
 
-
-# ==========================================
-# 4. ヘルパー関数 & エントリポイント
-# ==========================================
-
 def get_ref_images_from_dir(point_dir: str) -> List[str]:
     valid_exts = ('.jpg', '.jpeg', '.png', '.webp', '.bmp', '.JPG', '.JPEG', '.PNG', '.WEBP', '.BMP')
     if not os.path.isdir(point_dir):
@@ -233,7 +205,6 @@ def get_ref_images_from_dir(point_dir: str) -> List[str]:
         if fname.endswith(valid_exts)
     ]
     return sorted(ref_paths)
-
 
 if __name__ == "__main__":
     if len(sys.argv) < 3:

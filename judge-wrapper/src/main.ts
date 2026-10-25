@@ -26,6 +26,9 @@ const approverClient = new Client(session)
 
 const queue = new PQueue({ concurrency: 3 })
 
+// 判定CLI: 引数 [query, ...refs] を受け取り、到達なら exit 0 を返す
+const JUDGE_CMD = process.env.JUDGE_CMD?.split(" ") ?? ["python3", "judgman/judge_cli.py"]
+
 for await (const event of jetstream.live({ collections })) {
 	if (!isCreate(event, r.submit)) continue
 	// キューに積むだけにして、イベント受信をブロックしない
@@ -40,7 +43,7 @@ for await (const event of jetstream.live({ collections })) {
 				...(await getCheckpointImages(record.checkpoint.uri)),
 			])
 			// 判定NGは非ゼロ終了なので、例外にせず終了コードで判断する
-			const result = await execa("hogehoge.py", imageUrls, { reject: false })
+			const result = await execa(JUDGE_CMD[0], [...JUDGE_CMD.slice(1), ...imageUrls], { reject: false })
 			if (result.exitCode === 0) {
 				await approverClient.create(r.approve, {
 					submit: {
