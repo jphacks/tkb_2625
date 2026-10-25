@@ -1,16 +1,15 @@
+import ParticipantNav from './ParticipantNav';
+import { eventName } from './eventPresentation';
 import { useCallback, useMemo, useRef } from 'react';
-import { Link, NavLink, useSearchParams } from 'react-router-dom';
-import { Compass, Flag, LayoutGrid, Map, RefreshCw, Trophy, Users } from 'lucide-react';
+import { Link, useSearchParams } from 'react-router-dom';
+import { Compass, Flag, RefreshCw, Trophy, Users } from 'lucide-react';
 import { useLexClient } from './lexClient';
 import { r } from './lex';
 import { useRemoteQuery } from './useRemoteQuery';
 import { formatDate } from './utils';
-import type { EventView, RankingEntry } from './lexicons/win/tomo-x/rogaining/defs';
+import type { RankingEntry } from './lexicons/win/tomo-x/rogaining/defs';
 import './ranking.css';
 
-function eventName(event: EventView) {
-  return typeof event.record.name === 'string' && event.record.name.trim() ? event.record.name : '名前のない大会';
-}
 export function teamName(entry: RankingEntry) {
   return typeof entry.team.record.name === 'string' && entry.team.record.name.trim() ? entry.team.record.name : '名前のないチーム';
 }
@@ -40,12 +39,7 @@ export default function RankingPage() {
   return <div className="app-shell ranking-shell">
     <a className="skip-link" href="#ranking-main">本文へ移動</a>
     <header className="site-header"><div className="header-inner"><Link to="/cards" className="brand" aria-label="ROAM ホーム"><Compass size={31} strokeWidth={1.5}/><span>ROAM<span className="brand-sub">ROGAINING FIELD NOTES</span></span></Link><span className="ranking-header-label">EVENT LEADERBOARD</span></div></header>
-    <nav className="tab-nav" aria-label="メインナビゲーション"><div className="tab-inner">
-      <NavLink to="/cards"><LayoutGrid size={18}/><span>カード<small>CHECKPOINTS</small></span></NavLink>
-      <NavLink to="/team"><Users size={18}/><span>チーム<small>OUR TEAM</small></span></NavLink>
-      <NavLink to="/map"><Map size={18}/><span>マップ<small>EXPLORE</small></span></NavLink>
-      <NavLink to={{ pathname: '/ranking', search: search.toString() ? `?${search}` : '' }}><Trophy size={18}/><span>ランキング<small>RANKING</small></span></NavLink>
-    </div></nav>
+    <ParticipantNav/>
     <main id="ranking-main" className="main-container">
       <div className="ranking-heading"><div><span className="eyebrow">EVERY DISCOVERY COUNTS</span><h1>ランキング</h1><p>仲間と集めた発見を、チームの記録に。</p></div><Trophy size={36} strokeWidth={1.2}/></div>
       <section className="ranking-event" aria-label="表示する大会">
