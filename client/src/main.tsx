@@ -15,7 +15,7 @@ const RankingRedirect = lazy(() => import('./routes/RankingRedirect'))
 const RankingPage = lazy(() => import('./routes/event/RankingPage'))
 const AdminRankingPage = lazy(() => import('./routes/admin/RankingPage'))
 const EventLayout = lazy(() => import('./routes/event/EventLayout'))
-const CardsPage = lazy(() => import('./routes/event/CardsPage'))
+const EventCheckpointsPage = lazy(() => import('./routes/event/CheckpointsPage'))
 const TeamPage = lazy(() => import('./routes/event/TeamPage'))
 const MapPage = lazy(() => import('./routes/event/MapPage'))
 const AdminHomePage = lazy(() => import('./routes/admin/AdminHomePage'))
@@ -43,8 +43,8 @@ createRoot(document.getElementById('root')!).render(
             <Route path="/ranking" element={page(<RankingRedirect />)} />
             {/* イベントは at-uri の did / rkey で指定する (lib/eventUri.ts) */}
             <Route path="/events/:did/:rkey" element={page(<EventLayout />)}>
-              <Route index element={<Navigate to="cards" replace />} />
-              <Route path="cards" element={page(<CardsPage />)} />
+              <Route index element={<Navigate to="checkpoints" replace />} />
+              <Route path="checkpoints" element={page(<EventCheckpointsPage />)} />
               <Route path="team" element={page(<TeamPage />)} />
               <Route path="map" element={page(<MapPage />)} />
               <Route path="ranking" element={page(<RankingPage />)} />

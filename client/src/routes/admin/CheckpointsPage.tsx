@@ -94,7 +94,7 @@ export default function CheckpointsPage() {
       <form className="flex flex-col gap-2 border border-fg/10 p-3" onSubmit={create}>
         <div className="flex min-h-7 items-center gap-2"><h3 className="text-[13px] font-bold">CPを登録</h3>
           <HelpButton title="CPの登録" className="ml-auto">
-            <ul><li>位置は緯度・経度の入力、または地図クリックで指定できます。</li><li>登録したCPは参加者のカードと地図に表示されます。</li><li>ゴールの提出は審査されず、到着順にタイムボーナスが付きます。</li><li>見本写真は JPEG / PNG / WebP、8MBまで。自動で縮小します。</li><li>内部用画像は参加者には表示されません。最大{MAX_INTERNAL_IMAGES}枚まで。</li><li>CPを削除すると、そのCPへの提出は無効になり、各チームの得点からも外れます。</li></ul>
+            <ul><li>位置は緯度・経度の入力、または地図クリックで指定できます。</li><li>登録したCPは参加者のチェックポイント一覧と地図に表示されます。</li><li>ゴールの提出は審査されず、到着順にタイムボーナスが付きます。</li><li>見本写真は JPEG / PNG / WebP、8MBまで。自動で縮小します。</li><li>内部用画像は参加者には表示されません。最大{MAX_INTERNAL_IMAGES}枚まで。</li><li>CPを削除すると、そのCPへの提出は無効になり、各チームの得点からも外れます。</li></ul>
           </HelpButton></div>
         <fieldset className="m-0 flex min-w-0 flex-col gap-2 border-0 p-0" disabled={!isAuthor || pending}>
           <label className={fieldCls}>CP名<input className={input} required maxLength={100} value={draft.name} onChange={e => field('name', e.target.value)} /></label>

@@ -28,7 +28,7 @@ const placeholder = 'flex aspect-[4/3] w-full flex-col items-center justify-cent
 const caption = 'mb-1 flex justify-between gap-1 text-[11px] text-fg/60';
 const bigButton = 'h-11 text-[14px]';
 
-export default function CardsPage() {
+export default function CheckpointsPage() {
   const { checkpoints, statusOf, submissionsState } = useEventContext();
   const [filter, setFilter] = useState<CheckpointStatus | 'all'>('all');
   const [sort, setSort] = useState<Sort>('number');
