@@ -42,6 +42,6 @@ export default function AdminMap({ checkpoints, selected, onPick, focus }: Props
   useEffect(() => { if (focus) map.current?.setView(focus, 17); }, [focus, map]);
   return <div className="min-w-0 border border-line bg-[#e5e8da]">
     <div ref={container} className="z-0 h-[510px] bg-[#e5e8da] [font-family:inherit] max-sm:h-[370px]" role="region" aria-label={onPick ? 'CP登録位置を選択する地図' : 'チェックポイントの地図'} />
-    {tileError && <p className={errorPanel} role="alert">背景地図を取得できません。緯度・経度は入力欄からも指定できます。</p>}
+    {tileError && <p className={errorPanel} role="alert">背景地図を取得できません。{onPick ? '緯度・経度は入力欄からも指定できます。' : 'チェックポイントは一覧でも確認できます。'}</p>}
   </div>;
 }

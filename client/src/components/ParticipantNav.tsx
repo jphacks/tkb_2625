@@ -14,6 +14,7 @@ export default function ParticipantNav() {
   const tabs = [
     { to: '/events', label: 'イベント', en: 'EVENTS', icon: CalendarDays, end: true },
     ...event ? [
+      { to: eventPath(event), label: '詳細', en: 'DETAILS', icon: CalendarDays, end: true },
       { to: eventPath(event, 'cards'), label: 'カード', en: 'CHECKPOINTS', icon: LayoutGrid },
       { to: eventPath(event, 'team'), label: 'チーム', en: 'OUR TEAM', icon: Users },
       { to: eventPath(event, 'map'), label: 'マップ', en: 'EXPLORE', icon: Map },

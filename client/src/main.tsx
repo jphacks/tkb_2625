@@ -12,6 +12,7 @@ import AtPassportCallback from './auth/AtPassportCallback'
 const EventsPage = lazy(() => import('./routes/EventsPage'))
 const RankingPage = lazy(() => import('./routes/RankingPage'))
 const EventLayout = lazy(() => import('./routes/event/EventLayout'))
+const EventDetailPage = lazy(() => import('./routes/event/EventDetailPage'))
 const CardsPage = lazy(() => import('./routes/event/CardsPage'))
 const TeamPage = lazy(() => import('./routes/event/TeamPage'))
 const MapPage = lazy(() => import('./routes/event/MapPage'))
@@ -39,7 +40,7 @@ createRoot(document.getElementById('root')!).render(
             <Route path="/ranking" element={page(<RankingPage />)} />
             {/* イベントは at-uri の did / rkey で指定する (lib/eventUri.ts) */}
             <Route path="/events/:did/:rkey" element={page(<EventLayout />)}>
-              <Route index element={<Navigate to="cards" replace />} />
+              <Route index element={page(<EventDetailPage />)} />
               <Route path="cards" element={page(<CardsPage />)} />
               <Route path="team" element={page(<TeamPage />)} />
               <Route path="map" element={page(<MapPage />)} />

@@ -80,6 +80,8 @@ export default function EventLayout() {
     return () => clearTimeout(timer);
   }, [derived.waiting, submissions.loading, submissions.updatedAt]); // retry は毎回作り直される関数なので依存に含めない
 
+  if (event.errorCode === 'EventNotFound') return <main className={empty}><h1>イベントが見つかりません</h1><p role="alert">指定されたイベントは存在しないか、削除されています。</p><Link className={button} to="/events">イベント一覧へ</Link></main>;
+
   if (event.loading || checkpoints.loading) return <main className={empty} role="status"><Compass size={32}/><p>大会データを読み込んでいます…</p></main>;
   if (!event.data || !checkpoints.data) return <main className={empty}><h1>大会データを取得できませんでした</h1><p role="alert">{event.error || checkpoints.error}</p><div className="flex flex-wrap gap-2.5"><button className={buttonPrimary} onClick={() => { if (event.error) event.retry(); if (checkpoints.error) checkpoints.retry(); }}>再試行する</button><Link className={button} to="/events">イベント一覧へ</Link></div></main>;
 
