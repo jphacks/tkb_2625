@@ -174,8 +174,8 @@ export function deleteRecord(collection: string, uri: string): void {
 				tx.delete(submitsTable).where(eq(submitsTable.eventUri, uri)).run();
 				tx.delete(eventsTable).where(eq(eventsTable.uri, uri)).run();
                 tx.delete(checkpointsTable).where(eq(checkpointsTable.eventUri, uri)).run();
-                tx.delete(teamsTable).where(eq(teamsTable.eventUri, uri)).run();
                 tx.delete(teamMembersTable).where(eq(teamMembersTable.eventUri, uri)).run();
+                tx.delete(teamsTable).where(eq(teamsTable.eventUri, uri)).run();
 				break;
 			case r.checkpoint.$nsid:
 				tx.delete(submitsTable).where(eq(submitsTable.checkpointUri, uri)).run();
