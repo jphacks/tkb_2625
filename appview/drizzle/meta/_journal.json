@@ -8,6 +8,41 @@
       "when": 1792797910588,
       "tag": "0000_sloppy_silver_fox",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "6",
+      "when": 1792828558854,
+      "tag": "0001_bright_baron_zemo",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1792832167830,
+      "tag": "0002_known_yellow_claw",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "6",
+      "when": 1792833051512,
+      "tag": "0003_familiar_jasper_sitwell",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "6",
+      "when": 1792833542481,
+      "tag": "0004_dazzling_doctor_strange",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "6",
+      "when": 1792833546970,
+      "tag": "0005_sparkling_franklin_storm",
+      "breakpoints": true
     }
   ]
 }

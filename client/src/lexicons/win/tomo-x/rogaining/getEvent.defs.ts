@@ -15,12 +15,12 @@ export const $params = /*#__PURE__*/ l.params({"event":/*#__PURE__*/ l.string({"
 
 export type $Params = l.InferOutput<typeof $params>;
 
-export const $output = /*#__PURE__*/ l.jsonPayload({"event":/*#__PURE__*/ l.ref<RogainingDefs.EventView>((() => RogainingDefs.eventView) as any)});
+export const $output = /*#__PURE__*/ l.jsonPayload({"event":/*#__PURE__*/ l.ref<RogainingDefs.EventView>((() => RogainingDefs.eventView) as any),"teams":/*#__PURE__*/ l.array(/*#__PURE__*/ l.ref<RogainingDefs.TeamView>((() => RogainingDefs.teamView) as any), )});
 
 export type $Output<B = l.BinaryData> = l.InferPayload<typeof $output, B>;
 export type $OutputBody<B = l.BinaryData> = l.InferPayloadBody<typeof $output, B>;
 
-/** Get the metadata of an event. */
+/** Get the metadata of an event, including its participating teams. */
 const main = /*#__PURE__*/ l.query($nsid, $params, $output, ["EventNotFound"]);
 
 export { main };

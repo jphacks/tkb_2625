@@ -8,12 +8,18 @@ importers:
 
   .:
     dependencies:
+      '@atproto/crypto':
+        specifier: ^0.5.7
+        version: 0.5.7
+      '@atproto/identity':
+        specifier: ^0.5.20
+        version: 0.5.20
       '@atproto/lexicon':
         specifier: ^0.7.17
         version: 0.7.17
       '@evex-dev/xrpc-hono':
-        specifier: ^2.1.0
-        version: 2.1.0
+        specifier: ^2.1.1
+        version: 2.1.1
       '@hono/node-server':
         specifier: ^2.1.3
         version: 2.1.5(hono@4.13.13)
@@ -48,8 +54,28 @@ importers:
 
 packages:
 
+  '@atproto-labs/fetch-node@0.4.3':
+    resolution: {integrity: sha512-qENUCoXKKNegxin34IpFxNd8yRijTfHq9FEoAVk7ZSciedstUJrVbt4CbdGLkn1t5gcZUH+Csct+MTAEQzvNbA==}
+    engines: {node: '>=22'}
+
+  '@atproto-labs/fetch@0.4.0':
+    resolution: {integrity: sha512-9HEcZuCU4nWAzV3XZ7nwbDPdV8tbhICzyYeyE5SPHTPuuKS6C3i5WOdwGP1diCCUaYF3Vadw5ArVlQPtXnn73w==}
+    engines: {node: '>=22'}
+
+  '@atproto-labs/pipe@0.2.4':
+    resolution: {integrity: sha512-n67jCcrC+ouAeO10cWkpPzzLMlDi/lDCU30Us+LGqhOPhT6c4t5ASdBLQi9W3jUQtRzQBt3G9zipF+xKWNvVbw==}
+    engines: {node: '>=22'}
+
   '@atproto/common-web@0.5.15':
     resolution: {integrity: sha512-1u/30RbRtF8h69soQFldCiYmvv90KIG38MvZyFYBnUn8ygQxE3TRL2SDU87hJeU5mSXySgAMcJc4GE7m/kZK/A==}
+    engines: {node: '>=22'}
+
+  '@atproto/crypto@0.5.7':
+    resolution: {integrity: sha512-r3uizKlzcBVRJ4mQMXlsRVZMSfAcZ9tr/dijnJ95C1aNGvV5k9bQ+Hvu6OLnwsnVTISzYRkgAfJCDNLCrOBilw==}
+    engines: {node: '>=22'}
+
+  '@atproto/identity@0.5.20':
+    resolution: {integrity: sha512-zjhGn+nG6LD2r9F4dPU17KfU3d6YfOZi1uDcVViOAftdKgEQZsZEX4XmmHU5KzOVJFJwk50JtLwO/s33W5CTmQ==}
     engines: {node: '>=22'}
 
   '@atproto/lex-cbor@0.1.7':
@@ -531,8 +557,8 @@ packages:
     cpu: [x64]
     os: [win32]
 
-  '@evex-dev/xrpc-hono@2.1.0':
-    resolution: {integrity: sha512-TmdvCFUWu3aFxFcDk0qvZplE05uXNSpbZeI2JpsRRTzVHcs6ZDxVGHAMqIj+GW3TFy6/iw+w3NrPPzV+efmC2g==}
+  '@evex-dev/xrpc-hono@2.1.1':
+    resolution: {integrity: sha512-x+QWGlexrkF7Q2GXgWYtZmr2urIoUgvdFhoriHExLu/tCLUfULxdgi+G10SAJ94BsFiW/bFxGtiSlAgaVu5VEA==}
     hasBin: true
 
   '@hono/node-server@2.1.5':
@@ -540,6 +566,14 @@ packages:
     engines: {node: '>=20'}
     peerDependencies:
       hono: ^4 || ^5.0.0-0
+
+  '@noble/curves@1.9.7':
+    resolution: {integrity: sha512-gbKGcRUYIjA3/zCCNaWDciTMFI0dCkvou3TL8Zmy5Nc7sJ47a0jtOeZoTaMxkuqRo9cRhjOdZJXegxYE5FN/xw==}
+    engines: {node: ^14.21.3 || >=16}
+
+  '@noble/hashes@1.8.0':
+    resolution: {integrity: sha512-jCs9ldd7NwzpgXDIf6P3+NrHh9/sD6CQdxHyjQI+h/6rDNo88ypBxxz45UDuZHz9r3tNz7N/VInSVoVdtXEI4A==}
+    engines: {node: ^14.21.3 || >=16}
 
   '@ts-morph/common@0.28.1':
     resolution: {integrity: sha512-W74iWf7ILp1ZKNYXY5qbddNaml7e9Sedv5lvU1V8lftlitkc9Pq1A+jlH23ltDgWYeZFFEqGCD1Ies9hqu3O+g==}
@@ -846,6 +880,10 @@ packages:
   inherits@2.0.4:
     resolution: {integrity: sha512-k/vGaX4/Yla3WzyMCvTQOXYeIHvqOKtnqBduzTHpzpQZzAskKMhZ2K+EnBiSM9zGSoIFeMpXKxa4dYeZIQqewQ==}
 
+  ipaddr.js@2.5.0:
+    resolution: {integrity: sha512-aq+t5NAc+cS6rZQQVWC2x98CPqGtKKTMDd4Gaodv0wShnItdKg/51djkGJ1hqH+Oy0ivDftCbSLCQob8zso01w==}
+    engines: {node: '>= 10'}
+
   iso-datestring-validator@2.2.2:
     resolution: {integrity: sha512-yLEMkBbLZTlVQqOnQ4FiMujR6T4DEcCb1xizmvXS+OxuhwcbtynoosRzdMA69zZCShCNAbi+gJ71FxZBBXx1SA==}
 
@@ -916,8 +954,23 @@ packages:
     engines: {node: '>=16.20.0'}
     hasBin: true
 
+  uint8arrays@5.1.1:
+    resolution: {integrity: sha512-9muQwa4wZG4dKi9gMAIBtnk2Pw87SRpvWTH6lOGm19V2Uqxr4uomUf2PGqPnWc+qs06sN8owUU4jfcoWOcfwVQ==}
+
   undici-types@8.9.0:
     resolution: {integrity: sha512-KTDyRTYX8sWmKXAikPHHSyc63CRPETMctyjKFupcC6OBLXT3xsN0e9aF7m+mIXutFWpUXuedtowG7iLOzp0kQg==}
+
+  undici@6.29.1:
+    resolution: {integrity: sha512-EvRlUt/QqAEvXdQeRMYUfwOQsfzpDztykrG2owGEE/rBOBoYv9uF39ZzsNDh4lTFHhTr2XOZjKkYgueD12ZmGA==}
+    engines: {node: '>=18.17'}
+
+  undici@7.30.1:
+    resolution: {integrity: sha512-03KrMbjIFDWQR5RNPrSw3bd1r12JpyFQl9/yxjUbJtqkjmllqC5lFjZh6ujeuJCKr8EOQvRW872Oy/az+nLYxg==}
+    engines: {node: '>=20.18.1'}
+
+  undici@8.12.3:
+    resolution: {integrity: sha512-+fdndUTwBP86cVjihTp21hZHo7d6oj1c/47XPA3lL8mM0XHs+C4EkcjmgRsFnFk2f/UONGDy9ItBItmXsLOQHw==}
+    engines: {node: '>=22.19.0'}
 
   unicode-segmenter@0.14.5:
     resolution: {integrity: sha512-jHGmj2LUuqDcX3hqY12Ql+uhUTn8huuxNZGq7GvtF6bSybzH3aFgedYu/KTzQStEgt1Ra2F3HxadNXsNjb3m3g==}
@@ -933,12 +986,39 @@ packages:
 
 snapshots:
 
+  '@atproto-labs/fetch-node@0.4.3':
+    dependencies:
+      '@atproto-labs/fetch': 0.4.0
+      '@atproto-labs/pipe': 0.2.4
+      ipaddr.js: 2.5.0
+      undici_v6: undici@6.29.1
+      undici_v7: undici@7.30.1
+      undici_v8: undici@8.12.3
+
+  '@atproto-labs/fetch@0.4.0':
+    dependencies:
+      '@atproto-labs/pipe': 0.2.4
+
+  '@atproto-labs/pipe@0.2.4': {}
+
   '@atproto/common-web@0.5.15':
     dependencies:
       '@atproto/lex-data': 0.1.8
       '@atproto/lex-json': 0.1.7
       '@atproto/syntax': 0.7.7
       zod: 3.25.76
+
+  '@atproto/crypto@0.5.7':
+    dependencies:
+      '@noble/curves': 1.9.7
+      '@noble/hashes': 1.8.0
+      uint8arrays: 5.1.1
+
+  '@atproto/identity@0.5.20':
+    dependencies:
+      '@atproto-labs/fetch-node': 0.4.3
+      '@atproto/common-web': 0.5.15
+      '@atproto/crypto': 0.5.7
 
   '@atproto/lex-cbor@0.1.7':
     dependencies:
@@ -1208,7 +1288,7 @@ snapshots:
   '@esbuild/win32-x64@0.28.2':
     optional: true
 
-  '@evex-dev/xrpc-hono@2.1.0':
+  '@evex-dev/xrpc-hono@2.1.1':
     dependencies:
       '@atproto/lex-cbor': 0.1.7
       '@atproto/lexicon': 0.7.17
@@ -1226,6 +1306,12 @@ snapshots:
   '@hono/node-server@2.1.5(hono@4.13.13)':
     dependencies:
       hono: 4.13.13
+
+  '@noble/curves@1.9.7':
+    dependencies:
+      '@noble/hashes': 1.8.0
+
+  '@noble/hashes@1.8.0': {}
 
   '@ts-morph/common@0.28.1':
     dependencies:
@@ -1441,6 +1527,8 @@ snapshots:
 
   inherits@2.0.4: {}
 
+  ipaddr.js@2.5.0: {}
+
   iso-datestring-validator@2.2.2: {}
 
   minimatch@10.2.6:
@@ -1515,7 +1603,17 @@ snapshots:
       '@typescript/typescript-win32-arm64': 7.0.2
       '@typescript/typescript-win32-x64': 7.0.2
 
+  uint8arrays@5.1.1:
+    dependencies:
+      multiformats: 13.4.2
+
   undici-types@8.9.0: {}
+
+  undici@6.29.1: {}
+
+  undici@7.30.1: {}
+
+  undici@8.12.3: {}
 
   unicode-segmenter@0.14.5: {}
 

@@ -6,7 +6,7 @@
       "type": "record",
       "record": {
         "type": "object",
-        "required": ["event", "name", "point", "location", "createdAt"],
+        "required": ["event", "name", "point", "location", "createdAt","image","internalImages"],
         "properties": {
           "name": { "type": "string", "maxLength": 1000, "maxGraphemes": 100 },
           "event": {
@@ -34,6 +34,22 @@
             "default": 30,
             "minimum": 1,
             "description": "Allowed distance from the location for a valid submission."
+          },
+          "image": {
+            "type": "blob",
+            "accept": ["image/png", "image/jpeg", "image/webp"],
+            "maxSize": 2000000,
+            "description": "Image of the checkpoint."
+          },
+          "internalImages": {
+            "type": "array",
+            "items": {
+              "type": "blob",
+              "accept": ["image/png", "image/jpeg", "image/webp"],
+              "maxSize": 2000000
+            },
+            "maxLength": 10,
+            "description": "Internal images of the checkpoint, not shown to participants."
           }
         }
       },
