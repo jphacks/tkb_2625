@@ -1,0 +1,41 @@
+{
+  "id": "win.tomo-x.rogaining.getMe",
+  "defs": {
+    "main": {
+      "type": "query",
+      "output": {
+        "schema": {
+          "type": "object",
+          "required": ["participating", "organizing"],
+          "properties": {
+            "participating": {
+              "type": "array",
+              "items": { "ref": "#participation", "type": "ref" },
+              "description": "Events the requester participates in as a team member, with their team."
+            },
+            "organizing": {
+              "type": "array",
+              "items": {
+                "ref": "win.tomo-x.rogaining.defs#eventView",
+                "type": "ref"
+              },
+              "description": "Events authored by the requester."
+            }
+          }
+        },
+        "encoding": "application/json"
+      },
+      "description": "Get the events related to the requesting account. Requires auth. Each list is ordered by event start time, newest first."
+    },
+    "participation": {
+      "type": "object",
+      "required": ["event", "team"],
+      "properties": {
+        "event": { "ref": "win.tomo-x.rogaining.defs#eventView", "type": "ref" },
+        "team": { "ref": "win.tomo-x.rogaining.defs#teamView", "type": "ref" }
+      }
+    }
+  },
+  "$type": "com.atproto.lexicon.schema",
+  "lexicon": 1
+}

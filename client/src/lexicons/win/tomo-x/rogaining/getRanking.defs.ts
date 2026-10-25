@@ -20,7 +20,7 @@ export const $output = /*#__PURE__*/ l.jsonPayload({"ranking":/*#__PURE__*/ l.ar
 export type $Output<B = l.BinaryData> = l.InferPayload<typeof $output, B>;
 export type $OutputBody<B = l.BinaryData> = l.InferPayloadBody<typeof $output, B>;
 
-/** Get the leaderboard of an event, computed from approved submissions (each checkpoint counts once per participant). */
+/** Get the leaderboard of an event, computed from approved submissions (each checkpoint counts once per team). */
 const main = /*#__PURE__*/ l.query($nsid, $params, $output, ["EventNotFound"]);
 
 export { main };

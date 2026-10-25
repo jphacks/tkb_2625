@@ -12,7 +12,7 @@ type $nsid = typeof $nsid;
 
 export { $nsid };
 
-/** A participant's proof of reaching a checkpoint. */
+/** A participant's proof of reaching a checkpoint. Ignored unless the author is a member of a team in the event. Results are shared within the team. */
 type Main = { $type: "win.tomo-x.rogaining.submit";
 
   /**
@@ -42,7 +42,7 @@ type Main = { $type: "win.tomo-x.rogaining.submit";
 
 export type { Main };
 
-/** A participant's proof of reaching a checkpoint. */
+/** A participant's proof of reaching a checkpoint. Ignored unless the author is a member of a team in the event. Results are shared within the team. */
 const main = /*#__PURE__*/ l.record<"tid", Main>("tid", $nsid, /*#__PURE__*/ l.object({"event":/*#__PURE__*/ l.ref<RepoStrongRef.Main>((() => RepoStrongRef.main) as any),"photo":/*#__PURE__*/ l.blob({"accept":["image/png","image/jpeg","image/webp"],"maxSize":2000000}),"location":/*#__PURE__*/ l.ref<RogainingDefs.Location>((() => RogainingDefs.location) as any),"createdAt":/*#__PURE__*/ l.string({"format":"datetime"}),"checkpoint":/*#__PURE__*/ l.ref<RepoStrongRef.Main>((() => RepoStrongRef.main) as any)}));
 
 export { main };

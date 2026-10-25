@@ -11,16 +11,16 @@ type $nsid = typeof $nsid;
 
 export { $nsid };
 
-export const $params = /*#__PURE__*/ l.params({"event":/*#__PURE__*/ l.string({"format":"at-uri"}),"status":/*#__PURE__*/ l.optional(/*#__PURE__*/ l.string<{"knownValues":["pending","approved"]}>()),"checkpoint":/*#__PURE__*/ l.optional(/*#__PURE__*/ l.string({"format":"at-uri"})),"participant":/*#__PURE__*/ l.optional(/*#__PURE__*/ l.string({"format":"at-identifier"}))});
+export const $params = /*#__PURE__*/ l.params({"event":/*#__PURE__*/ l.string({"format":"at-uri"}),"checkpoint":/*#__PURE__*/ l.optional(/*#__PURE__*/ l.string({"format":"at-uri"})),"participant":/*#__PURE__*/ l.optional(/*#__PURE__*/ l.string({"format":"did"})),"limit":/*#__PURE__*/ l.optional(/*#__PURE__*/ l.withDefault(/*#__PURE__*/ l.integer({"minimum":1,"maximum":100}), 50)),"cursor":/*#__PURE__*/ l.optional(/*#__PURE__*/ l.string())});
 
 export type $Params = l.InferOutput<typeof $params>;
 
-export const $output = /*#__PURE__*/ l.jsonPayload({"submissions":/*#__PURE__*/ l.array(/*#__PURE__*/ l.ref<RogainingDefs.SubmissionView>((() => RogainingDefs.submissionView) as any), )});
+export const $output = /*#__PURE__*/ l.jsonPayload({"cursor":/*#__PURE__*/ l.optional(/*#__PURE__*/ l.string()),"submissions":/*#__PURE__*/ l.array(/*#__PURE__*/ l.ref<RogainingDefs.SubmissionView>((() => RogainingDefs.submissionView) as any), )});
 
 export type $Output<B = l.BinaryData> = l.InferPayload<typeof $output, B>;
 export type $OutputBody<B = l.BinaryData> = l.InferPayloadBody<typeof $output, B>;
 
-/** List submissions for an event, newest first. Used by participants to see their own progress and by approvers to review pending ones. */
+/** List submissions for an event, newest first. The event's author and approver see every team's submissions; a participant sees only their own team's. Anyone else gets an empty list. */
 const main = /*#__PURE__*/ l.query($nsid, $params, $output, ["EventNotFound"]);
 
 export { main };

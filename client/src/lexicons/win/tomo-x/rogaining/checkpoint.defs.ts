@@ -28,12 +28,22 @@ type Main = { $type: "win.tomo-x.rogaining.checkpoint";"name":string;
   /**
    * Allowed distance from the location for a valid submission.
    */
-  "radiusMeters"?:number };
+  "radiusMeters"?:number;
+
+  /**
+   * Image of the checkpoint.
+   */
+  "image":l.BlobRef;
+
+  /**
+   * Internal images of the checkpoint, not shown to participants.
+   */
+  "internalImages":(l.BlobRef)[] };
 
 export type { Main };
 
 /** A checkpoint belonging to a rogaining event. */
-const main = /*#__PURE__*/ l.record<"tid", Main>("tid", $nsid, /*#__PURE__*/ l.object({"name":/*#__PURE__*/ l.string({"maxLength":1000,"maxGraphemes":100}),"event":/*#__PURE__*/ l.ref<RepoStrongRef.Main>((() => RepoStrongRef.main) as any),"point":/*#__PURE__*/ l.integer({"minimum":0}),"location":/*#__PURE__*/ l.ref<RogainingDefs.Location>((() => RogainingDefs.location) as any),"createdAt":/*#__PURE__*/ l.string({"format":"datetime"}),"description":/*#__PURE__*/ l.optional(/*#__PURE__*/ l.string({"maxLength":10000,"maxGraphemes":1000})),"radiusMeters":/*#__PURE__*/ l.optional(/*#__PURE__*/ l.withDefault(/*#__PURE__*/ l.integer({"minimum":1}), 30))}));
+const main = /*#__PURE__*/ l.record<"tid", Main>("tid", $nsid, /*#__PURE__*/ l.object({"name":/*#__PURE__*/ l.string({"maxLength":1000,"maxGraphemes":100}),"event":/*#__PURE__*/ l.ref<RepoStrongRef.Main>((() => RepoStrongRef.main) as any),"point":/*#__PURE__*/ l.integer({"minimum":0}),"location":/*#__PURE__*/ l.ref<RogainingDefs.Location>((() => RogainingDefs.location) as any),"createdAt":/*#__PURE__*/ l.string({"format":"datetime"}),"description":/*#__PURE__*/ l.optional(/*#__PURE__*/ l.string({"maxLength":10000,"maxGraphemes":1000})),"radiusMeters":/*#__PURE__*/ l.optional(/*#__PURE__*/ l.withDefault(/*#__PURE__*/ l.integer({"minimum":1}), 30)),"image":/*#__PURE__*/ l.blob({"accept":["image/png","image/jpeg","image/webp"],"maxSize":2000000}),"internalImages":/*#__PURE__*/ l.array(/*#__PURE__*/ l.blob({"accept":["image/png","image/jpeg","image/webp"],"maxSize":2000000}), {"maxLength":10})}));
 
 export { main };
 

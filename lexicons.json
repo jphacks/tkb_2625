@@ -3,13 +3,18 @@
   "lexicons": [
     "win.tomo-x.rogaining.approve",
     "win.tomo-x.rogaining.checkpoint",
+    "win.tomo-x.rogaining.defs",
     "win.tomo-x.rogaining.event",
     "win.tomo-x.rogaining.getCheckpoints",
     "win.tomo-x.rogaining.getEvent",
+    "win.tomo-x.rogaining.getMe",
     "win.tomo-x.rogaining.getRanking",
+    "win.tomo-x.rogaining.getTeam",
     "win.tomo-x.rogaining.listEvents",
     "win.tomo-x.rogaining.listSubmissions",
-    "win.tomo-x.rogaining.submit"
+    "win.tomo-x.rogaining.reject",
+    "win.tomo-x.rogaining.submit",
+    "win.tomo-x.rogaining.team"
   ],
   "resolutions": {
     "app.bsky.actor.defs": {
@@ -94,7 +99,7 @@
     },
     "win.tomo-x.rogaining.defs": {
       "uri": "at://did:plc:qcwvyds5tixmcwkwrg3hxgxd/com.atproto.lexicon.schema/win.tomo-x.rogaining.defs",
-      "cid": "bafyreiggkrwlltsuroeudata6t6atrt3egmrporui72xnxupmgmcmehcue"
+      "cid": "bafyreibvrzpirdg65sshdw27qxczquse4lwtukueu4lvprfkhwr6nmzdtm"
     },
     "win.tomo-x.rogaining.event": {
       "uri": "at://did:plc:qcwvyds5tixmcwkwrg3hxgxd/com.atproto.lexicon.schema/win.tomo-x.rogaining.event",
@@ -106,11 +111,15 @@
     },
     "win.tomo-x.rogaining.getEvent": {
       "uri": "at://did:plc:qcwvyds5tixmcwkwrg3hxgxd/com.atproto.lexicon.schema/win.tomo-x.rogaining.getEvent",
-      "cid": "bafyreiahskgeq26gizhz7a7w4ok2r7sooxm3fa6xotkgm47xhqde5izonu"
+      "cid": "bafyreid633ojkh4jf3ahi43oua7fv67hlu3wjv465mi3z6f3jkag6tsicy"
     },
     "win.tomo-x.rogaining.getRanking": {
       "uri": "at://did:plc:qcwvyds5tixmcwkwrg3hxgxd/com.atproto.lexicon.schema/win.tomo-x.rogaining.getRanking",
       "cid": "bafyreigbwxgyfe4s6mqfiwh5r4uhulh76emjtl3cwoaaigxdstgsygenp4"
+    },
+    "win.tomo-x.rogaining.getTeam": {
+      "uri": "at://did:plc:qcwvyds5tixmcwkwrg3hxgxd/com.atproto.lexicon.schema/win.tomo-x.rogaining.getTeam",
+      "cid": "bafyreigfmtukd62dbu4qu4chpcbvp3taulaajdsa4wixult3yze4nkxuei"
     },
     "win.tomo-x.rogaining.listEvents": {
       "uri": "at://did:plc:qcwvyds5tixmcwkwrg3hxgxd/com.atproto.lexicon.schema/win.tomo-x.rogaining.listEvents",
@@ -123,6 +132,10 @@
     "win.tomo-x.rogaining.submit": {
       "uri": "at://did:plc:qcwvyds5tixmcwkwrg3hxgxd/com.atproto.lexicon.schema/win.tomo-x.rogaining.submit",
       "cid": "bafyreidf6vdit7stresclz4nj4xfmcblklh2q3vk7zb3zfq6lsde7qjema"
+    },
+    "win.tomo-x.rogaining.team": {
+      "uri": "at://did:plc:qcwvyds5tixmcwkwrg3hxgxd/com.atproto.lexicon.schema/win.tomo-x.rogaining.team",
+      "cid": "bafyreigtdz2cxm2kputpbynzbo4ccpha4dzy3bbcd4wuk52nxpjbfx6rqe"
     }
   }
 }

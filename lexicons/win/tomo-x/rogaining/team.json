@@ -1,0 +1,32 @@
+{
+  "id": "win.tomo-x.rogaining.team",
+  "defs": {
+    "main": {
+      "key": "tid",
+      "type": "record",
+      "record": {
+        "type": "object",
+        "required": ["event", "name", "members", "createdAt"],
+        "properties": {
+          "name": { "type": "string", "maxLength": 1000, "maxGraphemes": 100 },
+          "event": {
+            "ref": "com.atproto.repo.strongRef",
+            "type": "ref",
+            "description": "The event this team participates in."
+          },
+          "members": {
+            "type": "array",
+            "items": { "type": "string", "format": "did" },
+            "maxLength": 100,
+            "minLength": 1,
+            "description": "DIDs of the team members."
+          },
+          "createdAt": { "type": "string", "format": "datetime" }
+        }
+      },
+      "description": "A team participating in a rogaining event. Created by the event organizer (the event's author), not by the participants themselves. Only valid when created by the DID that authored the referenced event. If a DID is a member of several teams in the same event, only the earliest created team (by createdAt) counts."
+    }
+  },
+  "$type": "com.atproto.lexicon.schema",
+  "lexicon": 1
+}

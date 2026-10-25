@@ -10,6 +10,27 @@
       },
       "description": "Coordinates as decimal degrees encoded as strings (lexicon has no float type), e.g. \"35.681236\"."
     },
+    "teamView": {
+      "type": "object",
+      "required": ["uri", "cid", "record", "members", "indexedAt"],
+      "properties": {
+        "cid": { "type": "string", "format": "cid" },
+        "uri": { "type": "string", "format": "at-uri" },
+        "record": {
+          "type": "unknown",
+          "description": "The win.tomo-x.rogaining.team record."
+        },
+        "members": {
+          "type": "array",
+          "items": {
+            "ref": "app.bsky.actor.defs#profileViewBasic",
+            "type": "ref"
+          },
+          "description": "Profiles of the team members."
+        },
+        "indexedAt": { "type": "string", "format": "datetime" }
+      }
+    },
     "eventView": {
       "type": "object",
       "required": ["uri", "cid", "author", "record", "indexedAt"],
@@ -30,21 +51,23 @@
         },
         "imageUrl": { "type": "string", "format": "uri" },
         "indexedAt": { "type": "string", "format": "datetime" },
+        "teamCount": { "type": "integer", "minimum": 0 },
         "checkpointCount": { "type": "integer", "minimum": 0 },
         "participantCount": { "type": "integer", "minimum": 0 }
       }
     },
     "rankingEntry": {
       "type": "object",
-      "required": ["participant", "rank", "totalPoints", "approvedCount"],
+      "required": ["team", "rank", "totalPoints", "approvedCount"],
       "properties": {
         "rank": { "type": "integer", "minimum": 1 },
-        "participant": {
-          "ref": "app.bsky.actor.defs#profileViewBasic",
-          "type": "ref"
-        },
+        "team": { "ref": "win.tomo-x.rogaining.defs#teamView", "type": "ref" },
         "totalPoints": { "type": "integer", "minimum": 0 },
-        "approvedCount": { "type": "integer", "minimum": 0 }
+        "approvedCount": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Number of distinct checkpoints with an approved submission."
+        }
       }
     },
     "checkpointView": {
@@ -57,12 +80,31 @@
           "type": "unknown",
           "description": "The win.tomo-x.rogaining.checkpoint record."
         },
-        "indexedAt": { "type": "string", "format": "datetime" }
+        "indexedAt": { "type": "string", "format": "datetime" },
+        "imageUrl": {
+          "type": "string",
+          "format": "uri",
+          "description": "URL of the checkpoint image."
+        },
+        "internalImageUrls": {
+          "type": "array",
+          "items": { "type": "string", "format": "uri" },
+          "maxLength": 10,
+          "description": "URLs of the internal images. Only returned to the event's author."
+        }
       }
     },
     "submissionView": {
       "type": "object",
-      "required": ["uri", "cid", "author", "record", "status", "indexedAt"],
+      "required": [
+        "uri",
+        "cid",
+        "author",
+        "team",
+        "record",
+        "status",
+        "indexedAt"
+      ],
       "properties": {
         "cid": { "type": "string", "format": "cid" },
         "uri": { "type": "string", "format": "at-uri" },
@@ -70,14 +112,19 @@
           "ref": "app.bsky.actor.defs#profileViewBasic",
           "type": "ref"
         },
+        "team": {
+          "type": "string",
+          "format": "at-uri",
+          "description": "The team the author belongs to in this event."
+        },
         "record": {
           "type": "unknown",
           "description": "The win.tomo-x.rogaining.submit record."
         },
         "status": {
           "type": "string",
-          "description": "approved when a valid approve record by the event's approver exists.",
-          "knownValues": ["pending", "approved"]
+          "description": "approved when a valid approve record by the event's approver exists, otherwise rejected when a valid reject record by the approver exists, otherwise pending. Only approved submissions count for the ranking.",
+          "knownValues": ["pending", "approved", "rejected"]
         },
         "photoUrl": { "type": "string", "format": "uri" },
         "indexedAt": { "type": "string", "format": "datetime" },
@@ -85,6 +132,24 @@
           "type": "string",
           "format": "at-uri",
           "description": "AT-URI of the approve record, if approved."
+        },
+        "rejectionUri": {
+          "type": "string",
+          "format": "at-uri",
+          "description": "AT-URI of the reject record, if rejected by the approver."
+        },
+        "reason": {
+          "type": "string",
+          "description": "The reason of the approve or reject record that decided the status."
+        },
+        "distanceMeters": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Distance between the submitted location and the checkpoint, for the approver's review."
+        },
+        "withinEventPeriod": {
+          "type": "boolean",
+          "description": "Whether the submission's createdAt is between the event's startsAt and endsAt, for the approver's review."
         }
       }
     }

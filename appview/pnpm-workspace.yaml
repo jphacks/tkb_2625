@@ -2,4 +2,7 @@ onlyBuiltDependencies:
   - esbuild
 allowBuilds:
   better-sqlite3: true
+  core-js: false
   esbuild: true
+minimumReleaseAgeExclude:
+  - '@evex-dev/xrpc-hono@2.1.1'

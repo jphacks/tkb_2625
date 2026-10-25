@@ -9,6 +9,7 @@
           "type": "object",
           "required": ["submissions"],
           "properties": {
+            "cursor": { "type": "string" },
             "submissions": {
               "type": "array",
               "items": {
@@ -25,23 +26,18 @@
         "required": ["event"],
         "properties": {
           "event": { "type": "string", "format": "at-uri" },
-          "status": {
-            "type": "string",
-            "knownValues": ["pending", "approved"]
+          "checkpoint": { "type": "string", "format": "at-uri" },
+          "participant": { "type": "string", "format": "did" },
+          "limit": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 100,
+            "default": 50
           },
-          "checkpoint": {
-            "type": "string",
-            "format": "at-uri",
-            "description": "Only submissions for this checkpoint."
-          },
-          "participant": {
-            "type": "string",
-            "format": "at-identifier",
-            "description": "Only submissions by this account."
-          }
+          "cursor": { "type": "string" }
         }
       },
-      "description": "List submissions for an event, newest first. Used by participants to see their own progress and by approvers to review pending ones."
+      "description": "List submissions for an event, newest first. The event's author and approver see every team's submissions; a participant sees only their own team's. Anyone else gets an empty list."
     }
   },
   "$type": "com.atproto.lexicon.schema",

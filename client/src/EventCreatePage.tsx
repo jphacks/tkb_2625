@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import type { FormEvent } from 'react'
+import './event-create.css'
 
 type Session = { did: string; accessJwt: string; pds: string }
 const pdsDefault = 'https://bsky.social'

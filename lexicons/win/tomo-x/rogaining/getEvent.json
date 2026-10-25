@@ -7,11 +7,19 @@
       "output": {
         "schema": {
           "type": "object",
-          "required": ["event"],
+          "required": ["event", "teams"],
           "properties": {
             "event": {
               "ref": "win.tomo-x.rogaining.defs#eventView",
               "type": "ref"
+            },
+            "teams": {
+              "type": "array",
+              "items": {
+                "ref": "win.tomo-x.rogaining.defs#teamView",
+                "type": "ref"
+              },
+              "description": "Teams participating in the event."
             }
           }
         },
@@ -22,7 +30,7 @@
         "required": ["event"],
         "properties": { "event": { "type": "string", "format": "at-uri" } }
       },
-      "description": "Get the metadata of an event."
+      "description": "Get the metadata of an event, including its participating teams."
     }
   },
   "$type": "com.atproto.lexicon.schema",
