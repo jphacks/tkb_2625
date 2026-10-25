@@ -31,7 +31,7 @@ function EventRow({ event, now, did }: { event: EventView; now: number; did: str
   const dates = eventDates(event);
   const status = eventStatus(event, now);
   const ranking = `/ranking?${new URLSearchParams({ event: event.uri })}`;
-  const organizer = did !== undefined && (event.author.did === did || event.record.approver === did);
+  const organizer = did !== undefined && event.author.did === did;
   return <li className="flex items-center gap-3 border-b border-fg/10 py-2 max-sm:flex-wrap max-sm:gap-y-1">
     <EventCover key={event.imageUrl || ''} event={event}/>
     <div className="min-w-0 flex-1 max-sm:basis-[calc(100%-4.5rem)]">

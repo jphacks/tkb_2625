@@ -70,7 +70,7 @@ export default function CheckpointsPage() {
       await client.create(r.checkpoint, record);
     });
     if (!ok) return;
-    setNotice(`「${draft.name.trim()}」を登録しました。一覧への反映まで数秒かかることがあります。`);
+    setNotice(`「${draft.name.trim()}」を登録しました。`);
     setDraft(emptyDraft); setImage(null); setInternalImages([]); setSelected(null); setFormKey(k => k + 1);
     refresh('checkpoints', 'event');
   }
@@ -87,7 +87,7 @@ export default function CheckpointsPage() {
   }
 
   return <section>
-    {!isAuthor && <p className={errorPanel} role="alert">CPを登録・削除できるのはイベントの作成者（{event.author.handle ? `@${event.author.handle}` : event.author.did}）だけです。他のアカウントが作成したCPは無効になります。</p>}
+    {!isAuthor && <p className={errorPanel} role="alert">閲覧のみ（CPの編集は作成者 {event.author.handle ? `@${event.author.handle}` : event.author.did} のみ）</p>}
     {notice && <div className={noticeBar} role="status">{notice}<button className={iconButton} aria-label="通知を閉じる" onClick={() => setNotice('')}><X size={16}/></button></div>}
     {(error || formError) && <p className={errorPanel} role="alert">{error || formError}</p>}
     <div className="grid grid-cols-[300px_minmax(0,1fr)] items-start gap-3 max-md:grid-cols-1">

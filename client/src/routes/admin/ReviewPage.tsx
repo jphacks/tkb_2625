@@ -14,6 +14,11 @@ import type { CheckpointView, SubmissionView } from '../../lexicons/win/tomo-x/r
 import { atUriParts, useAdminEventContext } from './adminEventContext';
 
 type Decision = 'approved' | 'rejected';
+/** 自分が行った審査・取り消しと、その対象の審査レコード */
+type LocalChange = { decision: Decision | 'undone'; reviewUri: string };
+
+/** ステータスを決めている審査レコード */
+const decisiveReviewUri = (s: SubmissionView) => s.approvalUri ?? s.rejectionUri;
 
 const errorBox = cn(errorPanel);
 const placeholderBox = 'flex aspect-4/3 w-full items-center justify-center border border-dashed border-fg/30 bg-fg/5 text-[11px] text-fg/60';
@@ -27,52 +32,79 @@ const sectionHeading = 'mt-5 mb-2 flex min-h-9 items-center gap-2 border-b borde
 const count = 'text-[11px] font-normal text-fg/60';
 
 export default function ReviewPage() {
-  const { checkpoints, submissions, teams, isApprover, isAuthor, me, refresh } = useAdminEventContext();
+  const { event, checkpoints, submissions, teams, isAuthor, me, refresh } = useAdminEventContext();
+  const canReview = isAuthor;
   const client = useLexClient();
   const { run, error, pending: busy } = useAction();
   const [reasons, setReasons] = useState<Record<string, string>>({});
   const [notice, setNotice] = useState('');
   const [missingReason, setMissingReason] = useState('');
-  // appview に反映されるまでの間、審査済みの提出を審査待ちから外しておく
-  const [decided, setDecided] = useState<Record<string, Decision | 'undone'>>({});
+  // appview に反映されるまでの間、自分の審査結果を表示しておく
+  const [changes, setChanges] = useState<Record<string, LocalChange>>({});
 
   const checkpointOf = new Map(checkpoints.map((cp, i) => [cp.uri, { cp, index: i }]));
   const teamOf = new Map(teams.map(team => [team.uri, team]));
   const target = (s: SubmissionView) => checkpointOf.get(submissionCheckpointUri(s) ?? '');
   const isGoal = (s: SubmissionView) => { const found = target(s); return found ? checkpointIsGoal(found.cp) : false; };
-  const statusOf = (s: SubmissionView): CheckpointStatus => { const local = decided[s.uri]; return local === 'undone' ? 'pending' : local ?? submissionStatus(s); };
+  /** まだ appview に反映されていない自分の変更 */
+  const unreflected = (s: SubmissionView) => {
+    const change = changes[s.uri];
+    if (!change) return undefined;
+    const reflected = change.decision === 'undone' ? decisiveReviewUri(s) !== change.reviewUri : decisiveReviewUri(s) === change.reviewUri;
+    return reflected ? undefined : change;
+  };
+  // 取り消した後のステータスは古い審査が残っているかで変わるので、反映されるまで今のステータスのままにする
+  const statusOf = (s: SubmissionView): CheckpointStatus => { const change = unreflected(s); return change && change.decision !== 'undone' ? change.decision : submissionStatus(s); };
+  /** 審査者が主催者か (主催者の審査は承認者の審査より優先される) */
+  const reviewedByAuthor = (s: SubmissionView) => { const uri = decisiveReviewUri(s); return uri !== undefined && atUriParts(uri).repo === event.author.did; };
   const sorted = [...submissions].sort((a, b) => Date.parse(submissionCreatedAt(a)) - Date.parse(submissionCreatedAt(b)));
   const reviewable = sorted.filter(s => !isGoal(s));
   const waiting = reviewable.filter(s => statusOf(s) === 'pending');
   const reviewed = reviewable.filter(s => statusOf(s) !== 'pending').reverse();
   const goals = sorted.filter(isGoal).reverse();
 
+  // 同じアカウントの審査は新しいものが優先されるので、変更は新しいレコードを作るだけでよい
+  async function submitReview(s: SubmissionView, decision: Decision, reason: string) {
+    let reviewUri = '';
+    const ok = await run(async () => {
+      const record = { submit: { uri: s.uri, cid: s.cid }, ...(reason ? { reason } : {}), createdAt: currentDatetimeString() };
+      ({ uri: reviewUri } = decision === 'approved' ? await client.create(r.approve, record) : await client.create(r.reject, record));
+    });
+    if (!ok) return false;
+    setChanges(previous => ({ ...previous, [s.uri]: { decision, reviewUri } }));
+    refresh('submissions');
+    return true;
+  }
   async function review(s: SubmissionView, decision: Decision) {
     const reason = (reasons[s.uri] ?? '').trim();
     setMissingReason(decision === 'rejected' && !reason ? s.uri : '');
     if (decision === 'rejected' && !reason) return;
-    const ok = await run(async () => {
-      const record = { submit: { uri: s.uri, cid: s.cid }, ...(reason ? { reason } : {}), createdAt: currentDatetimeString() };
-      if (decision === 'approved') await client.create(r.approve, record);
-      else await client.create(r.reject, record);
-    });
-    if (!ok) return;
-    setDecided(previous => ({ ...previous, [s.uri]: decision }));
-    setNotice(decision === 'approved' ? '承認しました。ランキングへの反映まで数秒かかることがあります。' : '不承認にしました。参加者は再提出できます。');
-    refresh('submissions');
+    if (!await submitReview(s, decision, reason)) return;
+    setNotice(decision === 'approved' ? '承認しました。' : '不承認にしました。参加者は再提出できます。');
+  }
+  async function change(s: SubmissionView, decision: Decision) {
+    let reason = '';
+    if (decision === 'rejected') {
+      const input = window.prompt('不承認に変更します。理由を入力してください（参加者に表示されます）');
+      if (input === null) return;
+      reason = input.trim();
+      if (!reason) { window.alert('不承認にするには理由が必要です。'); return; }
+    } else if (!window.confirm('承認に変更しますか？')) return;
+    if (!await submitReview(s, decision, reason)) return;
+    setNotice(decision === 'approved' ? '承認に変更しました。' : '不承認に変更しました。参加者は再提出できます。');
   }
   async function undo(s: SubmissionView) {
-    const reviewUri = s.approvalUri ?? s.rejectionUri;
+    const reviewUri = decisiveReviewUri(s);
     if (!reviewUri) return;
     const { repo, rkey } = atUriParts(reviewUri);
-    if (repo !== me) { window.alert('他のアカウントが作成した審査結果は取り消せません。'); return; }
-    if (!window.confirm('この審査結果を取り消して、審査待ちに戻しますか？')) return;
+    if (repo !== me) return;
+    if (!window.confirm('この審査結果を取り消しますか？\n以前の審査結果があればそれに戻り、なければ審査待ちに戻ります。')) return;
     const ok = await run(async () => {
       if (s.approvalUri) await client.delete(r.approve, { rkey });
       else await client.delete(r.reject, { rkey });
     });
     if (!ok) return;
-    setDecided(previous => ({ ...previous, [s.uri]: 'undone' }));
+    setChanges(previous => ({ ...previous, [s.uri]: { decision: 'undone', reviewUri } }));
     setNotice('審査結果を取り消しました。');
     refresh('submissions');
   }
@@ -84,11 +116,11 @@ export default function ReviewPage() {
       <span>審査待ち <b className="text-[15px]">{waiting.length}</b></span>
       <span className="text-fg/60">審査済み <b className="text-[15px] text-fg">{reviewed.length}</b></span>
       <HelpButton title="写真審査" className="ml-auto">
-        <p>提出写真を目標画像と見比べて、承認または不承認にします。審査できるのはイベントの承認者だけです。</p>
-        <ul><li>審査結果は承認者のPDSに記録されます。取り消すと審査待ちに戻ります。</li><li>不承認にするには理由が必要です。参加者は再提出できます。</li><li>ゴールの提出は審査の対象外です。提出の早い順にタイムボーナスが加算されます。</li></ul>
+        <p>提出写真を目標画像と見比べて、承認または不承認にします。</p>
+        <ul><li>審査結果は審査したアカウントのPDSに記録されます。</li><li>主催者の審査結果は承認者（自動審査など）の結果より優先されます。審査済みの提出も承認・不承認を変更できます。</li><li>取り消すと、以前の審査結果があればそれに、なければ審査待ちに戻ります。</li><li>不承認にするには理由が必要です。参加者は再提出できます。</li><li>ゴールの提出は審査の対象外です。提出の早い順にタイムボーナスが加算されます。</li></ul>
       </HelpButton>
     </div>
-    {!isApprover && <p className={errorBox} role="alert">{isAuthor ? 'ログイン中のアカウントはこのイベントの承認者ではありません。提出写真は閲覧できますが、審査できるのは承認者だけです。' : '審査できるのはイベントの承認者だけです。'}</p>}
+    {!canReview && <p className={errorBox} role="alert">閲覧のみ（審査は主催者のみ）</p>}
     {notice && <div className={noticeBar} role="status">{notice}<button className={iconButton} aria-label="通知を閉じる" onClick={() => setNotice('')}><X size={16}/></button></div>}
     {error && <p role="alert" className={errorBox}>{error}</p>}
     <div className="grid gap-3">{waiting.map(s => {
@@ -105,7 +137,7 @@ export default function ReviewPage() {
           {found && (found.cp.internalImageUrls?.length ?? 0) > 0 && <details className="text-[11px]"><summary className="flex h-7 cursor-pointer items-center text-fg/60">内部用画像（{found.cp.internalImageUrls!.length}枚）</summary><div className="mt-1 grid grid-cols-4 gap-1">{found.cp.internalImageUrls!.map(url => <a key={url} href={url} target="_blank" rel="noreferrer"><img className="aspect-square w-full bg-fg/5 object-cover" src={url} alt="内部用画像" /></a>)}</div></details>}
           <label className="block text-[11px] font-bold text-fg/60">コメント・不承認の理由<textarea className={cn(textarea, 'mt-1 block min-h-16 resize-y font-normal')} value={reasons[s.uri] ?? ''} onChange={e => setReasons({ ...reasons, [s.uri]: e.target.value })} placeholder="不承認の場合は必須" maxLength={300} aria-invalid={missingReason === s.uri}/></label>
           {missingReason === s.uri && <p className="text-[12px] font-bold" role="alert">不承認にするには理由を入力してください。</p>}
-          <div className="grid grid-cols-2 gap-2"><button className={button} disabled={busy || !isApprover} onClick={() => void review(s, 'rejected')}><X size={16}/>不承認</button><button className={buttonPrimary} disabled={busy || !isApprover} onClick={() => void review(s, 'approved')}><Check size={16}/>承認</button></div>
+          <div className="grid grid-cols-2 gap-2"><button className={button} disabled={busy || !canReview} onClick={() => void review(s, 'rejected')}><X size={16}/>不承認</button><button className={buttonPrimary} disabled={busy || !canReview} onClick={() => void review(s, 'approved')}><Check size={16}/>承認</button></div>
         </div>
       </article>;
     })}</div>
@@ -116,15 +148,22 @@ export default function ReviewPage() {
       <thead><tr><th><span className="sr-only">写真</span></th><th>CP</th><th>チーム / 提出者</th><th>提出日時</th><th>結果</th><th>理由</th><th><span className="sr-only">操作</span></th></tr></thead>
       <tbody>{reviewed.map(s => {
         const found = target(s);
-        const local = decided[s.uri];
+        const local = unreflected(s);
+        const status = statusOf(s);
+        const ownReview = decisiveReviewUri(s) !== undefined && atUriParts(decisiveReviewUri(s)!).repo === me;
         return <tr key={s.uri}>
           <td>{s.photoUrl ? <img className={thumb} src={s.photoUrl} alt="提出画像" /> : <div className={thumbPlaceholder} />}</td>
           <td className="[overflow-wrap:anywhere]">{found ? `${checkpointNumber(found.index)} ${checkpointName(found.cp)}` : '不明なCP'}</td>
           <td>{teamLabel(s)}<span className="block text-[11px] text-fg/60">{profileName(s.author)}</span></td>
           <td className="whitespace-nowrap">{formatDate(submissionCreatedAt(s))}</td>
-          <td><Status value={statusOf(s)} />{local && local !== 'undone' && <span className="ml-1 text-[11px] text-fg/60">反映待ち</span>}</td>
-          <td className="max-w-[240px] [overflow-wrap:anywhere]">{s.reason}</td>
-          <td className="text-right">{isApprover && !local && (s.approvalUri ?? s.rejectionUri) && <button type="button" className={iconButton} disabled={busy} aria-label="審査結果を取り消す" title="審査結果を取り消す" onClick={() => void undo(s)}><RotateCcw size={16}/></button>}</td>
+          <td><Status value={status} />{local ? <span className="ml-1 text-[11px] text-fg/60">{local.decision === 'undone' ? '取り消し反映待ち' : '反映待ち'}</span> : <span className="ml-1 text-[11px] text-fg/60">{reviewedByAuthor(s) ? '主催者' : '承認者'}</span>}</td>
+          <td className="max-w-[240px] [overflow-wrap:anywhere]">{local ? '' : s.reason}</td>
+          <td className="text-right whitespace-nowrap">{canReview && !local && <>
+            {status === 'approved'
+              ? <button type="button" className={iconButton} disabled={busy} aria-label="不承認に変更" title="不承認に変更" onClick={() => void change(s, 'rejected')}><X size={16}/></button>
+              : <button type="button" className={iconButton} disabled={busy} aria-label="承認に変更" title="承認に変更" onClick={() => void change(s, 'approved')}><Check size={16}/></button>}
+            {ownReview && <button type="button" className={iconButton} disabled={busy} aria-label="審査結果を取り消す" title="審査結果を取り消す" onClick={() => void undo(s)}><RotateCcw size={16}/></button>}
+          </>}</td>
         </tr>;
       })}</tbody>
     </table></div> : <p className="py-3 text-fg/60">審査済みの提出はまだありません。</p>}

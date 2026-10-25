@@ -26,7 +26,7 @@
           }
         }
       },
-      "description": "An event approver's approval of a participant's checkpoint submission. Only valid when created by the DID in the event's approver field."
+      "description": "An event approver's approval of a participant's checkpoint submission. Only valid when created by the DID in the event's approver field or by the event's author. See submissionView.status for how approve and reject records are resolved."
     }
   },
   "$type": "com.atproto.lexicon.schema",

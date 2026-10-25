@@ -82,8 +82,9 @@ export interface RankingEntry {
   $type?: 'win.tomo-x.rogaining.defs#rankingEntry'
   rank: number
   team: TeamView
+  /** Sum of approved checkpoint points and the team's finish-time bonus. */
   totalPoints: number
-  /** Number of distinct checkpoints with an approved submission. */
+  /** Number of distinct non-goal checkpoints with an approved submission. */
   approvedCount: number
 }
 
@@ -129,13 +130,13 @@ export interface SubmissionView {
   team: string
   /** The win.tomo-x.rogaining.submit record. */
   record: { [_ in string]: unknown }
-  /** approved when a valid approve record by the event's approver exists, otherwise rejected when a valid reject record by the approver exists, otherwise pending. Only approved submissions count for the ranking. */
+  /** Decided by one valid approve or reject record for the submission's current cid, made by the event's author or approver. The author's records take precedence over the approver's; among one account's records, the one with the newest createdAt wins. approved or rejected by that record, otherwise pending. Only approved submissions count for the ranking. */
   status: 'pending' | 'approved' | 'rejected' | (string & {})
   photoUrl?: string
   indexedAt: string
   /** AT-URI of the approve record, if approved. */
   approvalUri?: string
-  /** AT-URI of the reject record, if rejected by the approver. */
+  /** AT-URI of the reject record, if rejected. */
   rejectionUri?: string
   /** The reason of the approve or reject record that decided the status. */
   reason?: string

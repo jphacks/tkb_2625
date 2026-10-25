@@ -60,7 +60,7 @@ export default function TeamsPage() {
       created = record.name;
     });
     if (!ok || !created) return;
-    setNotice(`チーム「${created}」を作成しました。一覧への反映まで数秒かかることがあります。`);
+    setNotice(`チーム「${created}」を作成しました。`);
     setName(''); setMembers('');
     refresh('event');
   }
@@ -79,7 +79,7 @@ export default function TeamsPage() {
       saved = true;
     });
     if (!ok || !saved) return false;
-    setNotice(`チーム「${nextName.trim()}」を更新しました。反映まで数秒かかることがあります。`);
+    setNotice(`チーム「${nextName.trim()}」を更新しました。`);
     refresh('event', 'submissions');
     return true;
   }
@@ -98,7 +98,7 @@ export default function TeamsPage() {
   const filtered = visible.filter(team => !keyword || [teamName(team), ...team.members.flatMap(m => [m.handle, m.displayName ?? '', m.did])].join(' ').toLowerCase().includes(keyword));
 
   return <section>
-    {!isAuthor && <p className={errorPanel} role="alert">チームを作成・編集できるのはイベントの作成者（{event.author.handle ? `@${event.author.handle}` : event.author.did}）だけです。他のアカウントが作成したチームは無効になります。</p>}
+    {!isAuthor && <p className={errorPanel} role="alert">閲覧のみ（チームの編集は作成者 {event.author.handle ? `@${event.author.handle}` : event.author.did} のみ）</p>}
     {notice && <div className={noticeBar} role="status">{notice}<button className={iconButton} aria-label="通知を閉じる" onClick={() => setNotice('')}><X size={16}/></button></div>}
     {error && <p className={errorPanel} role="alert">{error}</p>}
     <form className="border border-fg/10 p-3" onSubmit={create}>

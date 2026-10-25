@@ -75,7 +75,7 @@ jobs:
             judgman/ "${{ env.JUDGMAN_DIR }}/"
           cd "${{ env.JUDGMAN_DIR }}"
           [ -x .venv/bin/python ] || python3 -m venv .venv
-          .venv/bin/pip install --quiet -r requirements.txt
+          .venv/bin/pip install --no-cache-dir --quiet -r requirements.txt
 
       - name: Deploy judge-wrapper
         run: |

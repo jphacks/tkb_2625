@@ -71,14 +71,13 @@ function AdminEvent({ uri }: { uri: AtUriString }) {
   const record = eventRecord(event);
   const me = client.assertDid;
   const isAuthor = event.author.did === me;
-  const isApprover = record.approver === me;
   const dates = eventDates(event);
   const status = eventStatus(event, Date.now());
   const participants = teams.reduce((sum, team) => sum + team.members.length, 0);
   // ゴールの提出は審査しない
   const goals = new Set(checkpoints.filter(checkpointIsGoal).map(cp => cp.uri));
   const pending = submissions.filter(s => submissionStatus(s) === 'pending' && !goals.has(submissionCheckpointUri(s) ?? '')).length;
-  const context: AdminEventContext = { uri, event, teams, checkpoints, submissions, me, isAuthor, isApprover, retry, refresh };
+  const context: AdminEventContext = { uri, event, teams, checkpoints, submissions, me, isAuthor, retry, refresh };
   const tabs = [
     { to: 'review', label: '写真審査' },
     { to: 'checkpoints', label: 'CP管理' },
@@ -99,7 +98,7 @@ function AdminEvent({ uri }: { uri: AtUriString }) {
     <dl className="my-2 flex flex-wrap gap-x-4 gap-y-0.5 border-y border-fg/10 py-1.5 text-xs">
       {metrics.map(({ label, value, alert }) => <div key={label} className={cn('flex items-baseline gap-1', alert && 'text-accent')}><dt className={alert ? '' : 'text-fg/60'}>{label}</dt><dd className="font-bold">{value}</dd></div>)}
     </dl>
-    {!isAuthor && !isApprover && <p className={errorBox} role="alert">ログイン中のアカウント（{me}）はこのイベントの主催者でも承認者でもありません。提出写真の閲覧・審査や、CP・チームの登録はできません。</p>}
+    {!isAuthor && <p className={errorBox} role="alert">このアカウント（{me}）は主催者ではないため操作できません</p>}
     {errors.length > 0 && <p className={errorBox} role="alert">一部のデータを更新できませんでした：{errors[0]} <button className={textButton} onClick={() => retry('event', 'checkpoints', 'submissions')}>再試行</button></p>}
     <nav className="mb-3 flex overflow-x-auto border-b border-fg/10" aria-label="管理者メニュー">
       {tabs.map(({ to, label }) => <NavLink key={to} to={to} className={({ isActive }) => cn(tab, isActive && tabActive)}>{label}</NavLink>)}

@@ -17,10 +17,10 @@ const id = 'win.tomo-x.rogaining.listSubmissions'
 
 export type QueryParams = {
   event: string
-  limit: number
-  cursor?: string
   checkpoint?: string
   participant?: string
+  limit: number
+  cursor?: string
 }
 export type InputSchema = undefined
 

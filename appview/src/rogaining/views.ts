@@ -171,7 +171,7 @@ export async function toSubmissionView(
 		resolveProfileBasicOrFallback(submit.authorDid),
 		resolveBlobUrlOrUndefined(submit.authorDid, submit.photoCid),
 	]);
-	// approve と reject の両方があれば approve を優先する
+	// findSubmissions がどちらか一方だけを決めている
 	const decision = approval ?? rejection;
 	return {
 		$type: "win.tomo-x.rogaining.defs#submissionView",

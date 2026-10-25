@@ -132,7 +132,7 @@ export async function putSubmit({ uri, did, cid, record }: RecordPut<r.submit.Ma
 		.onConflictDoUpdate({ target: submitsTable.uri, set: values });
 }
 
-// 承認者として正当かどうかはクエリ時に event.approver と突き合わせる
+// 承認者として正当かどうかはクエリ時に event.approver / 作成者と突き合わせる
 export async function putApprove({ uri, did, record }: RecordPut<r.approve.Main>): Promise<void> {
 	if (!(await ensureIndexed(record.submit.uri, r.submit.$nsid))) {
  	   return logInvalid(uri, "referenced submit not found");

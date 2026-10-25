@@ -1,7 +1,6 @@
 import { Link } from 'react-router-dom';
 import { Plus } from 'lucide-react';
 import OrganizerShell from '../../components/OrganizerShell';
-import { HelpButton } from '../../components/SiteChrome';
 import { useMe } from '../../hooks/useRogainingQuery';
 import { eventDate, eventDates, eventName, eventStatus } from '../../lib/eventPresentation';
 import { adminEventPath } from '../../lib/eventUri';
@@ -16,7 +15,7 @@ export default function AdminHomePage() {
   const now = Date.now();
   return <OrganizerShell><main id="main" className={mainContainer}>
     <div className="mb-3 flex items-center justify-between gap-3">
-      <h1 className="flex items-center gap-2 text-[15px] font-bold">主催イベント{data && <small className="text-xs font-normal text-fg/60">{events.length}件</small>}{updatedAt && <small className="text-[11px] font-normal text-fg/60 max-sm:hidden">更新 {formatDate(updatedAt)}</small>}<HelpButton title="主催イベント一覧"><p>ログイン中のアカウントが作成したイベントです。</p><p>承認者として指定されたイベントは一覧に表示されません。主催者から管理画面のURLを共有してもらってください。</p></HelpButton></h1>
+      <h1 className="flex items-center gap-2 text-[15px] font-bold">主催イベント{data && <small className="text-xs font-normal text-fg/60">{events.length}件</small>}{updatedAt && <small className="text-[11px] font-normal text-fg/60 max-sm:hidden">更新 {formatDate(updatedAt)}</small>}</h1>
       <Link className={buttonPrimary} to="/admin/events/new"><Plus size={16}/>イベントを作成</Link>
     </div>
     {loading && <div className={empty} role="status">読み込み中…</div>}
