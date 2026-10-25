@@ -43,7 +43,9 @@ export async function putEvent({ uri, did, cid, record }: RecordPut<r.event.Main
 export async function putCheckpoint({ uri, did, cid, record }: RecordPut<r.checkpoint.Main>): Promise<void> {
 	const location = parseLocation(record.location);
 	if (!location) return logInvalid(uri, "invalid location");
-	await ensureIndexed(record.event.uri, r.event.$nsid);
+	if (!(await ensureIndexed(record.event.uri, r.event.$nsid))) {
+    	    return logInvalid(uri, "referenced event not found");
+	}
 
 	const values = {
 		cid,
@@ -69,7 +71,9 @@ export async function putCheckpoint({ uri, did, cid, record }: RecordPut<r.check
 }
 
 export async function putTeam({ uri, did, cid, record }: RecordPut<r.team.Main>): Promise<void> {
-	await ensureIndexed(record.event.uri, r.event.$nsid);
+	if (!(await ensureIndexed(record.event.uri, r.event.$nsid))) {
+ 	   return logInvalid(uri, "referenced event not found");
+	}
 
 	const members = [...new Set(record.members)];
 	const values = {
@@ -129,7 +133,9 @@ export async function putSubmit({ uri, did, cid, record }: RecordPut<r.submit.Ma
 
 // 承認者として正当かどうかはクエリ時に event.approver と突き合わせる
 export async function putApprove({ uri, did, record }: RecordPut<r.approve.Main>): Promise<void> {
-	await ensureIndexed(record.submit.uri, r.submit.$nsid);
+	if (!(await ensureIndexed(record.submit.uri, r.submit.$nsid))) {
+ 	   return logInvalid(uri, "referenced submit not found");
+	}
 	const values = {
 		submitUri: record.submit.uri,
 		submitCid: record.submit.cid,
@@ -144,7 +150,9 @@ export async function putApprove({ uri, did, record }: RecordPut<r.approve.Main>
 }
 
 export async function putReject({ uri, did, record }: RecordPut<r.reject.Main>): Promise<void> {
-	await ensureIndexed(record.submit.uri, r.submit.$nsid);
+	if (!(await ensureIndexed(record.submit.uri, r.submit.$nsid))) {
+	    return logInvalid(uri, "referenced submit not found");
+	}
 	const values = {
 		submitUri: record.submit.uri,
 		submitCid: record.submit.cid,
