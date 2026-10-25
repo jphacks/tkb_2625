@@ -30,7 +30,7 @@ const queue = new PQueue({ concurrency: 3 })
 
 // 判定CLI: 末尾に [query, ...refs] を付けて呼ぶ。exit 0: 到達, 1: 不到達, それ以外: 判定不能
 // judgman/main.py は先頭引数でモデルを選ぶ (0: SNN, 1: SIFT)
-const JUDGE_CMD = process.env.JUDGE_CMD?.split(" ") ?? ["python3", "../judgman/main.py", "0"]
+const JUDGE_CMD = process.env.JUDGE_CMD?.split(" ") ?? ["python3", "../judgman/main.py", "1"]
 
 for await (const event of jetstream.live({ collections })) {
 	if (!isCreate(event, r.submit)) continue
