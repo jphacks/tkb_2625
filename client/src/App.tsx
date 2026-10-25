@@ -5,7 +5,7 @@ import { useAction } from './useAction';
 import { useDialog } from './useDialog';
 import { useEffect, useRef, useState } from 'react';
 import { Link, NavLink, Navigate, Route, Routes, useLocation } from 'react-router-dom';
-import { ArrowDownUp, ArrowRight, ArrowUpRight, Camera, Check, CheckCheck, Clock3, Compass, Flag, ImagePlus, LayoutGrid, Leaf, Map, MapPin, RotateCcw, ShieldCheck, Sprout, Users, X } from 'lucide-react';
+import { ArrowDownUp, ArrowRight, ArrowUpRight, Camera, Check, CheckCheck, Clock3, Compass, Flag, ImagePlus, LayoutGrid, Leaf, Map, MapPin, RotateCcw, ShieldCheck, Sprout, Trophy, Users, X } from 'lucide-react';
 import { checkpointStatus, latestSubmission, selectCheckpoints, STATUSES } from './data';
 import { prepareImage } from './images';
 import { useRogaining } from './useRogaining';
@@ -15,7 +15,7 @@ import type { Checkpoint, CheckpointStatus, Execute, Snapshot, SubmissionStatus 
 
 type PageProps = { state: Snapshot; execute: Execute; notify: (message: string) => void };
 
-const tabs = [{ to: '/cards', label: 'カード', en: 'CHECKPOINTS', icon: LayoutGrid }, { to: '/team', label: 'チーム', en: 'OUR TEAM', icon: Users }, { to: '/map', label: 'マップ', en: 'EXPLORE', icon: Map }];
+const tabs = [{ to: '/cards', label: 'カード', en: 'CHECKPOINTS', icon: LayoutGrid }, { to: '/team', label: 'チーム', en: 'OUR TEAM', icon: Users }, { to: '/map', label: 'マップ', en: 'EXPLORE', icon: Map }, { to: '/ranking', label: 'ランキング', en: 'RANKING', icon: Trophy }];
 function Status({ value }: { value: CheckpointStatus }) { const status = STATUSES[value]; return <span className={`status ${value}`}><span aria-hidden="true">{status.symbol}</span> {status.label}</span>; }
 
 export default function App() {
