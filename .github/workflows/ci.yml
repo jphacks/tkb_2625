@@ -36,10 +36,3 @@ jobs:
       - name: client build
         working-directory: client
         run: pnpm build
-
-      - name: front install
-        working-directory: front
-        run: pnpm install --frozen-lockfile
-      - name: front build
-        working-directory: front
-        run: pnpm build
