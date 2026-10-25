@@ -19,6 +19,8 @@ export type QueryParams = {
   event: string
   limit: number
   cursor?: string
+  checkpoint?: string
+  participant?: string
 }
 export type InputSchema = undefined
 
