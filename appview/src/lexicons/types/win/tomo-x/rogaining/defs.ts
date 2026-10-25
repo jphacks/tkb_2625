@@ -81,8 +81,9 @@ export function validateEventView<V>(v: V) {
 export interface RankingEntry {
   $type?: 'win.tomo-x.rogaining.defs#rankingEntry'
   rank: number
-  participant: AppBskyActorDefs.ProfileViewBasic
+  team: TeamView
   totalPoints: number
+  /** Number of distinct checkpoints with an approved submission. */
   approvedCount: number
 }
 
@@ -124,14 +125,24 @@ export interface SubmissionView {
   cid: string
   uri: string
   author: AppBskyActorDefs.ProfileViewBasic
+  /** The team the author belongs to in this event. */
+  team: string
   /** The win.tomo-x.rogaining.submit record. */
   record: { [_ in string]: unknown }
-  /** approved when a valid approve record by the event's approver exists. */
-  status: 'pending' | 'approved' | (string & {})
+  /** approved when a valid approve record by the event's approver exists, otherwise rejected when a valid reject record by the approver exists, otherwise pending. Only approved submissions count for the ranking. */
+  status: 'pending' | 'approved' | 'rejected' | (string & {})
   photoUrl?: string
   indexedAt: string
   /** AT-URI of the approve record, if approved. */
   approvalUri?: string
+  /** AT-URI of the reject record, if rejected by the approver. */
+  rejectionUri?: string
+  /** The reason of the approve or reject record that decided the status. */
+  reason?: string
+  /** Distance between the submitted location and the checkpoint, for the approver's review. */
+  distanceMeters?: number
+  /** Whether the submission's createdAt is between the event's startsAt and endsAt, for the approver's review. */
+  withinEventPeriod?: boolean
 }
 
 const hashSubmissionView = 'submissionView'

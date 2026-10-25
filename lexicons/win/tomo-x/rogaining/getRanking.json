@@ -25,7 +25,7 @@
         "required": ["event"],
         "properties": { "event": { "type": "string", "format": "at-uri" } }
       },
-      "description": "Get the leaderboard of an event, computed from approved submissions (each checkpoint counts once per participant)."
+      "description": "Get the leaderboard of an event, computed from approved submissions (each checkpoint counts once per team)."
     }
   },
   "$type": "com.atproto.lexicon.schema",

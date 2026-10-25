@@ -1,0 +1,34 @@
+{
+  "id": "win.tomo-x.rogaining.reject",
+  "defs": {
+    "main": {
+      "key": "tid",
+      "type": "record",
+      "record": {
+        "type": "object",
+        "required": ["submit", "createdAt"],
+        "properties": {
+          "submit": {
+            "ref": "com.atproto.repo.strongRef",
+            "type": "ref",
+            "description": "The submission being rejected."
+          },
+          "reason": {
+            "type": "string",
+            "maxLength": 3000,
+            "maxGraphemes": 300,
+            "description": "Why the submission was rejected, shown to the team."
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "datetime",
+            "description": "When the submission was rejected."
+          }
+        }
+      },
+      "description": "An event approver's rejection of a participant's checkpoint submission. Only valid when created by the DID in the event's approver field. An approve record for the same submission takes precedence."
+    }
+  },
+  "$type": "com.atproto.lexicon.schema",
+  "lexicon": 1
+}

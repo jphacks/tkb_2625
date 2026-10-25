@@ -11,7 +11,7 @@ type $nsid = typeof $nsid;
 
 export { $nsid };
 
-/** A team participating in a rogaining event. Created by the event organizer (the event's author), not by the participants themselves. Only valid when created by the DID that authored the referenced event. */
+/** A team participating in a rogaining event. Created by the event organizer (the event's author), not by the participants themselves. Only valid when created by the DID that authored the referenced event. If a DID is a member of several teams in the same event, only the earliest created team (by createdAt) counts. */
 type Main = { $type: "win.tomo-x.rogaining.team";"name":string;
 
   /**
@@ -26,7 +26,7 @@ type Main = { $type: "win.tomo-x.rogaining.team";"name":string;
 
 export type { Main };
 
-/** A team participating in a rogaining event. Created by the event organizer (the event's author), not by the participants themselves. Only valid when created by the DID that authored the referenced event. */
+/** A team participating in a rogaining event. Created by the event organizer (the event's author), not by the participants themselves. Only valid when created by the DID that authored the referenced event. If a DID is a member of several teams in the same event, only the earliest created team (by createdAt) counts. */
 const main = /*#__PURE__*/ l.record<"tid", Main>("tid", $nsid, /*#__PURE__*/ l.object({"name":/*#__PURE__*/ l.string({"maxLength":1000,"maxGraphemes":100}),"event":/*#__PURE__*/ l.ref<RepoStrongRef.Main>((() => RepoStrongRef.main) as any),"members":/*#__PURE__*/ l.array(/*#__PURE__*/ l.string({"format":"did"}), {"maxLength":100,"minLength":1}),"createdAt":/*#__PURE__*/ l.string({"format":"datetime"})}));
 
 export { main };

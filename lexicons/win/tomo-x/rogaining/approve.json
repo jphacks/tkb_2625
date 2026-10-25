@@ -13,6 +13,12 @@
             "type": "ref",
             "description": "The submission being approved."
           },
+          "reason": {
+            "type": "string",
+            "maxLength": 3000,
+            "maxGraphemes": 300,
+            "description": "A comment on the approval, shown to the team."
+          },
           "createdAt": {
             "type": "string",
             "format": "datetime",

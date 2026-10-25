@@ -28,9 +28,9 @@ export interface Record {
   /** Allowed distance from the location for a valid submission. */
   radiusMeters: number
   /** Image of the checkpoint. */
-  image?: BlobRef
+  image: BlobRef
   /** Internal images of the checkpoint, not shown to participants. */
-  internalImages?: BlobRef[]
+  internalImages: BlobRef[]
   [k: string]: unknown
 }
 

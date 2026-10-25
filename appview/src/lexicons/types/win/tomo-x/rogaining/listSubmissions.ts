@@ -17,15 +17,13 @@ const id = 'win.tomo-x.rogaining.listSubmissions'
 
 export type QueryParams = {
   event: string
-  status?: 'pending' | 'approved' | (string & {})
-  /** Only submissions for this checkpoint. */
-  checkpoint?: string
-  /** Only submissions by this account. */
-  participant?: string
+  limit: number
+  cursor?: string
 }
 export type InputSchema = undefined
 
 export interface OutputSchema {
+  cursor?: string
   submissions: WinTomoXRogainingDefs.SubmissionView[]
 }
 

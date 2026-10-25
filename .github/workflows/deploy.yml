@@ -33,22 +33,33 @@ jobs:
       - name: Build client
         working-directory: client
         run: |
-          pnpm install
+          pnpm install --frozen-lockfile
           pnpm build
 
       - name: Build appview
         working-directory: appview
         run: |
-          pnpm install
+          pnpm install --frozen-lockfile
           pnpm build
 
       - name: Deploy client
         run: rsync -a --delete client/dist/ "${{ env.CLIENT_DIR }}/"
 
+      # マイグレーションは appview の起動時に drizzle/ から自動で適用される
+      # pnpm-workspace.yaml は better-sqlite3 のネイティブビルド許可 (allowBuilds) に必要
       - name: Deploy appview
         run: |
           rsync -a --delete appview/dist/ "${{ env.APPVIEW_DIR }}/dist/"
-          cp appview/package.json "${{ env.APPVIEW_DIR }}/"
+          rsync -a --delete appview/drizzle/ "${{ env.APPVIEW_DIR }}/drizzle/"
+          cp appview/package.json appview/pnpm-lock.yaml appview/pnpm-workspace.yaml "${{ env.APPVIEW_DIR }}/"
           cd "${{ env.APPVIEW_DIR }}"
-          pnpm install --prod
+          pnpm install --prod --frozen-lockfile
           sudo systemctl restart "${{ env.APPVIEW_SERVICE }}"
+
+      - name: Check appview is running
+        run: |
+          sleep 5
+          if ! systemctl is-active --quiet "${{ env.APPVIEW_SERVICE }}"; then
+            journalctl -u "${{ env.APPVIEW_SERVICE }}" -n 50 --no-pager || true
+            exit 1
+          fi

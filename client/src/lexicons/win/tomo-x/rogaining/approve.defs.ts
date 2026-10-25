@@ -20,6 +20,11 @@ type Main = { $type: "win.tomo-x.rogaining.approve";
   "submit":RepoStrongRef.Main;
 
   /**
+   * A comment on the approval, shown to the team.
+   */
+  "reason"?:string;
+
+  /**
    * When the submission was approved.
    */
   "createdAt":l.DatetimeString };
@@ -27,7 +32,7 @@ type Main = { $type: "win.tomo-x.rogaining.approve";
 export type { Main };
 
 /** An event approver's approval of a participant's checkpoint submission. Only valid when created by the DID in the event's approver field. */
-const main = /*#__PURE__*/ l.record<"tid", Main>("tid", $nsid, /*#__PURE__*/ l.object({"submit":/*#__PURE__*/ l.ref<RepoStrongRef.Main>((() => RepoStrongRef.main) as any),"createdAt":/*#__PURE__*/ l.string({"format":"datetime"})}));
+const main = /*#__PURE__*/ l.record<"tid", Main>("tid", $nsid, /*#__PURE__*/ l.object({"submit":/*#__PURE__*/ l.ref<RepoStrongRef.Main>((() => RepoStrongRef.main) as any),"reason":/*#__PURE__*/ l.optional(/*#__PURE__*/ l.string({"maxLength":3000,"maxGraphemes":300})),"createdAt":/*#__PURE__*/ l.string({"format":"datetime"})}));
 
 export { main };
 

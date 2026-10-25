@@ -18,6 +18,8 @@ const id = 'win.tomo-x.rogaining.approve'
 export interface Record {
   $type: 'win.tomo-x.rogaining.approve'
   submit: ComAtprotoRepoStrongRef.Main
+  /** A comment on the approval, shown to the team. */
+  reason?: string
   /** When the submission was approved. */
   createdAt: string
   [k: string]: unknown

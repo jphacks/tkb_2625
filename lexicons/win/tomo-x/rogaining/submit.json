@@ -36,7 +36,7 @@
           }
         }
       },
-      "description": "A participant's proof of reaching a checkpoint."
+      "description": "A participant's proof of reaching a checkpoint. Ignored unless the author is a member of a team in the event. Results are shared within the team."
     }
   },
   "$type": "com.atproto.lexicon.schema",

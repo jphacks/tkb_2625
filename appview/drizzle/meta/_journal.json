@@ -43,6 +43,13 @@
       "when": 1792833546970,
       "tag": "0005_sparkling_franklin_storm",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "6",
+      "when": 1792888023276,
+      "tag": "0006_indexer",
+      "breakpoints": true
     }
   ]
 }

@@ -7,10 +7,12 @@
     "win.tomo-x.rogaining.event",
     "win.tomo-x.rogaining.getCheckpoints",
     "win.tomo-x.rogaining.getEvent",
+    "win.tomo-x.rogaining.getMe",
     "win.tomo-x.rogaining.getRanking",
     "win.tomo-x.rogaining.getTeam",
     "win.tomo-x.rogaining.listEvents",
     "win.tomo-x.rogaining.listSubmissions",
+    "win.tomo-x.rogaining.reject",
     "win.tomo-x.rogaining.submit",
     "win.tomo-x.rogaining.team"
   ],
