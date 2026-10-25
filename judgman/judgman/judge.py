@@ -2,7 +2,8 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
-
+import sys
+import os
 import numpy as np
 
 from .embed import get_embedder
@@ -39,39 +40,40 @@ class Judgman:
     def features(self, ref: Image.Image, query: Image.Image) -> np.ndarray:
         return feature_vector(ref, query, get_embedder())
 
-    def score(self, ref_path: str | Path, query_path: str | Path) -> dict:
-        ref = load_image(str(ref_path))
-        query = load_image(str(query_path))
+    def score(self, ref:bytes ,query: bytes) -> dict:
         x = self.features(ref, query)
         p_f = float(self.fusion.predict_proba(x)[0])
         p_s = float(self.snn.predict_proba(x)[0]) if self.snn is not None else p_f
         final = self.blend * p_f + (1.0 - self.blend) * p_s
         return {
-            "ref": str(ref_path),
-            "query": str(query_path),
-            "features": {n: round(float(v), 4) for n, v in zip(FEATURE_NAMES, x)},
-            "p_fusion": round(p_f, 4),
-            "p_snn": round(p_s, 4),
             "score": round(final, 4),
-            "threshold": self.threshold,
             "verdict": "ARRIVED" if final >= self.threshold else "NOT_ARRIVED",
         }
 
-    def score_control(self, ref_paths: list[str | Path], query_path: str | Path) -> dict:
-        per = [self.score(r, query_path) for r in ref_paths]
+    def score_control(self, ref: list[bytes], query: bytes) -> dict:
+        per = [self.score(r, query) for r in ref]
         ps = [p["score"] for p in per]
         final = max(ps) if ps else 0.0
         best = per[int(np.argmax(ps))] if ps else None
         thr = self.threshold if len(per) <= 1 else self.threshold_multi
         return {
-            "query": str(query_path),
-            "n_refs": len(per),
-            "per_ref": [
-                {"ref": p["ref"], "score": p["score"], "verdict": p["verdict"]} for p in per
-            ],
-            "best_ref": best["ref"] if best else None,
-            "best_score": final,
             "score": round(final, 4),
-            "threshold": thr,
             "verdict": "ARRIVED" if final >= thr else "NOT_ARRIVED",
         }
+
+if __name__ == "__main__":
+    sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+
+    def main(argv: list[str]) -> int:
+        if len(argv) < 3:
+            print("usage: judge_cli.py <query image> <ref image> [ref image ...]", file=sys.stderr)
+            return 2
+        query_path, ref_path = argv[1], argv[2:]
+        refs = load_image(str(ref_path))
+        query = load_image(str(query_path))
+        j = Judgman()
+        result = j.score_control(refs, query)
+        print(json.dumps(result, ensure_ascii=False))
+        return 0 if result["verdict"] == "ARRIVED" else 1
+    
+    sys.exit(main(sys.argv))

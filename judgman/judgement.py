@@ -7,6 +7,9 @@ import torchvision.transforms as T
 from PIL import Image
 from dataclasses import dataclass
 from typing import List, Optional
+import logging
+
+logger = logging.getLogger(__name__)
 
 class Verdict:
     MATCH = "一致"
@@ -138,17 +141,17 @@ class HybridLocationVerifier:
         self.dino_sim_match_thresh = dino_sim_match_thresh
         self.dino_sim_mismatch_thresh = dino_sim_mismatch_thresh
 
-    def verify(self, ref_image_paths: List[str], query_image_path: str) -> EvaluationResult:
-        query_bgr = cv2.imread(query_image_path)
-        query_pil = Image.open(query_image_path)
+    def verify(self, refs: List[bytes], query: bytes) -> EvaluationResult:
+        query_pil = Image.open(query)
+        query_bgr = self.image_converter(query)
 
         best_sift_res = SIFTResult(0, 0, 0, 0, 0.0, False)
         best_dino_res = DINOv2Result(-1.0)
         best_ref_path = ""
 
-        for ref_path in ref_image_paths:
-            ref_bgr = cv2.imread(ref_path)
-            ref_pil = Image.open(ref_path)
+        for ref in refs:
+            ref_pil = Image.open(ref)
+            ref_bgr = self.image_converter(ref)
 
             sift_res = self.sift_matcher.match(ref_bgr, query_bgr)
             dino_res = self.dino_extractor.compare(ref_pil, query_pil)
@@ -158,7 +161,6 @@ class HybridLocationVerifier:
                     best_sift_res = sift_res
                 if dino_res.cosine_similarity >= best_dino_res.cosine_similarity:
                     best_dino_res = dino_res
-                best_ref_path = ref_path
 
         verdict = self._determine_verdict(best_sift_res, best_dino_res)
 
@@ -170,7 +172,6 @@ class HybridLocationVerifier:
 
         return EvaluationResult(
             verdict=verdict,
-            best_ref_path=best_ref_path,
             sift_result=best_sift_res,
             dino_result=best_dino_res,
             details=details
@@ -193,6 +194,16 @@ class HybridLocationVerifier:
             return Verdict.MISMATCH
 
         return Verdict.UNCERTAIN
+    
+    def image_converter(self,image_bytes:bytes) -> np.array:
+        buf = np.frombuffer(image_bytes, np.uint8)
+        image = cv2.imdecode(buf, cv2.IMREAD_COLOR)
+        if image is None:
+            err = Exception("画像のデコードに失敗しました")
+            logger.exception(err)
+            raise err
+        img_rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+        return img_rgb
 
 def get_ref_images_from_dir(point_dir: str) -> List[str]:
     valid_exts = ('.jpg', '.jpeg', '.png', '.webp', '.bmp', '.JPG', '.JPEG', '.PNG', '.WEBP', '.BMP')
@@ -205,6 +216,7 @@ def get_ref_images_from_dir(point_dir: str) -> List[str]:
         if fname.endswith(valid_exts)
     ]
     return sorted(ref_paths)
+
 
 if __name__ == "__main__":
     if len(sys.argv) < 3:
