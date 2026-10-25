@@ -26,7 +26,12 @@ export default function listSubmissions(server: Server<AppviewEnv>, auth: Servic
 
       let page;
       try {
-        page = await findSubmissions(event, authorDids, { limit: params.limit ?? 50, cursor: params.cursor });
+        page = await findSubmissions(event, authorDids, {
+          limit: params.limit ?? 50,
+          cursor: params.cursor,
+          checkpoint: params.checkpoint,
+          participant: params.participant,
+        });
       } catch (err) {
         if (err instanceof InvalidCursorError) return { status: 400, message: "invalid cursor" };
         throw err;
