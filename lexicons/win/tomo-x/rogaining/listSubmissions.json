@@ -26,6 +26,8 @@
         "required": ["event"],
         "properties": {
           "event": { "type": "string", "format": "at-uri" },
+          "checkpoint": { "type": "string", "format": "at-uri" },
+          "participant": { "type": "string", "format": "did" },
           "limit": {
             "type": "integer",
             "minimum": 1,
