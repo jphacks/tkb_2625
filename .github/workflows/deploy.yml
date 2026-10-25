@@ -11,10 +11,13 @@ env:
   CLIENT_DIR: /srv/rogaining/client
   APPVIEW_DIR: /srv/rogaining/appview
   APPVIEW_SERVICE: rogaining-appview.service
+  JUDGE_WRAPPER_DIR: /srv/rogaining/judge-wrapper
+  JUDGMAN_DIR: /srv/rogaining/judgman
+  JUDGE_WRAPPER_SERVICE: rogaining-judge-wrapper.service
 
-# self-hosted runner 側で必要なもの: rsync
+# self-hosted runner 側で必要なもの: rsync, python3 (venv モジュール込み)
 # リポジトリ Variables: APPVIEW_DIR (例 /srv/rogaining/appview), CLIENT_DIR (例 /srv/rogaining/client)
-# APPVIEW_SERVICE は systemd unit。runnerユーザーがパスワードなしで
+# APPVIEW_SERVICE / JUDGE_WRAPPER_SERVICE は systemd unit。runnerユーザーがパスワードなしで
 # `sudo systemctl restart <unit>` できるようにしておく
 jobs:
   deploy:
@@ -42,6 +45,12 @@ jobs:
           pnpm install --frozen-lockfile
           pnpm build
 
+      - name: Build judge-wrapper
+        working-directory: judge-wrapper
+        run: |
+          pnpm install --frozen-lockfile
+          pnpm build
+
       - name: Deploy client
         run: rsync -a --delete client/dist/ "${{ env.CLIENT_DIR }}/"
 
@@ -56,10 +65,34 @@ jobs:
           pnpm install --prod --frozen-lockfile
           sudo systemctl restart "${{ env.APPVIEW_SERVICE }}"
 
-      - name: Check appview is running
+      # 学習用の画像 (dataset, point-*) は判定に不要なので送らない
+      # .venv は deploy 先で作るので --delete で消さないよう除外する
+      - name: Deploy judgman
+        run: |
+          rsync -a --delete \
+            --exclude '/dataset/' --exclude '/point-*/' \
+            --exclude '/.venv/' --exclude '__pycache__/' \
+            judgman/ "${{ env.JUDGMAN_DIR }}/"
+          cd "${{ env.JUDGMAN_DIR }}"
+          [ -x .venv/bin/python ] || python3 -m venv .venv
+          .venv/bin/pip install --quiet -r requirements.txt
+
+      - name: Deploy judge-wrapper
+        run: |
+          rsync -a --delete judge-wrapper/dist/ "${{ env.JUDGE_WRAPPER_DIR }}/dist/"
+          cp judge-wrapper/package.json judge-wrapper/pnpm-lock.yaml judge-wrapper/pnpm-workspace.yaml "${{ env.JUDGE_WRAPPER_DIR }}/"
+          cd "${{ env.JUDGE_WRAPPER_DIR }}"
+          pnpm install --prod --frozen-lockfile
+          sudo systemctl restart "${{ env.JUDGE_WRAPPER_SERVICE }}"
+
+      - name: Check services are running
         run: |
           sleep 5
-          if ! systemctl is-active --quiet "${{ env.APPVIEW_SERVICE }}"; then
-            journalctl -u "${{ env.APPVIEW_SERVICE }}" -n 50 --no-pager || true
-            exit 1
-          fi
+          failed=0
+          for unit in "${{ env.APPVIEW_SERVICE }}" "${{ env.JUDGE_WRAPPER_SERVICE }}"; do
+            if ! systemctl is-active --quiet "$unit"; then
+              journalctl -u "$unit" -n 50 --no-pager || true
+              failed=1
+            fi
+          done
+          exit $failed
