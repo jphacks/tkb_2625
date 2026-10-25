@@ -11,7 +11,9 @@
     "gen:lexicon": "lex build --lexicons ../lexicons --out ./src/lexicons --override --clear"
   },
   "dependencies": {
+    "@atpassport/client": "^0.2.3",
     "@atproto/lex": "^0.4.2",
+    "@atproto/oauth-client-browser": "^0.5.10",
     "@tailwindcss/vite": "^4.3.3",
     "leaflet": "1.9.4",
     "lucide-react": "0.468.0",

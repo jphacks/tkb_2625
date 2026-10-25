@@ -19,3 +19,10 @@
 .login-panel-footer{display:flex;justify-content:center;align-items:center;gap:8px;border-top:1px solid var(--line);padding-top:21px;margin-top:18px;color:#7a846f;font-size:9px;letter-spacing:.6px}
 @media(max-width:800px){.login-main{gap:32px;grid-template-columns:minmax(0,1fr) minmax(0,360px);padding:45px 24px}.login-intro h1{font-size:30px;letter-spacing:2px}.login-intro>p{font-size:11px}.login-panel{padding:26px}}
 @media(max-width:640px){.login-main{grid-template-columns:1fr;gap:28px;padding:34px 20px 40px;max-width:460px}.login-intro{padding:0}.login-intro>.eyebrow{font-size:8px}.login-intro h1{font-size:28px;line-height:1.5;margin:14px 0 12px}.login-intro>p{font-size:11px}.login-field-art,.login-field-note{display:none}.login-panel{padding:23px}.login-emblem{margin:20px auto;width:60px;height:60px}.login-emblem svg{width:30px}.login-panel h2{font-size:25px}.login-button{font-size:12px;margin-top:24px}.login-description{font-size:11px}.login-panel-footer{font-size:8px}}
+.login-divider{display:flex;align-items:center;gap:12px;margin:24px 0 0;color:var(--muted);font-size:10px;letter-spacing:.5px}
+.login-divider::before,.login-divider::after{content:"";flex:1;border-top:1px solid var(--line)}
+.login-form{margin-top:14px;text-align:left}
+.login-handle-row{display:flex;gap:8px}
+.login-handle-row input{flex:1;min-width:0;min-height:44px;border:1px solid #cdd3be;background:#faf9f3;color:var(--ink);padding:9px 12px;font-size:12px}
+.login-handle-row .button{white-space:nowrap}
+.login-form .login-help{margin-top:8px}
