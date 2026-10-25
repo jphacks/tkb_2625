@@ -187,6 +187,31 @@ export function deleteRecord(collection: string, uri: string): void {
 	});
 }
 
+export async function indexRecord(collection: string, put: RecordPut<unknown>): Promise<void> {
+	switch (collection) {
+		case r.event.$nsid:
+			await indexFetched(put, r.event.main, putEvent);
+			break;
+		case r.checkpoint.$nsid:
+			await indexFetched(put, r.checkpoint.main, putCheckpoint);
+			break;
+		case r.team.$nsid:
+			await indexFetched(put, r.team.main, putTeam);
+			break;
+		case r.submit.$nsid:
+			await indexFetched(put, r.submit.main, putSubmit);
+			break;
+		case r.approve.$nsid:
+			await indexFetched(put, r.approve.main, putApprove);
+			break;
+		case r.reject.$nsid:
+			await indexFetched(put, r.reject.main, putReject);
+			break;
+		default:
+			throw new Error(`unsupported collection: ${collection}`);
+	}
+}
+
 // PDSから取ってきて索引できる参照先
 const fetchable = {
 	[r.event.$nsid]: { table: eventsTable, index: (put: RecordPut<unknown>) => indexFetched(put, r.event.main, putEvent) },
