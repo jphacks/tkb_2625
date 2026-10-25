@@ -52,11 +52,16 @@ const eventView = /*#__PURE__*/ l.typedObject<EventView>($nsid, "eventView", /*#
 
 export { eventView };
 
-type RankingEntry = { $type?: "win.tomo-x.rogaining.defs#rankingEntry";"rank":number;"participant":ActorDefs.ProfileViewBasic;"totalPoints":number;"approvedCount":number };
+type RankingEntry = { $type?: "win.tomo-x.rogaining.defs#rankingEntry";"rank":number;"team":TeamView;"totalPoints":number;
+
+  /**
+   * Number of distinct checkpoints with an approved submission.
+   */
+  "approvedCount":number };
 
 export type { RankingEntry };
 
-const rankingEntry = /*#__PURE__*/ l.typedObject<RankingEntry>($nsid, "rankingEntry", /*#__PURE__*/ l.object({"rank":/*#__PURE__*/ l.integer({"minimum":1}),"participant":/*#__PURE__*/ l.ref<ActorDefs.ProfileViewBasic>((() => ActorDefs.profileViewBasic) as any),"totalPoints":/*#__PURE__*/ l.integer({"minimum":0}),"approvedCount":/*#__PURE__*/ l.integer({"minimum":0})}));
+const rankingEntry = /*#__PURE__*/ l.typedObject<RankingEntry>($nsid, "rankingEntry", /*#__PURE__*/ l.object({"rank":/*#__PURE__*/ l.integer({"minimum":1}),"team":/*#__PURE__*/ l.ref<TeamView>((() => teamView) as any),"totalPoints":/*#__PURE__*/ l.integer({"minimum":0}),"approvedCount":/*#__PURE__*/ l.integer({"minimum":0})}));
 
 export { rankingEntry };
 
@@ -86,22 +91,47 @@ export { checkpointView };
 type SubmissionView = { $type?: "win.tomo-x.rogaining.defs#submissionView";"cid":l.CidString;"uri":l.AtUriString;"author":ActorDefs.ProfileViewBasic;
 
   /**
+   * The team the author belongs to in this event.
+   */
+  "team":l.AtUriString;
+
+  /**
    * The win.tomo-x.rogaining.submit record.
    */
   "record":l.LexMap;
 
   /**
-   * approved when a valid approve record by the event's approver exists.
+   * approved when a valid approve record by the event's approver exists, otherwise rejected when a valid reject record by the approver exists, otherwise pending. Only approved submissions count for the ranking.
    */
-  "status":"pending" | "approved" | l.UnknownString;"photoUrl"?:l.UriString;"indexedAt":l.DatetimeString;
+  "status":"pending" | "approved" | "rejected" | l.UnknownString;"photoUrl"?:l.UriString;"indexedAt":l.DatetimeString;
 
   /**
    * AT-URI of the approve record, if approved.
    */
-  "approvalUri"?:l.AtUriString };
+  "approvalUri"?:l.AtUriString;
+
+  /**
+   * AT-URI of the reject record, if rejected by the approver.
+   */
+  "rejectionUri"?:l.AtUriString;
+
+  /**
+   * The reason of the approve or reject record that decided the status.
+   */
+  "reason"?:string;
+
+  /**
+   * Distance between the submitted location and the checkpoint, for the approver's review.
+   */
+  "distanceMeters"?:number;
+
+  /**
+   * Whether the submission's createdAt is between the event's startsAt and endsAt, for the approver's review.
+   */
+  "withinEventPeriod"?:boolean };
 
 export type { SubmissionView };
 
-const submissionView = /*#__PURE__*/ l.typedObject<SubmissionView>($nsid, "submissionView", /*#__PURE__*/ l.object({"cid":/*#__PURE__*/ l.string({"format":"cid"}),"uri":/*#__PURE__*/ l.string({"format":"at-uri"}),"author":/*#__PURE__*/ l.ref<ActorDefs.ProfileViewBasic>((() => ActorDefs.profileViewBasic) as any),"record":/*#__PURE__*/ l.lexMap(),"status":/*#__PURE__*/ l.string<{"knownValues":["pending","approved"]}>(),"photoUrl":/*#__PURE__*/ l.optional(/*#__PURE__*/ l.string({"format":"uri"})),"indexedAt":/*#__PURE__*/ l.string({"format":"datetime"}),"approvalUri":/*#__PURE__*/ l.optional(/*#__PURE__*/ l.string({"format":"at-uri"}))}));
+const submissionView = /*#__PURE__*/ l.typedObject<SubmissionView>($nsid, "submissionView", /*#__PURE__*/ l.object({"cid":/*#__PURE__*/ l.string({"format":"cid"}),"uri":/*#__PURE__*/ l.string({"format":"at-uri"}),"author":/*#__PURE__*/ l.ref<ActorDefs.ProfileViewBasic>((() => ActorDefs.profileViewBasic) as any),"team":/*#__PURE__*/ l.string({"format":"at-uri"}),"record":/*#__PURE__*/ l.lexMap(),"status":/*#__PURE__*/ l.string<{"knownValues":["pending","approved","rejected"]}>(),"photoUrl":/*#__PURE__*/ l.optional(/*#__PURE__*/ l.string({"format":"uri"})),"indexedAt":/*#__PURE__*/ l.string({"format":"datetime"}),"approvalUri":/*#__PURE__*/ l.optional(/*#__PURE__*/ l.string({"format":"at-uri"})),"rejectionUri":/*#__PURE__*/ l.optional(/*#__PURE__*/ l.string({"format":"at-uri"})),"reason":/*#__PURE__*/ l.optional(/*#__PURE__*/ l.string()),"distanceMeters":/*#__PURE__*/ l.optional(/*#__PURE__*/ l.integer({"minimum":0})),"withinEventPeriod":/*#__PURE__*/ l.optional(/*#__PURE__*/ l.boolean())}));
 
 export { submissionView };

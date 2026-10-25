@@ -3711,6 +3711,12 @@ export const schemaDict = {
               type: 'ref',
               description: 'The submission being approved.',
             },
+            reason: {
+              type: 'string',
+              maxLength: 3000,
+              maxGraphemes: 300,
+              description: 'A comment on the approval, shown to the team.',
+            },
             createdAt: {
               type: 'string',
               format: 'datetime',
@@ -3733,7 +3739,15 @@ export const schemaDict = {
         type: 'record',
         record: {
           type: 'object',
-          required: ['event', 'name', 'point', 'location', 'createdAt'],
+          required: [
+            'event',
+            'name',
+            'point',
+            'location',
+            'createdAt',
+            'image',
+            'internalImages',
+          ],
           properties: {
             name: {
               type: 'string',
@@ -3892,14 +3906,14 @@ export const schemaDict = {
       },
       rankingEntry: {
         type: 'object',
-        required: ['participant', 'rank', 'totalPoints', 'approvedCount'],
+        required: ['team', 'rank', 'totalPoints', 'approvedCount'],
         properties: {
           rank: {
             type: 'integer',
             minimum: 1,
           },
-          participant: {
-            ref: 'lex:app.bsky.actor.defs#profileViewBasic',
+          team: {
+            ref: 'lex:win.tomo-x.rogaining.defs#teamView',
             type: 'ref',
           },
           totalPoints: {
@@ -3909,6 +3923,8 @@ export const schemaDict = {
           approvedCount: {
             type: 'integer',
             minimum: 0,
+            description:
+              'Number of distinct checkpoints with an approved submission.',
           },
         },
       },
@@ -3951,7 +3967,15 @@ export const schemaDict = {
       },
       submissionView: {
         type: 'object',
-        required: ['uri', 'cid', 'author', 'record', 'status', 'indexedAt'],
+        required: [
+          'uri',
+          'cid',
+          'author',
+          'team',
+          'record',
+          'status',
+          'indexedAt',
+        ],
         properties: {
           cid: {
             type: 'string',
@@ -3965,6 +3989,11 @@ export const schemaDict = {
             ref: 'lex:app.bsky.actor.defs#profileViewBasic',
             type: 'ref',
           },
+          team: {
+            type: 'string',
+            format: 'at-uri',
+            description: 'The team the author belongs to in this event.',
+          },
           record: {
             type: 'unknown',
             description: 'The win.tomo-x.rogaining.submit record.',
@@ -3972,8 +4001,8 @@ export const schemaDict = {
           status: {
             type: 'string',
             description:
-              "approved when a valid approve record by the event's approver exists.",
-            knownValues: ['pending', 'approved'],
+              "approved when a valid approve record by the event's approver exists, otherwise rejected when a valid reject record by the approver exists, otherwise pending. Only approved submissions count for the ranking.",
+            knownValues: ['pending', 'approved', 'rejected'],
           },
           photoUrl: {
             type: 'string',
@@ -3987,6 +4016,28 @@ export const schemaDict = {
             type: 'string',
             format: 'at-uri',
             description: 'AT-URI of the approve record, if approved.',
+          },
+          rejectionUri: {
+            type: 'string',
+            format: 'at-uri',
+            description:
+              'AT-URI of the reject record, if rejected by the approver.',
+          },
+          reason: {
+            type: 'string',
+            description:
+              'The reason of the approve or reject record that decided the status.',
+          },
+          distanceMeters: {
+            type: 'integer',
+            minimum: 0,
+            description:
+              "Distance between the submitted location and the checkpoint, for the approver's review.",
+          },
+          withinEventPeriod: {
+            type: 'boolean',
+            description:
+              "Whether the submission's createdAt is between the event's startsAt and endsAt, for the approver's review.",
           },
         },
       },
@@ -4137,6 +4188,58 @@ export const schemaDict = {
     $type: 'com.atproto.lexicon.schema',
     lexicon: 1,
   },
+  WinTomoXRogainingGetMe: {
+    id: 'win.tomo-x.rogaining.getMe',
+    defs: {
+      main: {
+        type: 'query',
+        output: {
+          schema: {
+            type: 'object',
+            required: ['participating', 'organizing'],
+            properties: {
+              participating: {
+                type: 'array',
+                items: {
+                  ref: 'lex:win.tomo-x.rogaining.getMe#participation',
+                  type: 'ref',
+                },
+                description:
+                  'Events the requester participates in as a team member, with their team.',
+              },
+              organizing: {
+                type: 'array',
+                items: {
+                  ref: 'lex:win.tomo-x.rogaining.defs#eventView',
+                  type: 'ref',
+                },
+                description: 'Events authored by the requester.',
+              },
+            },
+          },
+          encoding: 'application/json',
+        },
+        description:
+          'Get the events related to the requesting account. Requires auth. Each list is ordered by event start time, newest first.',
+      },
+      participation: {
+        type: 'object',
+        required: ['event', 'team'],
+        properties: {
+          event: {
+            ref: 'lex:win.tomo-x.rogaining.defs#eventView',
+            type: 'ref',
+          },
+          team: {
+            ref: 'lex:win.tomo-x.rogaining.defs#teamView',
+            type: 'ref',
+          },
+        },
+      },
+    },
+    $type: 'com.atproto.lexicon.schema',
+    lexicon: 1,
+  },
   WinTomoXRogainingGetRanking: {
     id: 'win.tomo-x.rogaining.getRanking',
     defs: {
@@ -4174,7 +4277,7 @@ export const schemaDict = {
           },
         },
         description:
-          'Get the leaderboard of an event, computed from approved submissions (each checkpoint counts once per participant).',
+          'Get the leaderboard of an event, computed from approved submissions (each checkpoint counts once per team).',
       },
     },
     $type: 'com.atproto.lexicon.schema',
@@ -4276,6 +4379,9 @@ export const schemaDict = {
             type: 'object',
             required: ['submissions'],
             properties: {
+              cursor: {
+                type: 'string',
+              },
               submissions: {
                 type: 'array',
                 items: {
@@ -4295,24 +4401,55 @@ export const schemaDict = {
               type: 'string',
               format: 'at-uri',
             },
-            status: {
-              type: 'string',
-              knownValues: ['pending', 'approved'],
+            limit: {
+              type: 'integer',
+              minimum: 1,
+              maximum: 100,
+              default: 50,
             },
-            checkpoint: {
+            cursor: {
               type: 'string',
-              format: 'at-uri',
-              description: 'Only submissions for this checkpoint.',
-            },
-            participant: {
-              type: 'string',
-              format: 'at-identifier',
-              description: 'Only submissions by this account.',
             },
           },
         },
         description:
-          'List submissions for an event, newest first. Used by participants to see their own progress and by approvers to review pending ones.',
+          "List submissions for an event, newest first. The event's author and approver see every team's submissions; a participant sees only their own team's. Anyone else gets an empty list.",
+      },
+    },
+    $type: 'com.atproto.lexicon.schema',
+    lexicon: 1,
+  },
+  WinTomoXRogainingReject: {
+    id: 'win.tomo-x.rogaining.reject',
+    defs: {
+      main: {
+        key: 'tid',
+        type: 'record',
+        record: {
+          type: 'object',
+          required: ['submit', 'createdAt'],
+          properties: {
+            submit: {
+              ref: 'lex:com.atproto.repo.strongRef',
+              type: 'ref',
+              description: 'The submission being rejected.',
+            },
+            reason: {
+              type: 'string',
+              maxLength: 3000,
+              maxGraphemes: 300,
+              description:
+                'Why the submission was rejected, shown to the team.',
+            },
+            createdAt: {
+              type: 'string',
+              format: 'datetime',
+              description: 'When the submission was rejected.',
+            },
+          },
+        },
+        description:
+          "An event approver's rejection of a participant's checkpoint submission. Only valid when created by the DID in the event's approver field. An approve record for the same submission takes precedence.",
       },
     },
     $type: 'com.atproto.lexicon.schema',
@@ -4356,7 +4493,8 @@ export const schemaDict = {
             },
           },
         },
-        description: "A participant's proof of reaching a checkpoint.",
+        description:
+          "A participant's proof of reaching a checkpoint. Ignored unless the author is a member of a team in the event. Results are shared within the team.",
       },
     },
     $type: 'com.atproto.lexicon.schema',
@@ -4399,7 +4537,7 @@ export const schemaDict = {
           },
         },
         description:
-          "A team participating in a rogaining event. Created by the event organizer (the event's author), not by the participants themselves. Only valid when created by the DID that authored the referenced event.",
+          "A team participating in a rogaining event. Created by the event organizer (the event's author), not by the participants themselves. Only valid when created by the DID that authored the referenced event. If a DID is a member of several teams in the same event, only the earliest created team (by createdAt) counts.",
       },
     },
     $type: 'com.atproto.lexicon.schema',
@@ -4462,10 +4600,12 @@ export const ids = {
   WinTomoXRogainingEvent: 'win.tomo-x.rogaining.event',
   WinTomoXRogainingGetCheckpoints: 'win.tomo-x.rogaining.getCheckpoints',
   WinTomoXRogainingGetEvent: 'win.tomo-x.rogaining.getEvent',
+  WinTomoXRogainingGetMe: 'win.tomo-x.rogaining.getMe',
   WinTomoXRogainingGetRanking: 'win.tomo-x.rogaining.getRanking',
   WinTomoXRogainingGetTeam: 'win.tomo-x.rogaining.getTeam',
   WinTomoXRogainingListEvents: 'win.tomo-x.rogaining.listEvents',
   WinTomoXRogainingListSubmissions: 'win.tomo-x.rogaining.listSubmissions',
+  WinTomoXRogainingReject: 'win.tomo-x.rogaining.reject',
   WinTomoXRogainingSubmit: 'win.tomo-x.rogaining.submit',
   WinTomoXRogainingTeam: 'win.tomo-x.rogaining.team',
 } as const

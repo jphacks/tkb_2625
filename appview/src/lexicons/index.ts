@@ -14,6 +14,7 @@ import { type Env } from 'hono'
 import { schemas } from './lexicons.js'
 import * as WinTomoXRogainingGetCheckpoints from './types/win/tomo-x/rogaining/getCheckpoints.js'
 import * as WinTomoXRogainingGetEvent from './types/win/tomo-x/rogaining/getEvent.js'
+import * as WinTomoXRogainingGetMe from './types/win/tomo-x/rogaining/getMe.js'
 import * as WinTomoXRogainingGetRanking from './types/win/tomo-x/rogaining/getRanking.js'
 import * as WinTomoXRogainingGetTeam from './types/win/tomo-x/rogaining/getTeam.js'
 import * as WinTomoXRogainingListEvents from './types/win/tomo-x/rogaining/listEvents.js'
@@ -196,6 +197,19 @@ export class WinTomoXRogainingNS<E extends Env> {
     >,
   ) {
     const nsid = 'win.tomo-x.rogaining.getEvent'
+    return this._server.xrpc.addMethod(nsid, cfg)
+  }
+
+  getMe<A extends Auth | ErrorResult = undefined>(
+    cfg: HonoConfigOrHandler<
+      E,
+      A,
+      WinTomoXRogainingGetMe.QueryParams,
+      WinTomoXRogainingGetMe.HandlerInput,
+      WinTomoXRogainingGetMe.HandlerOutput
+    >,
+  ) {
+    const nsid = 'win.tomo-x.rogaining.getMe'
     return this._server.xrpc.addMethod(nsid, cfg)
   }
 
