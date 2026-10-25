@@ -1,9 +1,39 @@
-import { useState } from 'react';
+import { useRef, useState, type FormEvent } from 'react';
+import { Navigate, useLocation } from 'react-router-dom';
 import { ArrowRight, Compass, Leaf, LogIn, Sprout } from 'lucide-react';
+import { AtPassportIcon, AtPassportUI } from '@atpassport/client/ui';
+import { useAuth, type LoginLocationState } from './auth/AuthProvider';
+import { chooseHandleWithAtPassport } from './auth/atpassport';
+import { errorMessage } from './utils';
 import './login.css';
 
 export default function LoginPage() {
-  const [message, setMessage] = useState('');
+  const { session, signIn } = useAuth();
+  const locationState = useLocation().state as LoginLocationState;
+  const [handle, setHandle] = useState('');
+  const [busy, setBusy] = useState(false);
+  const [message, setMessage] = useState(locationState?.error ?? '');
+  const handleInput = useRef<HTMLInputElement>(null);
+
+  if (session) return <Navigate to={locationState?.from ?? '/'} replace />;
+
+  async function start(chooseHandle: () => Promise<string | null>) {
+    setBusy(true); setMessage('');
+    try {
+      const chosen = await chooseHandle();
+      // null はユーザーが選択をやめたか、@passport へリダイレクト中
+      if (!chosen) { setBusy(false); return; }
+      await signIn(chosen, locationState?.from);
+      // 成功すると認可サーバーへ遷移するので busy のままにしておく
+    } catch (error) {
+      setMessage(`ログインを開始できませんでした: ${errorMessage(error)}`); setBusy(false);
+    }
+  }
+
+  function submit(event: FormEvent) {
+    event.preventDefault();
+    void start(async () => handle.trim());
+  }
 
   return <div className="app-shell login-shell">
     <a className="skip-link" href="#login-main">本文へ移動</a>
@@ -32,8 +62,18 @@ export default function LoginPage() {
         <div className="login-emblem" aria-hidden="true"><Sprout size={36} strokeWidth={1.3}/></div>
         <h2 id="login-title">ログイン</h2>
         <p className="login-description">あなたのアカウントで、<br/>今日の冒険をはじめましょう。</p>
-        <button type="button" className="button primary login-button" aria-describedby="login-help" onClick={() => setMessage('ログイン機能は準備中です。')}><LogIn size={19}/><span>AT Protocolでログイン</span><ArrowRight size={18}/></button>
-        <p id="login-help" className="login-help">AT Protocolのアカウントを使用します。</p>
+        <button type="button" className="button primary login-button" disabled={busy} aria-describedby="login-passport-help" onClick={() => void start(() => chooseHandleWithAtPassport(handleInput.current ?? undefined, locationState?.from))}><AtPassportIcon size={20} aria-hidden="true"/><span>{busy ? '移動しています…' : AtPassportUI.ja.title}</span><ArrowRight size={18}/></button>
+        <p id="login-passport-help" className="login-help">{AtPassportUI.ja.description}</p>
+        <div className="login-divider"><span>またはハンドルを入力</span></div>
+        <form className="login-form" onSubmit={submit}>
+          <label htmlFor="handle" className="sr-only">ハンドル</label>
+          <div className="login-handle-row">
+            {/* name / id="handle" は @passport 拡張機能の入力アシストが拾う目印 */}
+            <input ref={handleInput} id="handle" name="handle" required autoComplete="username" autoCapitalize="none" spellCheck={false} value={handle} onChange={e => setHandle(e.target.value)} placeholder="you.bsky.social" aria-describedby="login-help"/>
+            <button className="button" disabled={busy}><LogIn size={16}/><span>ログイン</span></button>
+          </div>
+          <p id="login-help" className="login-help">AT Protocolのアカウント（Blueskyなど）のハンドル</p>
+        </form>
         <p className="login-message" role="status">{message || '\u00a0'}</p>
         <div className="login-panel-footer"><Compass size={15}/><span>一歩先に、まだ知らない景色。</span></div>
       </section>

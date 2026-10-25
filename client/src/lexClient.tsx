@@ -1,12 +1,17 @@
 import { Client } from '@atproto/lex';
-import { createContext, useContext, useState, type ReactNode } from 'react';
+import type { OAuthSession } from '@atproto/oauth-client-browser';
+import { createContext, useContext, useMemo, type ReactNode } from 'react';
+import { APPVIEW_SERVICE } from './auth/clientMetadata';
 
-// TODO: atproto-oauth のセッションから Client を作って provider に渡す
 const LexClientContext = createContext<Client | null>(null);
 
-export function LexClientProvider({ client, children }: { client?: Client; children: ReactNode }) {
-  const [fallback] = useState(() => new Client(location.origin));
-  return <LexClientContext.Provider value={client ?? fallback}>{children}</LexClientContext.Provider>;
+/**
+ * OAuth セッションから lex の Client を作って配る。
+ * xrpc は PDS 経由で appview にプロキシされ (atproto-proxy)、create / uploadBlob などのレコード操作は PDS に直接届く。
+ */
+export function LexClientProvider({ session, children }: { session: OAuthSession; children: ReactNode }) {
+  const client = useMemo(() => new Client(session, { service: APPVIEW_SERVICE }), [session]);
+  return <LexClientContext.Provider value={client}>{children}</LexClientContext.Provider>;
 }
 
 /**
@@ -25,7 +30,7 @@ export function LexClientProvider({ client, children }: { client?: Client; child
  * body.teams; // TeamView[]
  * ```
  *
- * @example レコードを作成する（ログイン済みの Client が必要）
+ * @example レコードを作成する
  * ```tsx
  * import { currentDatetimeString, toDatetimeString } from '@atproto/lex';
  * import { r } from './lex';
@@ -33,7 +38,7 @@ export function LexClientProvider({ client, children }: { client?: Client; child
  * const client = useLexClient();
  * const { uri, cid } = await client.create(r.event, {
  *   name: '代々木ロゲイニング',
- *   approver: client.assertDid, // 未ログインなら throw
+ *   approver: client.assertDid,
  *   startsAt: currentDatetimeString(),
  *   endsAt: toDatetimeString(Date.now() + 3 * 60 * 60 * 1000),
  *   createdAt: currentDatetimeString(),
