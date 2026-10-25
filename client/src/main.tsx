@@ -8,6 +8,7 @@ import { EventCreatePage } from './EventCreatePage'
 import { LexClientProvider } from './lexClient'
 
 const RankingPage = lazy(() => import('./RankingPage'))
+const EventsPage = lazy(() => import('./EventsPage'))
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
@@ -15,6 +16,7 @@ createRoot(document.getElementById('root')!).render(
       <BrowserRouter>
         <Routes>
           <Route path="/login" element={<LoginPage />} />
+          <Route path="/events" element={<Suspense fallback={<main className="empty" role="status">イベントを読み込んでいます…</main>}><EventsPage /></Suspense>} />
           <Route path="/admin/events/new" element={<EventCreatePage />} />
           <Route path="/ranking" element={<Suspense fallback={<main className="empty" role="status">ランキングを読み込んでいます…</main>}><RankingPage /></Suspense>} />
           <Route path="*" element={<App />} />
