@@ -12,7 +12,12 @@ export type SubmissionWithReview = {
   rejection: Review | undefined;
 };
 
-export type SubmissionPage = { limit: number; cursor?: string };
+export type SubmissionPage = {
+  limit: number;
+  cursor?: string;
+  checkpoint?: string;
+  participant?: string;
+};
 
 export class InvalidCursorError extends Error {}
 
@@ -29,6 +34,12 @@ export async function findSubmissions(
   if (authorDids.length === 0) return { submissions: [] };
 
   const conditions: SQL[] = [eq(submitsTable.eventUri, event.uri), inArray(submitsTable.authorDid, authorDids)];
+  if (page?.checkpoint !== undefined) {
+    conditions.push(eq(submitsTable.checkpointUri, page.checkpoint));
+  }
+  if (page?.participant !== undefined) {
+    conditions.push(eq(submitsTable.authorDid, page.participant));
+  }
   if (page?.cursor !== undefined) {
     const { createdAt, uri } = decodeCursor(page.cursor);
     conditions.push(
